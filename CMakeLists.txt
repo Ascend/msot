@@ -1,0 +1,115 @@
+cmake_minimum_required(VERSION 3.13)
+project(msopt)
+set(CMAKE_SKIP_RPATH TRUE)
+
+get_filename_component(ROOT_DIR ${CMAKE_CURRENT_LIST_DIR} ABSOLUTE)
+
+# 检查是否可用 ccache
+find_program(CCACHE_PROGRAM ccache)
+if(CCACHE_PROGRAM)
+    message(STATUS "Using ccache: ${CCACHE_PROGRAM}")
+    set(CMAKE_C_COMPILER_LAUNCHER ${CCACHE_PROGRAM})
+    set(CMAKE_CXX_COMPILER_LAUNCHER ${CCACHE_PROGRAM})
+else()
+    message(STATUS "ccache not found, using native compiler.")
+endif()
+
+# 检查是否可用 python
+find_program(PYTHON NAMES python3 python)
+if(NOT PYTHON)
+    message(FATAL_ERROR "Could not find python3 or python in PATH!")
+else()
+    message(STATUS "Found Python: ${PYTHON}")
+endif()
+
+# 为了适用于工程本身构建，也适用于其它工程调用此工程，CMAKE_INSTALL_PREFIX的判断方式需要判断是否未设定或者系统默认路径
+if (${CMAKE_INSTALL_PREFIX} STREQUAL "/usr/local" OR ${CMAKE_INSTALL_PREFIX} STREQUAL "/usr" OR NOT DEFINED CMAKE_INSTALL_PREFIX)
+    set(CMAKE_INSTALL_PREFIX ${ROOT_DIR}/output CACHE STRING "install prefix" FORCE)
+    message(STATUS "No install prefix selected, default to ${CMAKE_INSTALL_PREFIX}")
+endif() 
+file(MAKE_DIRECTORY ${CMAKE_INSTALL_PREFIX})
+
+option(BUILD_TESTS "build unit tests" OFF)
+if(BUILD_TESTS)
+    set(BUILD_ARG test)
+endif()
+
+include(cmake/module/msdebug.cmake)
+include(cmake/module/mskl.cmake)
+include(cmake/module/mskpp.cmake)
+include(cmake/module/msopgen.cmake)
+include(cmake/module/msopprof.cmake)
+include(cmake/module/mssanitizer.cmake)
+
+# 根据构建环境信息生成scene.info
+string(TOLOWER "${CMAKE_SYSTEM_NAME}" SYSTEM)
+set(ENV_INFO "os=${SYSTEM}\narch=${CMAKE_SYSTEM_PROCESSOR}")
+file(WRITE "${CMAKE_INSTALL_PREFIX}/scene.info" "${ENV_INFO}")
+
+                
+# 读取version.info，并从中获取包名及版本信息
+file(READ "${ROOT_DIR}/package/conf/version.info" FILE_CONTENT)
+if(FILE_CONTENT MATCHES "\\[PACKAGE\\]([^\\[]+)")
+    set(TMP_SECTION "${CMAKE_MATCH_1}")
+    
+    # 提取 name
+    if(TMP_SECTION MATCHES "Name=([^\n]+)")
+        string(STRIP "${CMAKE_MATCH_1}" NAME)
+        message(STATUS "Name: ${NAME}")
+    endif()
+    
+    # 提取 version
+    if(TMP_SECTION MATCHES "Version=([^\\n]+)")
+        string(STRIP "${CMAKE_MATCH_1}" PACKAGE_VERSION)
+        message(STATUS "Version: ${PACKAGE_VERSION}")
+    endif()
+endif()
+
+set(packageName "Ascend-${NAME}-${PACKAGE_VERSION}_linux-${CMAKE_SYSTEM_PROCESSOR}.run")
+set(makeselfTool  ${ROOT_DIR}/thirdparty/makeself/makeself.sh)
+set(makeselfHeader ${ROOT_DIR}/thirdparty/makeself/makeself-header.sh)
+set(helpInfo ${ROOT_DIR}/package/conf/help.info)
+set(installShell share/info/${NAME}/script/install.sh)
+set(comments "ASCEND MINDSTUDIO SANITIZER RUN PACKAGE")
+file(GLOB_RECURSE PACAKGE_SCRIPT_FILES ${ROOT_DIR}/package/**/*)
+
+file(GLOB_RECURSE MAKESELF_TAR_FILE_GLOB ${ROOT_DIR}/thirdparty/makeself/makeself-*.tar.gz)
+file(GLOB_RECURSE MAKESELF_PATCH_FILE_GLOB ${ROOT_DIR}/thirdparty/makeself/makeself-*.patch)
+list(GET MAKESELF_TAR_FILE_GLOB 0 MAKESELF_TAR_FILE)
+list(GET MAKESELF_PATCH_FILE_GLOB 0 MAKESELF_PATCH_FILE)
+message(STATUS "Use makeself tar file: ${MAKESELF_TAR_FILE}")
+message(STATUS "Use makeself patch file: ${MAKESELF_PATCH_FILE}")
+
+add_custom_command(
+    OUTPUT ${makeselfTool} ${makeselfHeader}
+    COMMENT "Extract makeself component from ${MAKESELF_TAR_FILE}"
+    # 跳过最外层目录，直接将内容解压到当前目录
+    COMMAND tar xf ${MAKESELF_TAR_FILE} --strip-components=1
+    COMMAND git apply ${MAKESELF_PATCH_FILE}
+    # git 应用 patch 后不一定会更新akeself.sh 文件的时间戳，此处需要手动更新一下，
+    # 保证 makeself 解压流程完成后重新触发打包
+    COMMAND touch ${makeselfTool} ${makeselfHeader}
+    DEPENDS ${MAKESELF_TAR_FILE} ${MAKESELF_PATCH_FILE}
+    WORKING_DIRECTORY ${ROOT_DIR}/thirdparty/makeself/
+)
+
+# 解析打包配置文件filelist.xml，并完成打包
+add_custom_command(OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/package.flag
+    COMMAND ${CMAKE_COMMAND} -E copy "${ROOT_DIR}/package/conf/version.info" ${CMAKE_INSTALL_PREFIX}
+    COMMAND cd ${ROOT_DIR}/package/script/ && ${PYTHON} parser.py -x ${ROOT_DIR}/package/conf/filelist.xml
+            --delivery_path ${CMAKE_INSTALL_PREFIX} -o ${CMAKE_SYSTEM_PROCESSOR}
+    COMMAND cd ${CMAKE_INSTALL_PREFIX} && ${makeselfTool} --header ${makeselfHeader} --help-header ${helpInfo} --pigz
+            --complevel 4 --nocrc --nomd5 --sha256 --chown --tar-quietly ${NAME} ${packageName} ${comments} ${installShell}
+    COMMAND touch ${CMAKE_CURRENT_BINARY_DIR}/package.flag
+    COMMAND chmod 750 ${CMAKE_INSTALL_PREFIX}/*.run
+    DEPENDS ${PACAKGE_SCRIPT_FILES} ${ROOT_DIR}/package/conf/version.info ${makeselfTool} ${makeselfHeader}
+    WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
+)
+add_custom_target(package_msot ALL DEPENDS 
+                                    package_msdebug
+                                    package_mskl
+                                    package_mskpp
+                                    package_msopgen
+                                    package_msopprof
+                                    package_mssanitizer
+                                    ${CMAKE_CURRENT_BINARY_DIR}/package.flag)

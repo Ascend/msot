@@ -1,0 +1,28 @@
+[submodule "thirdparty/makeself"]
+	path = thirdparty/makeself
+	url = https://gitcode.com/cann-src-third-party/makeself.git
+	branch = master
+[submodule "mskpp"]
+	path = mskpp
+	url = https://gitcode.com/Ascend/mskpp.git
+	branch = master
+[submodule "mskl"]
+	path = mskl
+	url = https://gitcode.com/Ascend/mskl.git
+	branch = master
+[submodule "msopgen"]
+	path = msopgen
+	url = https://gitcode.com/Ascend/msopgen.git
+	branch = master
+[submodule "msdebug"]
+	path = msdebug
+	url = https://gitcode.com/Ascend/msdebug.git
+	branch = master
+[submodule "mssanitizer"]
+	path = mssanitizer
+	url = https://gitcode.com/Ascend/mssanitizer.git
+	branch = master
+[submodule "msopprof"]
+	path = msopprof
+	url = https://gitcode.com/Ascend/msopprof.git
+	branch = master

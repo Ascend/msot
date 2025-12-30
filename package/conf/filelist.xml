@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<config name="mindstudio-operator-tools" dst_path="mindstudio-operator-tools" install_path="mindstudio-operator-tools" install_own="$username:$usergroup" install_mod="550">
+    <!-- install directory -->
+    <dir_info value="common" install_mod="550">
+        <path value="${TARGET_ENV}"/>
+        <path value="${TARGET_ENV}/bin" install_softlink="bin"/>
+        <path value="tools" install_mod="750"/>
+        <path value="python" install_mod="750"/>
+        <path value="python/site-packages" install_mod="750"/>
+    </dir_info>
+
+    <dir_info value="mindstudio-operator-tools">
+        <path value="share/info/mindstudio-operator-tools/script"/>
+    </dir_info>
+
+    <file_info value="install_info" copy_type="delivery" src_path="" dst_path="share/info/mindstudio-operator-tools" install_path="share/info/mindstudio-operator-tools" install_mod="440">
+        <file value="version.info"/>
+        <file value="scene.info"/>
+    </file_info>
+
+    <file_info value="scripts" copy_type="source" src_path="package/script" dst_path="share/info/mindstudio-operator-tools/script" install_path="share/info/mindstudio-operator-tools/script" install_mod="550">
+        <file value="install.sh"/>
+        <file value="uninstall.sh"/>
+        <file value="cann_uninstall.sh"/>
+        <file value="common.sh"/>
+        <file value="filelist.csv" copy_type="delivery" src_path="" install_mod="440"/>
+        <file value="parser_install.sh" copy_type="delivery" src_path=""/>
+        <file value="help.info" src_path="package/conf" install_mod="440"/>
+    </file_info>
+
+    <file_info value="package" copy_type="source" src_path="${OUTPUT}" dst_path="mindstudio-operator-tools" install_path="mindstudio-operator-tools" install_mod="550">
+        <file value="mskpp/mskpp-*.whl" />
+        <file value="mskl/mskl-*.whl" />
+        <file value="msopgen/msopgen-*.whl" />
+        <file value="msopgen/msopst-*.whl" />
+        <file value="msdebug/Ascend-mindstudio-debugger-*.run" />
+        <file value="mssanitizer/Ascend-mindstudio-sanitizer-*.run" />
+        <file value="msopprof/Ascend-mindstudio-opprof-*.run" />
+    </file_info>
+
+</config>
