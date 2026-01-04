@@ -28,37 +28,10 @@ import shutil
 
 
 def exec_cmd(cmd):
-    result = subprocess.run(cmd, capture_output=False, text=True, timeout=3600)
+    result = subprocess.run(cmd, capture_output=False, text=True, timeout=36000)
     if result.returncode != 0:
         logging.error("execute command %s failed, please check the log", " ".join(cmd))
         sys.exit(result.returncode)
-
-
-submodule_dependencies = {
-    "msopprof": ["thirdparty/json", "thirdparty/securec", "thirdparty/llvm-project", "thirdparty/makeself", "msopscommon"],
-    "msopprof/msopscommon": ["thirdparty/json"],
-    "mssanitizer": ["thirdparty/json", "thirdparty/securec", "thirdparty/llvm-project", "thirdparty/makeself", "msopscommon"],
-    "mssanitizer/msopscommon": ["thirdparty/json"],
-    "msdebug": []
-}
-
-
-def update_submodle(args):
-    logging.info("============ start download thirdparty code using git submodule ============")
-
-    # 先拉取要构建的所有工具模块
-    exec_cmd(["git", "submodule", "update", "--init", "--depth=1", "--jobs=4"])
-
-    pwd = os.getcwd()
-    for module, dependencies in submodule_dependencies.items():
-        os.chdir(os.path.join(pwd, module))
-        if args.revision is not None:
-            exec_cmd(["git", "fetch", "--tags"])
-            exec_cmd(["git", "checkout", args.revision])
-        exec_cmd(["git", "submodule", "update", "--init", "--depth=1", "--jobs=4", *dependencies])
-
-    logging.info("============ download thirdparty code  success ============")
-
 
 def execute_build(build_path, cmake_cmd, make_cmd):
     if not os.path.exists(build_path):
@@ -110,7 +83,8 @@ if __name__ == "__main__":
 
     # 解析入参是否为local，非local场景时按需更新代码；local场景不更新代码只使用本地代码
     if 'local' not in args.command:
-        update_submodle(args)
+        from download_dependencies import update_submodule
+        update_submodule(args)
 
     # 执行构建并打run包
     execute_build(build_path, cmake_cmd, make_cmd)
