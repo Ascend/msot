@@ -1,8 +1,0 @@
-*.fatbin
-*.o
-*.so
-*gen_launch.cpp
-**/input/
-**/output/
-**/mindstudio_sanitizer_log/
-**/.vscode/
