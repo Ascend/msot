@@ -37,14 +37,7 @@ MindStudio-Operator-Tools
 
 
 # 快速入门
-|功能  |  功能说明　 | 快速入门  
-|---------|--------|--------| 
-算子设计（msKPP） |   算子理论性能建模工具，支持用户在设计阶段表达算子实现算法并评估性能。 | [msKPP快速入门](https://www.hiascend.com/document/detail/zh/mindstudio/830/msquickstart/atlasopdev_16_0003.html?framework=mindspore)
-算子调用（msKL） | 具有Kernel轻量化调用的功能，提供模板库Kernel下发代码生成、编译、运行的能力。  | [msKL快速入门](https://www.hiascend.com/document/detail/zh/mindstudio/830/ODtools/Operatordevelopmenttools/atlasopdev_16_0155.html)
-算子工程创建（msOpGen） | 算子开发效率提升工具，提供模板工程生成能力，简化算子工程搭建并辅助算子测试验证。  | [msOpGen快速入门](https://www.hiascend.com/document/detail/zh/mindstudio/830/msquickstart/atlasopdev_16_0009.html?framework=mindspore)
-算子异常检测（msSanitizer） | 算子异常检测工具，提供内存检测、竞争检测、未初始化检测及同步检测的能力，支持多核程序下内存问题的精准定位。  | [msSanitizer快速入门](https://www.hiascend.com/document/detail/zh/mindstudio/830/msquickstart/atlasopdev_16_0006.html?framework=mindspore)
-算子调试（msDebug） | 提供基于昇腾处理器的原生环境调试能力，实现灵活的变量展示。支持算子功能调试，单步调试（上板）等功能。  | [msDebug快速入门](https://www.hiascend.com/document/detail/zh/mindstudio/830/msquickstart/atlasopdev_16_0007.html?framework=mindspore)
-算子调优（msOpProf） | 提供上板和仿真的性能数据采集方式，并通过MindStudio Insight进行可视化呈现，方便用户快速定位算子性能瓶颈。  | [msOpProf快速入门](https://www.hiascend.com/document/detail/zh/mindstudio/830/msquickstart/atlasopdev_16_0008.html?framework=mindspore)
+以开发一个简单的加法算子为例，贯穿算子开发全流程，10分钟快速体验msKPP(设计)、msOpGen(开发)、msSanitizer(检测)、msDebug(调试)、msOpProf(调优)工具的核心功能。详细操作指导请参见：[《快速入门》](docs/zh/quick_start/op_tool_quick_start.md)。
 
 # 功能介绍
 *   [msKPP（MindStudio Kernel Performance Prediction） ](https://www.hiascend.com/document/detail/zh/mindstudio/830/ODtools/Operatordevelopmenttools/atlasopdev_16_0006.html)   

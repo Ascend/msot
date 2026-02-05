@@ -1,0 +1,7 @@
+numpy<=1.26.4
+sympy
+scipy
+attrs
+psutil
+decorator
+packaging
