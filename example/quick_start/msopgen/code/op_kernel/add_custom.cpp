@@ -44,11 +44,11 @@ public:
          * @brief 处理数据的核心函数，执行数据搬运、AI Core计算和结果回写的流水线循环
          *
          * 该函数通过循环处理多个Tiling分片，每个循环包含三个阶段：
-         * 1. 调用CopyIn函数将数据从全局共享内存(Gobal Memory)搬运至UB(Local Memory)
+         * 1. 调用CopyIn函数将数据从全局共享内存(Global Memory)搬运至UB(Local Memory)
          * 2. 调用Compute函数在AI Core上执行向量化加法计算
-         * 3. 调用CopyOut函数将结果从UB(Local Memory)回写至全局共享内存(Gobal Memory)
+         * 3. 调用CopyOut函数将结果从UB(Local Memory)回写至全局共享内存(Global Memory)
          *
-         * 循环次数由tileNum和BUFFER_NUM两个成员变量的乘积确定，
+         * 循环次数由成员变量tileNum与常量BUFFER_NUM的乘积确定，
          * 表示需要处理的Tiling分片总数。
          */
     __aicore__ inline void Process()
@@ -78,7 +78,7 @@ private:
         AscendC::LocalTensor<DTYPE_X> xLocal = inQueueX.AllocTensor<DTYPE_X>();
         AscendC::LocalTensor<DTYPE_Y> yLocal = inQueueY.AllocTensor<DTYPE_Y>();
 
-        // 从全局共享内存(Gobal Memory)搬运数据到本地UB(Local Memory)
+        // 从全局共享内存(Global Memory)搬运数据到本地UB(Local Memory)
         AscendC::DataCopy(xLocal, xGm[progress * this->tileLength], this->tileLength);
         AscendC::DataCopy(yLocal, yGm[progress * this->tileLength], this->tileLength);
 
@@ -111,20 +111,18 @@ private:
         inQueueY.FreeTensor(yLocal);
     }
     /**
-     * @brief 将本地LocalTensor数据回写到全局内存(Gobal Memory)输出区域
+     * @brief 将LocalTensor数据回写到全局内存(Global Memory)输出区域
      *
      * 该函数从输出队列中获取一个LocalTensor，将其数据复制到全局共享内存的指定位置，
      * 然后释放该LocalTensor的UB资源。主要用于AI Core算子的结果输出操作。
      *
      * @param progress 当前处理进度索引，用于计算全局共享内存中的目标写入位置
-     *
-     * @return 无返回值
      */
     __aicore__ inline void CopyOut(int32_t progress)
     {
         // 从输出队列中获取LocalTensor
         AscendC::LocalTensor<DTYPE_Z> zLocal = outQueueZ.DeQue<DTYPE_Z>();
-        // 将LocalTensor数据从UB(Local Memory)回写到全局共享内存(Gobal Memory)
+        // 将LocalTensor数据从UB(Local Memory)回写到全局共享内存(Global Memory)
         AscendC::DataCopy(zGm[progress * this->tileLength], zLocal, this->tileLength);
         // 释放LocalTensor的UB(Local Memory)资源
         outQueueZ.FreeTensor(zLocal);
@@ -146,7 +144,7 @@ private:
  * @brief 自定义加法核函数，在AI Core上执行向量加法操作
  *
  * 该函数作为昇腾AI Core算子的入口，负责初始化加法操作并处理Tiling分片计算。
- * 函数通过解析Tiling配置信息来管理大规模数据在多AI Core上的协同处理。
+ * 函数通过解析Tiling配置信息来管理大规模数据在多个AI Core上的协同处理。
  *
  * @param x 输入向量x的全局内存地址
  * @param y 输入向量y的全局内存地址
@@ -177,12 +175,12 @@ extern "C" __global__ __aicore__ void add_custom(GM_ADDR x, GM_ADDR y, GM_ADDR z
  * 该函数封装了昇腾 AI Core 上的核函数调用，用于执行用户自定义的向量加法运算。
  * 通过传入 Tiling 配置、工作空间及设备内存指针，完成算子在 NPU 上的调度与执行。
  *
- * @param core_num 本次启动的AI Core数量（对应原blockDim语义）
+ * @param blockDim 本次启动的AI Core数量
  * @param l2ctrl 预留参数
  * @param stream 流对象，用于异步任务提交与执行依赖管理
- * @param x 输入张量 x 的设备内存地址(Gobal Memory)
- * @param y 输入张量 y 的设备内存地址(Gobal Memory)
- * @param z 输出张量 z 的设备内存地址，用于存储 x + y 的结果(Gobal Memory)
+ * @param x 输入张量 x 的设备内存地址(Global Memory)
+ * @param y 输入张量 y 的设备内存地址(Global Memory)
+ * @param z 输出张量 z 的设备内存地址，用于存储 x + y 的结果(Global Memory)
  * @param workspace 临时工作空间设备地址，供核函数内部中间计算使用
  * @param tiling Tiling策略数据结构地址，定义数据分块方式以优化 AI Core 计算吞吐与内存带宽利用率
  */

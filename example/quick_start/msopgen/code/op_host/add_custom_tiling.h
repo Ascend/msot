@@ -13,13 +13,13 @@
 
 namespace optiling {
 
-    // Tile算法信息结构体定义，比如数据总长/TileNum等，由开发者自行设计，框架进行传递
-    BEGIN_TILING_DATA_DEF(TilingData) // 声明tiling结构名字
-        TILING_DATA_FIELD_DEF(uint32_t, totalLength);  // 自行定义的结构成员的类型和名字：总计算数据量
-        TILING_DATA_FIELD_DEF(uint32_t, tileNum);      // 自行定义的结构成员的类型和名字：每个核上总计算数据分块个数
+    // Tiling算法信息结构体定义，比如数据总长度/TileNum等，由开发者自行设计，由框架负责传递
+    BEGIN_TILING_DATA_DEF(TilingData) // 声明Tiling结构体名称
+        TILING_DATA_FIELD_DEF(uint32_t, totalLength);  // 自定义结构体成员的类型和名称：总计算数据量
+        TILING_DATA_FIELD_DEF(uint32_t, tileNum);      // 自定义结构体成员的类型和名称：每个核上总计算数据分块个数
     END_TILING_DATA_DEF;
 
-    // 注册算子tilingdata类到对应的AddCustom算子
+    // 将TilingData类注册到对应的AddCustom算子
     REGISTER_TILING_DATA_CLASS(AddCustom, TilingData)
 
   } // namespace optiling
