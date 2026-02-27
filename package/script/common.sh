@@ -465,7 +465,7 @@ function install_subpackage() {
     # 遍历查找整包安装路径下的所有子run包，执行子包的安装过程
     find "${_package_path}" -type f -name "*.run" | while read -r run_file; do
         log_and_print $LEVEL_INFO "Installing ${run_file}"
-        ${run_file} --install-path=${_install_path} --run --force || return 1
+        ${run_file} --install-path=${_install_path} --run --force --quiet || return 1
         # 安装完成后删除子run包
         rm -rf ${run_file} || return 1
     done
