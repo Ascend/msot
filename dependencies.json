@@ -1,0 +1,23 @@
+{
+  "version": "1.0",
+  "artifact_spec": {},
+  "dependency_sets": {
+    "prod": {
+      "submodules": [
+        "thirdparty/makeself",
+        "mskpp",
+        "mskl",
+        "msopgen",
+        "msdebug",
+        "mssanitizer",
+        "msopprof"
+      ],
+      "artifacts": []
+    },
+    "test": {
+      "submodules": [],
+      "artifacts": []
+    }
+  }
+}
+
