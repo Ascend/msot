@@ -251,24 +251,30 @@ function check_dir_permission() {
     return 0
 }
 
-function create_relative_softlink() {
-    local _src_path="$1"
-    local _des_path="$2"
+create_soft_link()
+{
+    local _src_dir="$1"
+    local _dst_dir="$2"
+    local _name="$3"
 
-    local _des_dir_name=$(dirname $_des_path)
-    _src_path=$(readlink -f ${_src_path})
-    if [ ! -f "$_src_path" -a ! -d "$_src_path" -a ! -L "$_src_path" ]; then
-        return
+    _dst_dir=$(readlink -f ${_dst_dir})
+    [ ! -d "$_src_dir" -o ! -d "$_dst_dir" ] && return
+    [ ! -f "$_src_dir/$_name" -a ! -d "$_src_dir/$_name" ] && return
+
+    if [ -L "$_dst_dir/$_name" ]; then
+        rm -rf "$_dst_dir/$_name"
     fi
-    _src_path=$(get_relative_path $_des_dir_name $_src_path)
-    if [ -L "${_des_path}" ]; then
-        delete_softlink "${_des_path}"
-    fi
-    ln -sf "${_src_path}" "${_des_path}"
+
+    change_dir_mode 750 $_dst_dir
     if [ $? -ne 0 ]; then
-        print_log $LEVEL_ERROR "${_src_path} softlink to ${_des_path} failed!"
+        log_and_print ${LEVEL_ERROR} "chmod ${_dst_dir} failed."
+    fi
+    ln -sf "$_src_dir/$_name" "$_dst_dir/$_name"
+    if [ $? -ne 0 ]; then
+        print_log $LEVEL_ERROR " create ${_src_dir}/${_name} softlink to ${_dst_dir}/${_name} failed!"
         return 1
     fi
+    change_dir_mode 550 $_dst_dir
 }
 
 function delete_softlink() {
@@ -472,6 +478,13 @@ function install_subpackage() {
 
     # 安装所有whl子包
     installWhlPackage ${pylocal} ${_package_path} ${_package_path}/../python/site-packages || return 1
+
+    # 创建软连接
+    local _src_dir="$_install_path/python/site-packages/bin"
+    local _dst_dir="$_install_path/bin"
+    create_soft_link "$_src_dir" "$_dst_dir" "msopgen"
+    create_soft_link "$_src_dir"  "$_dst_dir" "msopst"
+
     log_and_print $LEVEL_INFO "all subpackage installed succeed"
     return 0
 }
