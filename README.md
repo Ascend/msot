@@ -39,15 +39,19 @@ MindStudio Operator Tools（msOT）算子开发工具链，致力于解决算子
 
 ## 贡献指南
 
-贡献流程详见 [《msOT 贡献流程说明》](./docs/zh/common/contribute_workflow.md)。  
+贡献方法详见 [《贡献指南》](./docs/zh/contributing/contributing_guide.md)。  
 
 ## License
 
-许可条款详见 [《msOT License声明》](./docs/zh/common/license_notice.md)。  
+许可条款详见 [《License声明》](docs/zh/legal/license_notice.md)。  
+
+## 安全声明
+
+安全声明详见 [《安全声明》](docs/zh/legal/security_statement.md)。  
 
 ## 免责声明
 
-免责条款详见 [《msOT 免责声明》](./docs/zh/common/disclaimer.md)。  
+免责条款详见 [《免责声明》](docs/zh/legal/disclaimer.md)。  
 
 ## 建议与交流
 
