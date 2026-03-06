@@ -33,7 +33,7 @@
         <file value="mskl/mskl-*.whl" />
         <file value="msopgen/msopgen-*.whl" />
         <file value="msopgen/msopst-*.whl" />
-        <file value="msdebug/Ascend-mindstudio-debugger-*.run" />
+        <file value="msdebug/mindstudio-debugger_*.run" />
         <file value="mssanitizer/Ascend-mindstudio-sanitizer-*.run" />
         <file value="msopprof/Ascend-mindstudio-opprof-*.run" />
     </file_info>
