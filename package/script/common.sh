@@ -251,21 +251,37 @@ function check_dir_permission() {
     return 0
 }
 
-create_soft_link()
+create_softlink()
 {
     local _src_dir="$1"
     local _dst_dir="$2"
     local _name="$3"
+    local _path="$_dst_dir/$_name"
+    local _parent_path=$(dirname ${_path})
 
     _dst_dir=$(readlink -f ${_dst_dir})
     [ ! -d "$_src_dir" -o ! -d "$_dst_dir" ] && return
     [ ! -f "$_src_dir/$_name" -a ! -d "$_src_dir/$_name" ] && return
 
-    if [ -L "$_dst_dir/$_name" ]; then
-        rm -rf "$_dst_dir/$_name"
+    if [ -L ${_path} ]; then
+        if [ ! -w ${_parent_path} ]; then
+            chmod u+w ${_parent_path}
+            rm "${_path}"
+            if [ $? -ne 0 ]; then
+                print_log $LEVEL_ERROR "remove softlink ${_path}  failed!"
+                exit 1
+            fi
+            chmod u-w ${_parent_path}
+        else
+            rm "${_path}"
+            if [ $? -ne 0 ]; then
+                print_log $LEVEL_ERROR "remove softlink ${_path} failed!"
+                exit 1
+            fi
+        fi
     fi
 
-    change_dir_mode 750 $_dst_dir
+    change_dir_mode u+w $_dst_dir
     if [ $? -ne 0 ]; then
         log_and_print ${LEVEL_ERROR} "chmod ${_dst_dir} failed."
     fi
@@ -274,7 +290,7 @@ create_soft_link()
         print_log $LEVEL_ERROR " create ${_src_dir}/${_name} softlink to ${_dst_dir}/${_name} failed!"
         return 1
     fi
-    change_dir_mode 550 $_dst_dir
+    change_dir_mode u-w $_dst_dir
 }
 
 function delete_softlink() {
@@ -482,8 +498,8 @@ function install_subpackage() {
     # 创建软连接
     local _src_dir="$_install_path/python/site-packages/bin"
     local _dst_dir="$_install_path/bin"
-    create_soft_link "$_src_dir" "$_dst_dir" "msopgen"
-    create_soft_link "$_src_dir"  "$_dst_dir" "msopst"
+    create_softlink "$_src_dir" "$_dst_dir" "msopgen"
+    create_softlink "$_src_dir"  "$_dst_dir" "msopst"
 
     log_and_print $LEVEL_INFO "all subpackage installed succeed"
     return 0
