@@ -27,10 +27,34 @@ import subprocess
 import os
 import re
 
-def run_npu_smi():
+def get_npu_id():
     try:
         result = subprocess.run(
-            ["npu-smi", "info", "-t", "board", "-i", "0", "-c", "0"],
+            ["npu-smi", "info", "-l"],
+            capture_output=True,
+            text=True,
+            check=True
+        )
+    except FileNotFoundError:
+        print("Error: npu-smi command not found. Please ensure CANN is installed.")
+        exit(1)
+    except subprocess.CalledProcessError as e:
+        print(f"Error running 'npu-smi info -l': {e}")
+        print(e.stderr)
+        exit(1)
+
+    match = re.search(r'NPU ID\s+:\s+(\d+)', result.stdout)
+    if not match:
+        print("Error: Failed to find 'NPU ID' in 'npu-smi info -l' output.")
+        exit(1)
+    return match.group(1)
+
+
+def run_npu_smi():
+    npu_id = get_npu_id()
+    try:
+        result = subprocess.run(
+            ["npu-smi", "info", "-t", "board", "-i", npu_id, "-c", "0"],
             capture_output=True,
             text=True,
             check=True

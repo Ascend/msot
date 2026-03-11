@@ -37,7 +37,7 @@ MindStudio 算子开发工具链包含多种工具，本文档以开发一个简
 #### ▸ 体验流程
 
 1.环境准备(CANN) → 2.设计(msKPP) → 3.开发(msOpGen) → 4.检测(msSanitizer) → 5.调试(msDebug) → 6.调优(msOpProf)
-> 关于体验顺序：1是基础，完成1后可体验2或3，4、5、6依赖于3，但彼此之间无依赖关系，可任意顺序进行或选择性跳过。
+> 关于体验顺序：1 是基础，完成 1 后可体验 2 或 3，4、5、6 依赖于 3，但彼此之间无依赖关系，可任意顺序进行或选择性跳过。
 
 ### 1.2 环境准备
 
@@ -64,9 +64,9 @@ echo $MY_STUDY_VAR_CHIP_SOC_TYPE
 >[!CAUTION]注意    
 >请确保 MY_STUDY_VAR_CHIP_SOC_TYPE 环境变量已正确配置，否则后续步骤将频繁报错。此变量为学习环境专用，**正式商用版本中严禁使用**。
 
-#### 2.1.2 确认 Python 插件已安装
+#### 2.1.2 确认 Python 包已安装
 
-执行以下命令，若输出"All is OK"，则表明所需 Python 包及其版本均满足规范：
+执行以下命令，若输出 "All is OK"，则表明所需 Python 包及其版本均满足规范：
 
 ```shell
 python3 -c "import numpy, sympy, scipy, attrs, psutil, decorator; from packaging import version; assert version.parse(numpy.__version__) <= version.parse('1.26.4'); print('All is OK')"
@@ -90,7 +90,7 @@ ls -al ~/ot_demo/msot/example/quick_start
 
 >[!NOTE]说明   
 > **知识点：msKPP 工具原理**   
-> msKPP 并非传统可执行程序，而是一套专用于昇腾的 Python 类库。用户需通过import相关模块、编写并执行 Python 脚本，生成性能分析结果文件以完成建模。内部原理是预先采集真实环境中各类指令操作的性能数据，基于用户定义的算子执行流程，对各种性能开销进行建模与估算。
+> msKPP 并非传统可执行程序，而是一套专用于昇腾的 Python 类库。用户需通过 import 相关模块、编写并执行 Python 脚本，生成性能分析结果文件以完成建模。内部原理是预先采集真实环境中各类指令操作的性能数据，基于用户定义的算子执行流程，对各种性能开销进行建模与估算。
 
 #### 2.2.1 编写 Python 建模脚本
 
@@ -141,7 +141,7 @@ MSKPP{timestamp}/
 |     VADD     |    0.0135    |  25   |    -    | 1536 |
 | MOV-UB_TO_GM |    0.4254    |  787  |  3072   |  -   |
 
-由上述内容可见，MOV_UB_TO_GM（从 UB 搬移到 GM）的耗时（Duration）最长，指令周期数（Cycle）也最多，是性能优化中需重点关注的关键路径。在实际开发中，如果发现此类内存搬运耗时占比过高，应优先考虑优化数据复用（Tiling）或使用更高效的搬运指令。
+由上述内容可见，MOV-UB_TO_GM（从 UB 搬移到 GM）的耗时（Duration）最长，指令周期数（Cycle）也最多，是性能优化中需重点关注的关键路径。在实际开发中，如果发现此类内存搬运耗时占比过高，应优先考虑优化数据复用（Tiling）或使用更高效的搬运指令。
 
 <br>
 
@@ -258,9 +258,10 @@ echo "export LD_LIBRARY_PATH=${ASCEND_OPP_PATH}/vendors/customize/op_api/lib:$LD
 #### 2.3.4 验证算子功能
 
 >[!CAUTION]注意   
->**关于 NPU 卡号的配置**   
->以下 run.sh 脚本将实际执行算子，默认使用 0 号 NPU 卡。若您必须使用其他卡，或 0 号卡运行算子异常而需要换用其他正常卡，请按如下方式修改卡号：     
->编辑 ~/ot_demo/workspace/src/caller/main.cpp 文件，在 main 函数首行将 deviceId 的值调整为目标 NPU 卡号。   
+>**关于 NPU 卡选择的配置说明**   
+>以下 `run.sh` 脚本将实际执行算子，默认使用序号为 0 的 NPU 卡。若需使用其他卡，或因 0 号卡运行异常需切换，请按如下方式修改卡序号后再执行 `bash ./run.sh` 运行算子：   
+>编辑 `~/ot_demo/workspace/src/caller/main.cpp` 文件，在 `main` 函数首行将 `deviceId` 的值调整为按如下说明获取的目标卡的序号。      
+><span style="color:#e60000;">序号获取方法：</span>  `deviceId` 并非对应 `npu-smi` 命令所显示的 NPU Chip 编号，而是系统中实际可用 NPU 卡的顺序编号（该编号与物理 Chip 号未必一致）。例如，若当前设备有 4 张卡，其 NPU Chip 号分别为 1、3、5、7，则对应的 `deviceId` 值依次为 0、1、2、3。
  
 执行算子调用工程，验证算子功能（本例执行 1.0 + 2.0，预期结果为 3.0）：
 
@@ -377,7 +378,7 @@ mssanitizer --tool=memcheck bash run.sh
 cat /proc/debug_switch
 ```
 
-若输出值不为 1，请使用 root 权限执行以下命令：
+若输出值不为 1，请使用 root 权限执行以下命令 **（有条件最好在宿主机中执行，某些场景容器内设置成功实际并不能生效）**：
 
 ```shell
 echo 1 > /proc/debug_switch
@@ -425,6 +426,19 @@ msdebug execute_add_op
 ```text
 b add_custom.cpp:34
 ```
+
+>
+>[!CAUTION]注意   
+>**若在直接申请的容器环境中操作，需特别留意 `/proc/debug_switch = 1` 可能为虚假状态**       
+> 若您在云服务商提供的容器环境中操作，即使在容器内成功将 /proc/debug_switch 设置并查询为 1，该状态也可能是虚假的。因出于安全考虑，
+> 底层宿主机通常会通过写时复制（CoW）、影子文件或覆盖挂载（overlay mount）等机制对 /proc 目录进行隔离，导致设置未实际生效。
+> 在此情况下，执行上一节所述的断点设置将触发警告；而按照后续章节运行 `run` 命令时，则会报出如下错误：
+>
+> ```text
+> error: 'A' packet returned an error: 8
+> ```
+>
+> 若无法在宿主机上以 root 权限正确设置 `/proc/debug_switch`，或不具备切换至其他合适环境的条件，则只能跳过本节关于 `msDebug` 的实操体验。
 
 **3. 运行算子**   
 输入 run 启动程序，等待命中断点：
@@ -641,10 +655,21 @@ Breakpoint 1: no locations (pending on future shared library load).
 WARNING:  Unable to resolve breakpoint to any actual locations.
 ```
 
-**问题原因：** 指定的断点行可能是空行或注释等无法设置断点的行。   
-**解决方法：** 查看代码源文件，确认代码的真实行号。  
+**问题原因：** 指定的断点行可能是空行或注释等无法设置断点的行，或者 `/proc/debug_switch` 没有成功设置，原因参考下节说明。       
+**解决方法：** 查看代码源文件，确认代码的真实行号；按 [2.5.1 节](#251-开启内核调试开关) 以 root 权限在宿主机上（注意不是容器内）设置 `/proc/debug_switch` = 1。
 
-#### 2.8.5 执行 workspace/src/caller/run.sh 卡住不动？
+#### 2.8.5 执行 msDebug 的 run 时提示如下错误？
+
+```text
+error: 'A' packet returned an error: 8
+```
+
+**问题原因：** 没有成功设置`/proc/debug_switch = 1`。确认宿主机上是否被修改回0了，或者若您在云服务商提供的容器环境中操作的，这种场景即使在容器内成功将 `/proc/debug_switch` 设置并查询为 1，
+该状态也可能是虚假的。因出于安全考虑，底层宿主机通常会通过写时复制（CoW）、影子文件或覆盖挂载（overlay mount）等机制对 /proc 目录进行隔离，导致设置未实际生效。    
+**解决方法：** 以 root 权限登录到宿主机上（注意不是容器内），按 [2.5.1 节](#251-开启内核调试开关) 设置 `/proc/debug_switch` = 1，如果不能设置成功只能跳过此工具体验。
+
+#### 2.8.6 执行 workspace/src/caller/run.sh 卡住不动？
 
 **问题原因：** 因默认使用 0 号卡运行，可能 0 号卡繁忙或异常。   
-**解决方法：** 执行 npu-smi info 查看是否有其他空闲卡，然后修改 caller/main.cpp 中 main 函数第 1 行，将 deviceId 的值修改为其他空闲卡号。
+**解决方法：** 执行 `npu-smi info` 查看是否有其他空闲卡，然后修改 caller/main.cpp 中 main 函数首行，将 `deviceId` 的值修改为其他空闲卡，
+注意：`deviceId` 不是查询到的 NPU Chip 号，而是实际可用卡的顺序编号。
