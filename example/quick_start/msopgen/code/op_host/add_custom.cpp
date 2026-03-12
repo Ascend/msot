@@ -74,12 +74,8 @@ namespace ops {
                 .Format({ge::FORMAT_ND});
 
             // 配置AICore计算单元，设置分块策略和兼容的芯片型号
-            this->AICore()
-                .SetTiling(optiling::TilingFunc) // 引用上面定义的tiling函数
-                .AddConfig("ascend910b")
-                .AddConfig("ascend910")
-                .AddConfig("ascend310p")
-                .AddConfig("ascend310b");
+            this->AICore().SetTiling(optiling::TilingFunc);
+            this->AICore().AddConfig("ascend910b");
         }
     };
 

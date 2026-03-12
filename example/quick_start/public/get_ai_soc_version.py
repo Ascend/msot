@@ -1,6 +1,22 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
+# -------------------------------------------------------------------------
+# This file is part of the MindStudio project.
+# Copyright (c) 2025 Huawei Technologies Co.,Ltd.
+#
+# MindStudio is licensed under Mulan PSL v2.
+# You can use this software according to the terms and conditions of the Mulan PSL v2.
+# You may obtain a copy of Mulan PSL v2 at:
+#
+#          http://license.coscl.org.cn/MulanPSL2
+#
+# THIS SOFTWARE IS PROVIDED ON AN "AS IS" BASIS, WITHOUT WARRANTIES OF ANY KIND,
+# EITHER EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO NON-INFRINGEMENT,
+# MERCHANTABILITY OR FIT FOR A PARTICULAR PURPOSE.
+# See the Mulan PSL v2 for more details.
+# -------------------------------------------------------------------------
+
 get_ai_soc_version.py - 昇腾 AI 处理器芯片型号检测工具
 
 功能描述:
@@ -23,9 +39,10 @@ get_ai_soc_version.py - 昇腾 AI 处理器芯片型号检测工具
     - 生成 set_chip_env_var.sh 脚本文件
     - 执行 source set_chip_env_var.sh 即可应用环境变量
 """
-import subprocess
 import os
 import re
+import subprocess
+
 
 def get_npu_id():
     try:
@@ -68,6 +85,7 @@ def run_npu_smi():
         print(e.stderr)
         exit(1)
 
+
 def parse_chip_info(output):
     chip_name = None
     npu_id = None
@@ -86,6 +104,7 @@ def parse_chip_info(output):
                 npu_id = match.group(1)
 
     return chip_name, npu_id
+
 
 def main():
     output = run_npu_smi()
@@ -119,6 +138,7 @@ echo "export MY_STUDY_VAR_CHIP_SOC_TYPE={chip_type}" >> ~/.bashrc
     print(f"Chip type detected: {chip_type}")
     print(f"Shell script generated: {os.path.abspath(script_path)}")
     print(f"To apply immediately, run: source {script_path}")
+
 
 if __name__ == "__main__":
     main()

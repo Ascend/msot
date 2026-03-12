@@ -214,15 +214,18 @@ AddCustom
 >op_host/add_custom_tiling.h：定义 Tiling 分块策略的数据结构。   
 >op_host/add_custom.cpp：实现 Host 侧的 Tiling 计算逻辑与算子原型注册。   
 >op_kernel/add_custom.cpp：实现 Kernel 侧加法算子的具体计算逻辑（GM→UB 搬运→向量加法→UB→GM 写回）。   
->若需深入理解上述三个文件的功能与协作机制，除参考代码注释外，建议详细阅读<a href="https://www.hiascend.com/developer/blog/details/0239124507827469022" target="_blank">《昇腾Ascend C编程入门教程（纯干货）》</a>。
+>若需深入理解上述三个文件的功能与协作机制，除参考代码注释外，建议详细阅读<a href="https://www.hiascend.com/developer/blog/details/0239124507827469022" target="_blank">《昇腾Ascend C编程入门教程（纯干货）》</a>。    
+>如下 `keep_soc_info.py` 用于处理 SoC 信息，由于该信息因环境而异，不可机械覆盖，必须使用当前系统中的实际配置。
 
 在上述三个【用户扩展点】文件中实现具体算法逻辑。因是快速入门，将准备好的 3 个 C++ 文件拷贝到此即视为开发完成（本教程聚焦工具链使用，实际开发需自行实现核心逻辑）：  
 
 ```shell
 cd ~/ot_demo/workspace/src/AddCustom/
+python3 ~/ot_demo/msot/example/quick_start/msopgen/keep_soc_info.py get ./op_host/add_custom.cpp
 \cp -f ~/ot_demo/msot/example/quick_start/msopgen/code/op_host/add_custom_tiling.h ./op_host/
 \cp -f ~/ot_demo/msot/example/quick_start/msopgen/code/op_host/add_custom.cpp ./op_host/
 \cp -f ~/ot_demo/msot/example/quick_start/msopgen/code/op_kernel/add_custom.cpp ./op_kernel/
+python3 ~/ot_demo/msot/example/quick_start/msopgen/keep_soc_info.py set ./op_host/add_custom.cpp
 ```
 
 #### 2.3.3 编译与部署算子
