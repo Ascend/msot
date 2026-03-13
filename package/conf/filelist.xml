@@ -29,13 +29,13 @@
     </file_info>
 
     <file_info value="package" copy_type="source" src_path="${OUTPUT}" dst_path="mindstudio-operator-tools" install_path="mindstudio-operator-tools" install_mod="550">
-        <file value="mskpp/mskpp-*.whl" />
-        <file value="mskl/mskl-*.whl" />
-        <file value="msopgen/msopgen-*.whl" />
-        <file value="msopgen/msopst-*.whl" />
+        <file value="mskpp/mindstudio_kpp-*.whl" />
+        <file value="mskl/mindstudio_kl-*.whl" />
+        <file value="msopgen/mindstudio_opgen-*.whl" />
+        <file value="msopgen/mindstudio_opst-*.whl" />
         <file value="msdebug/mindstudio-debugger_*.run" />
-        <file value="mssanitizer/Ascend-mindstudio-sanitizer-*.run" />
-        <file value="msopprof/Ascend-mindstudio-opprof-*.run" />
+        <file value="mssanitizer/mindstudio-sanitizer_*.run" />
+        <file value="msopprof/mindstudio-opprof_*.run" />
     </file_info>
 
 </config>
