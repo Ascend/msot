@@ -140,7 +140,7 @@ function get_install_param() {
 }
 
 function change_mode() {
-    local _mode=$14
+    local _mode=$1
     local _path=$2
     local _type=$3
 
