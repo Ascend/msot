@@ -491,7 +491,7 @@ function installWhlPackage() {
 function whlUninstallPackage() {
     local module_="$1"
     local python_path_="$2"
- 
+    local _install_bin_dir="$install_path/bin"
     log ${LEVEL_INFO} "start to uninstall ${module_}"
     export PYTHONPATH=${python_path_}
     pip3 show ${module_} > /dev/null 2>&1
@@ -499,11 +499,15 @@ function whlUninstallPackage() {
         log ${LEVEL_WARN} "${module_} has not been installed."
         return 0
     fi
+    _install_bin_dir=$(readlink -f ${_install_bin_dir})
+    change_dir_mode u+w ${_install_bin_dir}
     pip3 uninstall -y "${module_}" > /dev/null 2>&1
     if [ $? -ne 0 ]; then
         log_and_print ${LEVEL_ERROR} "uninstall ${module_} failed."
+        change_dir_mode u-w ${_install_bin_dir}
         return 1
     fi
+    change_dir_mode u-w ${_install_bin_dir}
     remove_if_file_exist ${python_path_}/bin/${module_}
     remove_if_file_exist ${python_path_}/bin/${module_}.ini
     remove_empty_dir ${python_path_}/bin
