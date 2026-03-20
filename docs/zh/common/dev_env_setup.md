@@ -42,7 +42,7 @@ docker pull swr.cn-north-4.myhuaweicloud.com/mindstudio-image/msot:arm_20260211_
 
 ## 2. 启动容器
 
-请参见<a href="https://gitcode.com/mengguangxin/ascend_op_docker/blob/main/cann_docker_env_install.md#2--启动容器" target="_blank">《CANN 容器环境安装指南 > 第二节》</a>完成容器的启动。
+请参见[《CANN 容器环境安装指南 > 第二节》](../quick_start/cann_container_setup.md#2-启动容器)完成容器的启动。
 
 ## 3. 环境设置
 

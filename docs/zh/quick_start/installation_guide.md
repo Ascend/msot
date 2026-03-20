@@ -12,11 +12,10 @@
 
 ### 1.1 算子工具安装
 
-建议使用如下第 1 种方案的 CANN 容器环境进行体验，裸机/虚机安装较复杂，多人使用易冲突，且可能遇到不易解决的环境问题：   
+算子工具是集成到 CANN 中发布的，提供以下两种安装方式：
 
-1. CANN 容器环境（基于社区经验总结的快速指导）：请参考<a href="https://gitcode.com/mengguangxin/ascend_op_docker/blob/main/cann_docker_env_install.md" target="_blank">《CANN容器环境安装指南》</a>安装，在 Docker 服务正常的情况下可在 5 分钟内完成；   
-2. CANN 容器环境（基于华为官方镜像仓网站指导）：如果担心第 1 种方案的安全问题，请访问<a href="https://www.hiascend.com/developer/ascendhub/detail/17da20d1c2b6493cb38765adeba85884" target="_blank">《CANN官方镜像仓库》</a>，按仓库中的指导自主探索完成安装；
-3. 裸机/虚机环境：如必须使用此类环境，请参考<a href="https://www.hiascend.com/document/detail/zh/canncommercial/83RC1/softwareinst/instg/instg_0008.html?Mode=PmIns&InstallType=local&OS=openEuler&Software=cannToolKit" target="_blank">《CANN安装官方文档》</a>安装，版本使用较新的即可。
+1. **容器化运行环境**：推荐方式，Docker 服务正常时 5 分钟内即可完成，请参考[《CANN容器环境安装指南》](./cann_container_setup.md)进行安装；
+2. **裸机或虚机环境**：安装复杂，耗时较长，多用户共享易引发冲突，可能遇到难以解决的环境问题。如确需使用此类环境，请参考<a href="https://www.hiascend.com/document/detail/zh/canncommercial/83RC1/softwareinst/instg/instg_0008.html?Mode=PmIns&InstallType=local&OS=openEuler&Software=cannToolKit" target="_blank">《CANN安装官方文档》</a>进行安装，版本使用较新的即可。
 
 ### 1.2 工作区目录初始化
 
