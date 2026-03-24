@@ -35,7 +35,7 @@ docker images | grep cann
 
 ```text
 REPOSITORY                                          TAG                                               IMAGE ID            CREATED             SIZE
-swr.cn-south-1.myhuaweicloud.com/ascendhub/cann     8.5.0-910b-ubuntu22.04-py3.11                     6df0c5bbc16f        2 weeks ago         17.1GB
+swr.cn-south-1.myhuaweicloud.com/ascendhub/cann     8.5.1-910b-openeuler24.03-py3.11                  6df0c5bbc16f        2 weeks ago         17.1GB
 ```
 
 若已有合适版本，可直接跳转至 [第 2 节：启动容器](#2-启动容器)。
@@ -54,9 +54,9 @@ swr.cn-south-1.myhuaweicloud.com/ascendhub/cann     8.5.0-910b-ubuntu22.04-py3.1
 | ----------- | ------------------------------------------------ |
 | **CANN 版本** | 若无特殊需求，建议选用最新稳定版本                                |
 | **芯片型号**    | 根据实际硬件选择（执行 `npu-smi info` 查看，如 910、910b、310P 等） |
-| **操作系统**    | Ubuntu 或 openEuler 均可，推荐 openEuler               |
+| **操作系统**    | openEuler 或 Ubuntu 均可，推荐 openEuler               |
 
-**Step 3** — 复制完整的镜像版本号（例如：8.5.0-910b-ubuntu22.04-py3.11），按如下格式拼接拉取命令：
+**Step 3** — 复制完整的镜像版本号（例如：8.5.1-910b-openeuler24.03-py3.11），按如下格式拼接拉取命令：
 
 ```bash
 docker pull swr.cn-south-1.myhuaweicloud.com/ascendhub/cann:<镜像版本号>
@@ -65,7 +65,7 @@ docker pull swr.cn-south-1.myhuaweicloud.com/ascendhub/cann:<镜像版本号>
 执行示例（耗时约 3~5 分钟，视网络状况而定）：
 
 ```bash
-docker pull swr.cn-south-1.myhuaweicloud.com/ascendhub/cann:8.5.0-910b-ubuntu22.04-py3.11
+docker pull swr.cn-south-1.myhuaweicloud.com/ascendhub/cann:8.5.1-910b-openeuler24.03-py3.11
 ```
 
 > [!NOTE] 说明    
@@ -112,7 +112,7 @@ python3 ~/ctr_in.py <CONTAINER_NAME> <USER_NAME> <IMAGE>
 python3 ~/ctr_in.py op_dev_alice alice 6df0c5bbc16f
 
 # 使用镜像全名
-python3 ~/ctr_in.py op_dev_alice alice swr.cn-south-1.myhuaweicloud.com/ascendhub/cann:8.5.0-910b-ubuntu22.04-py3.11
+python3 ~/ctr_in.py op_dev_alice alice swr.cn-south-1.myhuaweicloud.com/ascendhub/cann:8.5.1-910b-openeuler24.03-py3.11
 ```
 
 **预期输出：**    
