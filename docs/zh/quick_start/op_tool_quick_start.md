@@ -25,7 +25,7 @@ MindStudio 算子开发工具链包含多种工具。本文档以开发一个简
 
 ### 1.2 环境准备
 
-请严格按 [《昇腾 AI 算子开发工具链学习环境安装指南》](study_env_install_guide.md)完成环境与工作区配置。   
+请严格按 [《昇腾 AI 算子开发工具链学习环境安装指南》](installation_guide.md)完成环境与工作区配置。   
 
 >💡 <span style="color:#a10000;">**重要提示**</span>：后续体验环节全程支持 Copy/Paste 命令执行。为避免异常，即使已有类似环境，也请按如上指南核验依赖与环境变量。若遇异常请参阅 [第 2.8 节 FAQ](#28-faq常见错误解决) 。
 
@@ -244,11 +244,14 @@ echo "export LD_LIBRARY_PATH=${ASCEND_OPP_PATH}/vendors/customize/op_api/lib:$LD
 #### 2.3.4 验证算子功能
 
 >[!CAUTION]注意   
->**关于 NPU 卡选择的配置说明**   
->以下 `run.sh` 脚本将实际执行算子，默认使用序号为 0 的 NPU 卡。若需使用其他卡，或因 0 号卡运行异常需切换，请按如下方式修改卡序号后再执行 `bash ./run.sh` 运行算子：   
->编辑 `~/ot_demo/workspace/src/caller/main.cpp` 文件，在 `main` 函数首行将 `deviceId` 的值调整为按如下说明获取的目标卡的序号。      
-><span style="color:#e60000;">序号获取方法：</span>  `deviceId` 并非对应 `npu-smi` 命令所显示的 NPU Chip 编号，而是系统中实际可用 NPU 卡的顺序编号（该编号与物理 Chip 号未必一致）。例如，若当前设备有 4 张卡，其 NPU Chip 号分别为 1、3、5、7，则对应的 `deviceId` 值依次为 0、1、2、3。
- 
+>**关于 NPU 设备选择的说明**   
+>执行以下 `run.sh` 脚本将实际运行算子。为便于学习，假设环境中所有 NPU 卡型号相同，系统将随机选择一张空闲卡执行任务。
+>若因随机选定的卡存在故障等原因需指定 NPU 卡，请根据 `npu-smi info` 命令返回的 NPU 逻辑 ID，按如下方式调用，例如固定使用 2 号卡：
+>
+> ```shell
+> bash ./run.sh 2
+> ```
+
 执行算子调用工程，验证算子功能（本例执行 1.0 + 2.0，预期结果为 3.0）：
 
 ```shell
@@ -263,6 +266,15 @@ bash ./run.sh
 result is:
 3.0 3.0 3.0 3.0 3.0 3.0 3.0 3.0 3.0 3.0 
 test pass
+```
+
+若出现类似如下错误，可能原因包括：NPU卡异常（硬件故障、驱动问题等），/dev/hisi_hdc 设备异常（如容器内未成功挂载、缺乏访问权限、因线程数过多导致设备无法打开等），以及内存等系统资源不足等。    
+错误码说明请参见：[《ACL错误码表》](https://www.hiascend.com/document/detail/zh/CANNCommunityEdition/850/API/appdevgapi/aclcppdevg_03_1345.html)，
+请先解决 NPU 卡故障或更换为其他正常卡后再继续体验（指定 NPU 卡运行的方法详见上文“关于 NPU 设备选择的说明”）：
+
+```text
+aclrtSetDevice failed. ERROR: xxxxxx
+Init acl failed. ERROR: 1
 ```
 
 #### 2.3.5 备份 Kernel 侧 CMakeLists.txt
@@ -653,9 +665,3 @@ error: 'A' packet returned an error: 8
 **问题原因：** 没有成功设置`/proc/debug_switch = 1`。确认宿主机上是否被修改回0了，或者若您在云服务商提供的容器环境中操作的，这种场景即使在容器内成功将 `/proc/debug_switch` 设置并查询为 1，
 该状态也可能是虚假的。因出于安全考虑，底层宿主机通常会通过写时复制（CoW）、影子文件或覆盖挂载（overlay mount）等机制对 /proc 目录进行隔离，导致设置未实际生效。    
 **解决方法：** 以 root 权限登录到宿主机上（注意不是容器内），按 [2.5.1 节](#251-开启内核调试开关) 设置 `/proc/debug_switch` = 1，如果不能设置成功只能跳过此工具体验。
-
-#### 2.8.6 执行 workspace/src/caller/run.sh 卡住不动？
-
-**问题原因：** 因默认使用 0 号卡运行，可能 0 号卡繁忙或异常。   
-**解决方法：** 执行 `npu-smi info` 查看是否有其他空闲卡，然后修改 caller/main.cpp 中 main 函数首行，将 `deviceId` 的值修改为其他空闲卡，
-注意：`deviceId` 不是查询到的 NPU Chip 号，而是实际可用卡的顺序编号。
