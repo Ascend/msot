@@ -28,6 +28,8 @@ import sys
 import time
 import traceback
 import xml.etree.ElementTree as ET
+from pathlib import Path
+import fnmatch
 
 THIS_FILE_NAME = __file__
 CURRENT_DIR = os.path.abspath(os.path.dirname(os.path.realpath(__file__)))
@@ -286,6 +288,30 @@ class Xmlparser(object):
                 OUTPUT, self.delivery_dir)
         return item_attr
 
+def copy_file_by_pattern(src_path: str, dst_path:str, mode: int) -> None:
+    """
+    拷贝符合模式的文件到目标目录下,替代cp -rf 功能
+    src_path: 传入的带有匹配模式的全路径 /a/b/c/*.whl
+    dst_path: 目标目录文件夹
+    mode:权限模式
+    """ 
+    current_path = Path(src_path)
+    pattern = current_path.name
+    parent_path = current_path.parent
+
+    files = os.listdir(parent_path)
+
+    for filename in fnmatch.filter(files, pattern):
+        src_file_path = os.path.join(parent_path, filename)
+        dst_file_path = os.path.join(dst_path, filename)
+        try:
+            shutil.copy(src_file_path, dst_file_path)
+            os.chmod(dst_file_path, mode)
+        except Exception as e:
+            log_msg(LOG_E, "Faile to copy file src %s to dst %s failed!. error is %s", src_file_path, dst_file_path, str(e))
+            return False
+    return True
+
 
 def do_copy(target_conf={}, delivery_dir='', release_dir=''):
     '''
@@ -307,27 +333,17 @@ def do_copy(target_conf={}, delivery_dir='', release_dir=''):
     value_list = target_conf.get('value').split('/')
     target_name = value_list[-1] if value_list[-1] else value_list[-2]
     dst_path = os.path.join(release_dir, target_conf.get('dst_path', ''))
-    pkg_mod = target_conf.get('pkg_mod', '')
+    pkg_mod = target_conf.get('pkg_mod', '0o750')
     rename = target_conf.get('rename')
     cmd = ''
     if not os.path.exists(dst_path):
-        cmd += ' '.join(['mkdir', '-p', dst_path, '&&'])
+        os.makedirs(dst_path, mode=0o750)
     if rename:
         dst_path = os.path.join(dst_path, rename)
-    cmd += ' '.join(['cp -rf', src_target, dst_path])
-    status, output = subprocess.getstatusoutput(cmd)
-    if status != SUCC:
-        log_msg(LOG_E, "do_copy(%s) failed!", cmd)
-        log_msg(LOG_I, "%s", output)
-        return FAIL
-
-    cmd = " chmod %s -R %s" % (pkg_mod,
-                os.path.join(dst_path, target_name))
-    if pkg_mod:
-        status, output = subprocess.getstatusoutput(cmd)
-    if status != SUCC:
-        log_msg(LOG_E, "%s failed!.", cmd)
-        log_msg(LOG_I, "%s", output)
+    if (pkg_mod.startswith(('0o','0o'))) :
+        pkg_mod = pkg_mod[2:]
+    mode = int(pkg_mod, 8)
+    if not copy_file_by_pattern(src_target, dst_path, mode) :
         return FAIL
     pkg_softlink = target_conf.get('pkg_softlink')
     if pkg_softlink:
@@ -348,6 +364,11 @@ def creat_softlink(source, target):
     link_target_path = os.path.dirname(target)
     link_target_name = os.path.basename(target)
     relative_path = os.path.relpath(source, link_target_path)
+    if os.path.isfile(target):
+        try:
+            os.remove(target)
+        except Exception as e:
+            log_msg(LOG_E, "Faile to delete file %s!. error is %s", target, str(e))
     if os.path.isfile(target):
         cmd = 'rm -f {}'.format(target)
         status, output = subprocess.getstatusoutput(cmd)
