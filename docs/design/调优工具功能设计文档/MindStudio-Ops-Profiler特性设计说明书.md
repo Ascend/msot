@@ -1,4 +1,4 @@
-**MindStudio-Ops-Profiler特性设计说明书**
+# **MindStudio-Ops-Profiler特性设计说明书**
 
 <table>
     <tr>
@@ -43,7 +43,6 @@ CC BY-SA 4.0的完整协议内容您可以访问如下网址获取：<https://cr
         <td>陈泽仁</td>
     </tr>
 </table>
-
 
 **目录**
 
@@ -143,21 +142,20 @@ Kernel重放实现流程如下：
 在上述的流程中，通过预加载prof-injection的方式对以下的接口进行打桩：
 <table>
    <tr>
-       <th>runtime接口</th>	
-       <th>接口作用</th>	
+       <th>runtime接口</th> 
+       <th>接口作用</th> 
        <th>插桩内容</th>
    </tr>
-   <tr> 
    <tr>   
-<td>rtMalloc</td>	<td>Device侧GM内存申请</td>	<td>记录申请的大小、地址，创建副本内存</td></tr>
+<td>rtMalloc</td> <td>Device侧GM内存申请</td> <td>记录申请的大小、地址，创建副本内存</td></tr>
 <tr>
-<td>rtFree</td>	<td>Device侧GM内存释放</td>	<td>释放副本内存</td></tr>
+<td>rtFree</td> <td>Device侧GM内存释放</td> <td>释放副本内存</td></tr>
 <tr>
-<td>rtKernelLaunch</td>	<td><<<>>>拉起算子</td>	<td>第一次跑的时候将原内存更新至副本内存
+<td>rtKernelLaunch</td> <td><<<>>>拉起算子</td> <td>第一次跑的时候将原内存更新至副本内存
 后续重放时从副本内存获取值
 需要针对每一次的重放逻辑增加同步，确保每次采集到的数据是完整的</td></tr>
-<tr><td>rtKernelLaunchWithHandle</td>	<td>ACLNN拉起动态算子</td>	<td>同上</td></tr>
-<tr><td>rtKernelLaunchWithFlag</td>	<td>ACLNN拉起静态算子</td>	<td>同上</td></tr>
+<tr><td>rtKernelLaunchWithHandle</td> <td>ACLNN拉起动态算子</td> <td>同上</td></tr>
+<tr><td>rtKernelLaunchWithFlag</td> <td>ACLNN拉起静态算子</td> <td>同上</td></tr>
 </table>
 
 注意，在副本内存拷贝时需要使用rtMemcpyAsync，通过SDMA的机制搬运内存，之后还需要rtSynchronizeStream阻塞完成。rtMemcpy走的是CPU路线，会出现一些Cache异常。
@@ -244,12 +242,12 @@ NA
 NA
 4.7系统外部接口
 <table>
-<tr><th>接口</th>	<th>说明</th>	<th>参数样例</th></tr>
-<tr><td>--replay-mode</td>	<td>
+<tr><th>接口</th> <th>说明</th> <th>参数样例</th></tr>
+<tr><td>--replay-mode</td> <td>
 指令重放模式<br>
 kernel:kernel级重放<br>
 application:应用级重放<br>
-range:范围级重放</td>	<td>--replay-mode=kernel</td></tr>
+range:范围级重放</td> <td>--replay-mode=kernel</td></tr>
 </table>
 
 4.8自测用例设计
