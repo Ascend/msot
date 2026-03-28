@@ -62,3 +62,18 @@ MindStudio Operator Tools（msOT）算子开发工具链，致力于解决算子
 
 本工具由华为公司 **计算产品线** 贡献。    
 感谢来自社区的每一个PR，欢迎贡献。
+
+## 关于MindStudio团队
+
+华为MindStudio全流程开发工具链团队致力于提供端到端的昇腾AI应用开发解决方案，使能开发者高效完成训练开发、推理开发和算子开发。您可以通过以下渠道更深入了解华为MindStudio团队：
+<div style="display: flex; align-items: center; gap: 10px;">
+    <span>MindStudio公众号：</span>
+    <img width="100" src="./docs/zh/figures/readme/officialAccount.png" />
+    <span style="margin-left: 20px;">昇腾小助手：</span>
+    <img width="100" src="./docs/zh/figures/readme/xiaozhushou.png" />
+    <span style="margin-left: 20px;">昇腾论坛：</span>
+    <a href="https://www.hiascend.com/forum/" rel="nofollow">
+        <img src="https://img.shields.io/badge/Website-%231e37ff?style=for-the-badge&amp;logo=bytedance&amp;logoColor=white" style="max-width: 100%;">
+    </a>
+</div>
+在公众号中私信【交流群】，可以获取技术交流群二维码
