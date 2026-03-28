@@ -1,14 +1,21 @@
-/**
- * @file main.cpp
+/* -------------------------------------------------------------------------
+ * This file is part of the MindStudio project.
+ * Copyright (c) 2025 Huawei Technologies Co.,Ltd.
  *
- * Copyright (C) 2024. Huawei Technologies Co., Ltd. All rights reserved.
+ * MindStudio is licensed under Mulan PSL v2.
+ * You can use this software according to the terms and conditions of the Mulan PSL v2.
+ * You may obtain a copy of Mulan PSL v2 at:
  *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
- */
+ *          http://license.coscl.org.cn/MulanPSL2
+ *
+ * THIS SOFTWARE IS PROVIDED ON AN "AS IS" BASIS, WITHOUT WARRANTIES OF ANY KIND,
+ * EITHER EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO NON-INFRINGEMENT,
+ * MERCHANTABILITY OR FIT FOR A PARTICULAR PURPOSE.
+ * See the Mulan PSL v2 for more details.
+ * ------------------------------------------------------------------------- */
 #include <algorithm>
 #include <cstdint>
+#include <cstdlib>
 #include <iostream>
 #include <vector>
 
@@ -95,8 +102,14 @@ void DestroyResources(std::vector<void *> tensors, std::vector<void *> deviceAdd
 int main(int argc, char **argv)
 {
     // 1. (Fixed code) Initialize device / stream, refer to the list of external interfaces of acl
-    // Update deviceId to your own device id
     int32_t deviceId = 0;
+    if (argc > 1) {
+        deviceId = static_cast<int32_t>(strtol(argv[1], nullptr, 10));
+    }
+    LOG_PRINT(
+        "Running on NPU [%d]. If this is the first run on this card, scheduling may take a few seconds; please wait...\n",
+        deviceId);
+
     aclrtStream stream;
     auto ret = Init(deviceId, &stream);
     CHECK_RET(ret == 0, LOG_PRINT("Init acl failed. ERROR: %d\n", ret); return FAILED);

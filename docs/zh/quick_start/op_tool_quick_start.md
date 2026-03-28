@@ -4,53 +4,36 @@
 
 ## 1. 概述
 
-MindStudio 算子开发工具链包含多种工具，本文档以开发一个简单加法算子为例，贯穿算子开发全流程，系统体验各工具的核心功能，帮助初学者直观感受这些工具为算子开发带来的高效与便捷。
-<br>
+MindStudio 算子开发工具链包含多种工具。本文档以开发一个简单加法算子为例，带您贯穿算子开发全流程，直观体验工具链带来的高效与便捷。
 
 ### 1.1 前言
 
-#### ▸ 预备知识
-
-您需要掌握昇腾算子开发的基础知识，至少理解 <a href="https://www.hiascend.com/developer/blog/details/0239124507827469022" target="_blank">《昇腾 Ascend C 编程入门教程（纯干货）》</a> 里的内容，若已学习过 <a href="https://www.hiascend.com/document/detail/zh/CANNCommunityEdition/850/opdevg/Ascendcopdevg/atlas_ascendc_map_10_0002.html" target="_blank">《Ascend C 算子开发》</a> 则更佳。否则，可能难以充分理解本工具链各项功能的使用方法。
-
-#### ▸ 学习目标
-
-完成本教程后，您将掌握以下基础能力：使用 msKPP 对算子性能进行建模，自动生成 Ascend C 算子工程，调试并验证算子功能，检测算子中的内存越界、同步异常等运行时错误，分析算子性能瓶颈；同时，您将具备初步查阅各工具详细文档并快速上手中高级功能的技术基础。  
-
-#### ▸ 学习耗时
-
-“10 分钟” 指核心工具链的连续操作体验时间，不包含不可控的环境准备及工具原理学习时间。  
-若您具备昇腾算子开发经验，采用容器安装方案或已具备环境，则可在 10 分钟内完成全流程体验。
-
-| 章节 |       内容        |        实测纯操作时间        | 建议学习原理时间 |
-|:--:|:----------------:|:---------------------:|:--------:|
-| 1  |       环境准备       | 容器 ≤ 5 分，裸机/虚机 ≥ 20 分 |   5 分钟    |
-| 2  |    设计 (msKPP)    |         30 秒          |   5 分钟    |
-| 3  |   开发 (msOpGen)   |         1 分钟          |   20 分钟   |
-| 4  | 检测 (msSanitizer) |         1 分钟          |   10 分钟   |
-| 5  |   调试 (msDebug)   |         1 分钟          |   10 分钟   |
-| 6  |  调优 (msOpProf)   |         1 分钟          |   10 分钟   |
-| - |       时间总计       |  10 分钟 (容器方案或环境已具备)   |   60 分钟   |
-
-> 注：操作时间基于环境已正确配置且无中断的前提。
->
-#### ▸ 体验流程
-
-1.环境准备(CANN) → 2.设计(msKPP) → 3.开发(msOpGen) → 4.检测(msSanitizer) → 5.调试(msDebug) → 6.调优(msOpProf)
-> 关于体验顺序：1 是基础，完成 1 后可体验 2 或 3，4、5、6 依赖于 3，但彼此之间无依赖关系，可任意顺序进行或选择性跳过。
+**📚 预备知识**    
+建议提前阅读 <a href="https://www.hiascend.com/developer/blog/details/0239124507827469022" target="_blank">《昇腾 Ascend C 编程入门教程（纯干货）》</a> ，若已学习过 <a href="https://www.hiascend.com/document/detail/zh/CANNCommunityEdition/850/opdevg/Ascendcopdevg/atlas_ascendc_map_10_0002.html" target="_blank">《Ascend C 算子开发》</a> 则更佳。
+ 
+**🗺️ 体验地图 (核心操作仅需 10 分钟)**     
+> **执行顺序建议**：步骤 1 为基础；完成 1 后可体验 2 或 3；步骤 4、5、6 均依赖步骤 3 生成的工程，但这三者之间相互独立，可按需选学。
+ 
+ | 步骤 | 环节 | 核心工具 | 实测纯操作时间 | 建议原理学习 |
+| :---: | :---: | :--- | :---: | :---: |
+| **1** | **环境准备** | `CANN` | 容器 ≤5分，裸机 ≥20分 | 5分钟 |
+| **2** | **算子设计** | `msKPP` | 30 秒 | 5分钟 |
+| **3** | **工程开发** | `msOpGen` | 1 分钟 | 20分钟 |
+| **4** | **异常检测** | `msSanitizer` | 1 分钟 | 10分钟 |
+| **5** | **原生调试** | `msDebug` | 1 分钟 | 10分钟 |
+| **6** | **性能调优** | `msOpProf` | 1 分钟 | 10分钟 |
 
 ### 1.2 环境准备
 
-请严格按照[《昇腾 AI 算子开发工具链学习环境安装指南》](installation_guide.md)完成环境安装与工作区配置。   
-即使您已具备类似环境，也要按指南重新执行一遍，以确保所有依赖组件、环境变量等完整无缺。
+请严格按 [《昇腾 AI 算子开发工具链学习环境安装指南》](installation_guide.md)完成环境与工作区配置。   
 
-环境安装完成后，从下一节起进入实际体验环节，全程支持 copy/paste 命令快速执行，若过程中出现报错，请参考[第 2.8 节 FAQ](#28-faq常见错误解决)进行排查与解决。
+>💡 <span style="color:#a10000;">**重要提示**</span>：后续体验环节全程支持 Copy/Paste 命令执行。为避免异常，即使已有类似环境，也请按如上指南核验依赖与环境变量。若遇异常请参阅 [第 2.8 节 FAQ](#28-faq常见错误解决) 。
 
 <br>
 
 ## 2. 操作步骤
 
-### 2.1 【环境】运行环境预检
+### 2.1 💻【环境】运行环境预检
 
 #### 2.1.1 验证环境变量配置
 
@@ -84,7 +67,7 @@ ls -al ~/ot_demo/msot/example/quick_start
 
 若报错，请参照[第 1.2 节](#12-环境准备)完成正确的准备。
 
-### 2.2 【设计】算子建模设计（msKPP）
+### 2.2 📐【设计】算子建模设计（msKPP）
 
 首先，进行算子算法设计。借助 msKPP 工具，可在秒级时间内获得算子性能建模结果，在无硬件条件下预估性能，快速验证实现方案的可行性。先跟着操作体验效果，原理部分可稍后阅读：
 
@@ -104,7 +87,7 @@ mkdir -p ~/ot_demo/workspace/mskpp && cd ~/ot_demo/workspace/mskpp
 >[!NOTE]说明  
 >**知识点（可选阅读）：msKPP 的 DSL 语言方案（Domain-Specific Language，领域特定语言）**   
 >这套类库及接口是专为昇腾性能建模而设计的"方言"，需经过专门学习方可掌握，无法仅凭通用 Python 语法直接编写，但用法较简单，稍加学习即可应用。  
->常规开发流程：需先导入 Tensor、Chip 以及算子实现所必需的指令（例如 vadd），通过 with 语句进入算子实现代码的上下文，再创建 Tensor 以执行具体操作，样例脚本中已做了详细的注释，其他指令接口说明请参考<a href="https://gitcode.com/Ascend/mskpp/blob/master/docs/zh/mskpp_api_reference.md" target="_blank">《msKPP 工具接口说明》</a>。
+>常规开发流程：需先导入 Tensor、Chip 以及算子实现所必需的指令（例如 vadd），通过 with 语句进入算子实现代码的上下文，再创建 Tensor 以执行具体操作，样例脚本中已做了详细的注释，其他指令接口说明请参考<a href="https://gitcode.com/Ascend/mskpp/blob/master/docs/zh/api_reference/mskpp_api_reference.md" target="_blank">《msKPP 工具接口说明》</a>。
 
 因是快速入门，将准备好的 msKPP 的 DSL 脚本复制到此即视为开发完成（本教程聚焦工具链使用，实际开发需自行实现）：
 
@@ -145,7 +128,7 @@ MSKPP{timestamp}/
 
 <br>
 
-### 2.3 【开发】构建算子工程（msOpGen）
+### 2.3 🛠️【开发】构建算子工程（msOpGen）
 
 算法设计完成后，即可进入算子代码编写阶段。算子工程较为复杂且包含大量框架代码，msOpGen 工具可自动生成完整的算子工程框架，使开发者聚焦于核心算法实现，避免在项目搭建、编译配置等重复性工作上耗费时间。先跟着操作体验效果，原理部分可稍后阅读：
 
@@ -261,11 +244,14 @@ echo "export LD_LIBRARY_PATH=${ASCEND_OPP_PATH}/vendors/customize/op_api/lib:$LD
 #### 2.3.4 验证算子功能
 
 >[!CAUTION]注意   
->**关于 NPU 卡选择的配置说明**   
->以下 `run.sh` 脚本将实际执行算子，默认使用序号为 0 的 NPU 卡。若需使用其他卡，或因 0 号卡运行异常需切换，请按如下方式修改卡序号后再执行 `bash ./run.sh` 运行算子：   
->编辑 `~/ot_demo/workspace/src/caller/main.cpp` 文件，在 `main` 函数首行将 `deviceId` 的值调整为按如下说明获取的目标卡的序号。      
-><span style="color:#e60000;">序号获取方法：</span>  `deviceId` 并非对应 `npu-smi` 命令所显示的 NPU Chip 编号，而是系统中实际可用 NPU 卡的顺序编号（该编号与物理 Chip 号未必一致）。例如，若当前设备有 4 张卡，其 NPU Chip 号分别为 1、3、5、7，则对应的 `deviceId` 值依次为 0、1、2、3。
- 
+>**关于 NPU 设备选择的说明**   
+>执行以下 `run.sh` 脚本将实际运行算子。为便于学习，假设环境中所有 NPU 卡型号相同，系统将随机选择一张空闲卡执行任务。
+>若因随机选定的卡存在故障等原因需指定 NPU 卡，请根据 `npu-smi info` 命令返回的 NPU 逻辑 ID，按如下方式调用，例如固定使用 2 号卡：
+>
+> ```shell
+> bash ./run.sh 2
+> ```
+
 执行算子调用工程，验证算子功能（本例执行 1.0 + 2.0，预期结果为 3.0）：
 
 ```shell
@@ -282,6 +268,15 @@ result is:
 test pass
 ```
 
+若出现类似如下错误，可能原因包括：NPU卡异常（硬件故障、驱动问题等），/dev/hisi_hdc 设备异常（如容器内未成功挂载、缺乏访问权限、因线程数过多导致设备无法打开等），以及内存等系统资源不足等。    
+错误码说明请参见：[《ACL错误码表》](https://www.hiascend.com/document/detail/zh/CANNCommunityEdition/850/API/appdevgapi/aclcppdevg_03_1345.html)，
+请先解决 NPU 卡故障或更换为其他正常卡后再继续体验（指定 NPU 卡运行的方法详见上文“关于 NPU 设备选择的说明”）：
+
+```text
+aclrtSetDevice failed. ERROR: xxxxxx
+Init acl failed. ERROR: 1
+```
+
 #### 2.3.5 备份 Kernel 侧 CMakeLists.txt
 
 后续 3 个工具的执行都需要修改此 CMakeLists.txt，保留此备份，用于恢复环境：
@@ -292,7 +287,7 @@ test pass
 
 <br>
 
-### 2.4 【检测】算子异常检测（msSanitizer）
+### 2.4 🛡️【检测】算子异常检测（msSanitizer）
 
 算子开发完成后，可借助 msSanitizer 工具检测是否存在内存越界、竞争条件、未初始化变量或同步异常等严重运行时缺陷，从而高效定位潜在的隐蔽性错误。先跟着操作体验效果，原理部分可稍后阅读：
 
@@ -364,12 +359,12 @@ mssanitizer --tool=memcheck bash run.sh
 
 <br>
 
-### 2.5 【调试】断点调试算子代码（msDebug）
+### 2.5 🐞【调试】断点调试算子代码（msDebug）
 
 若算子功能异常，可借助 msDebug 工具进行断点调试，高效定位问题。先跟着操作体验效果，原理部分可稍后阅读：
 
 #### 2.5.1 开启内核调试开关
->
+
 >[!CAUTION]注意   
 >**msDebug 需要 root 权限**       
 > msDebug 需要内核调试开关 /proc/debug_switch 开启才能正常工作，但出于安全考虑默认关闭，且需要 root 权限才能打开。   
@@ -430,17 +425,16 @@ msdebug execute_add_op
 b add_custom.cpp:34
 ```
 
->
 >[!CAUTION]注意   
 >**若在云平台直接申请的托管容器环境中操作，需特别留意 `/proc/debug_switch = 1` 可能为虚假状态。**       
 > 即使在容器内成功将 `/proc/debug_switch` 设置并查询为 `1`，该值仍可能未真实生效。出于安全隔离考虑，底层宿主机通常通过写时复制（Copy-on-Write, CoW）、
 > 影子文件或覆盖挂载（overlay mount）等机制对 `/proc` 目录进行虚拟化或拦截，导致写入操作仅作用于容器视图，而未反映至内核实际状态。    
 > 在此情况下，执行上一节所述的断点设置将触发警告；而按照后续章节运行 `run` 命令时，则会报出如下错误：
->
+> 
 > ```text
 > error: 'A' packet returned an error: 8
 > ```
->
+> 
 > 请登录**宿主机**，以root权限执行 `echo 1 > /proc/debug_switch`, 然后执行 `cat /proc/debug_switch` 确认是否成功设置为 1。    
 > 若无法登录宿主机，或在宿主机没有成功设置，或不具备切换至其它合适环境的条件，则只能跳过本节关于 msDebug 的实操体验。
 
@@ -491,7 +485,7 @@ q
 
 <br>
 
-### 2.6 【调优】分析算子性能（msOpProf）
+### 2.6 📈【调优】分析算子性能（msOpProf）
 
 若算子性能未达预期，可借助 msOpProf 工具采集运行时性能数据，进行深入分析与优化，确保算子在不同昇腾硬件平台上高效执行。先跟着操作体验效果，原理部分可稍后阅读：
 
@@ -572,7 +566,7 @@ msprof op simulator --soc-version=Ascend${MY_STUDY_VAR_CHIP_SOC_TYPE} --output=.
 
 <br>
 
-### 2.7 【结业】恭喜您完成算子开发工具链入门体验
+### 2.7 🎉【结业】恭喜您完成算子开发工具链入门体验
 
 至此，您已完整走通"设计 → 开发 → 检测 → 调试 → 调优"的算子开发全流程，并实际体验了以下五个核心工具的基本用法：
 
@@ -606,7 +600,7 @@ msprof op simulator --soc-version=Ascend${MY_STUDY_VAR_CHIP_SOC_TYPE} --output=.
 
 深入研读[《Ascend C 编程指南（官方教程）》](https://www.hiascend.com/zh/ascend-c?utm_source=cann&utm_medium=article&utm_campaign=alll)，系统掌握多级流水、数据排布、内存管理等核心概念，在此基础上尝试将工具链应用于实际业务算子的开发与调优，逐步构建从原型验证到生产级交付的完整能力。
 
-### 2.8 【FAQ】常见错误解决
+### 2.8 ❓【FAQ】常见错误解决
 
 #### 2.8.1 执行 mskpp_demo.py 报错如下，怎么解决？
 
@@ -671,9 +665,3 @@ error: 'A' packet returned an error: 8
 **问题原因：** 没有成功设置`/proc/debug_switch = 1`。确认宿主机上是否被修改回0了，或者若您在云服务商提供的容器环境中操作的，这种场景即使在容器内成功将 `/proc/debug_switch` 设置并查询为 1，
 该状态也可能是虚假的。因出于安全考虑，底层宿主机通常会通过写时复制（CoW）、影子文件或覆盖挂载（overlay mount）等机制对 /proc 目录进行隔离，导致设置未实际生效。    
 **解决方法：** 以 root 权限登录到宿主机上（注意不是容器内），按 [2.5.1 节](#251-开启内核调试开关) 设置 `/proc/debug_switch` = 1，如果不能设置成功只能跳过此工具体验。
-
-#### 2.8.6 执行 workspace/src/caller/run.sh 卡住不动？
-
-**问题原因：** 因默认使用 0 号卡运行，可能 0 号卡繁忙或异常。   
-**解决方法：** 执行 `npu-smi info` 查看是否有其他空闲卡，然后修改 caller/main.cpp 中 main 函数首行，将 `deviceId` 的值修改为其他空闲卡，
-注意：`deviceId` 不是查询到的 NPU Chip 号，而是实际可用卡的顺序编号。
