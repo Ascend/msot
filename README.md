@@ -53,6 +53,7 @@ MindStudio Operator Tools（msOT）算子开发工具链，聚焦算子开发中
 
 ## ⚖️ 相关说明
 
+🔹 [《版本说明》](./docs/zh/release_notes/release_notes.md)   
 🔹 [《许可证声明》](./docs/zh/legal/license_notice.md)     
 🔹 [《安全声明》](./docs/zh/legal/security_statement.md)     
 🔹 [《免责声明》](./docs/zh/legal/disclaimer.md)     
