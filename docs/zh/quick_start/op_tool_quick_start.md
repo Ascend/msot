@@ -246,7 +246,7 @@ echo "export LD_LIBRARY_PATH=${ASCEND_OPP_PATH}/vendors/customize/op_api/lib:$LD
 >[!CAUTION]注意   
 >**关于 NPU 设备选择的说明**   
 >执行以下 `run.sh` 脚本将实际运行算子。为便于学习，假设环境中所有 NPU 卡型号相同，系统将随机选择一张空闲卡执行任务。
->若因随机选定的卡存在故障等原因需指定 NPU 卡，请根据 `npu-smi info` 命令返回的 NPU 逻辑 ID，按如下方式调用，例如固定使用 2 号卡：
+>若因随机选定的卡存在故障等原因需指定 NPU 卡，请根据 `npu-smi info` 命令返回的 NPU 信息，使用其顺序号（取值范围为 [0, NPU 数量 - 1]）按如下方式调用：
 >
 > ```shell
 > bash ./run.sh 2
@@ -268,7 +268,7 @@ result is:
 test pass
 ```
 
-若出现类似如下错误，可能原因包括：NPU卡异常（硬件故障、驱动问题等），/dev/hisi_hdc 设备异常（如容器内未成功挂载、缺乏访问权限、因线程数过多导致设备无法打开等），以及内存等系统资源不足等。    
+若超过 30 秒未返回结果，可能是 NPU 卡繁忙，可按 Ctrl+C 终止后切换至其他空闲卡重试；若出现类似如下错误，可能原因包括：NPU卡异常（硬件故障、驱动问题等），/dev/hisi_hdc 设备异常（如容器内未成功挂载、缺乏访问权限、因线程数过多导致设备无法打开等），以及内存等系统资源不足等。    
 错误码说明请参见：[《ACL错误码表》](https://www.hiascend.com/document/detail/zh/CANNCommunityEdition/850/API/appdevgapi/aclcppdevg_03_1345.html)，
 请先解决 NPU 卡故障或更换为其他正常卡后再继续体验（指定 NPU 卡运行的方法详见上文“关于 NPU 设备选择的说明”）：
 
