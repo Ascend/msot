@@ -87,7 +87,7 @@ mkdir -p ~/ot_demo/workspace/mskpp && cd ~/ot_demo/workspace/mskpp
 >[!NOTE]说明  
 >**知识点（可选阅读）：msKPP 的 DSL 语言方案（Domain-Specific Language，领域特定语言）**   
 >这套类库及接口是专为昇腾性能建模而设计的"方言"，需经过专门学习方可掌握，无法仅凭通用 Python 语法直接编写，但用法较简单，稍加学习即可应用。  
->常规开发流程：需先导入 Tensor、Chip 以及算子实现所必需的指令（例如 vadd），通过 with 语句进入算子实现代码的上下文，再创建 Tensor 以执行具体操作，样例脚本中已做了详细的注释，其他指令接口说明请参考<a href="https://gitcode.com/Ascend/mskpp/blob/master/docs/zh/mskpp_api_reference.md" target="_blank">《msKPP 工具接口说明》</a>。
+>常规开发流程：需先导入 Tensor、Chip 以及算子实现所必需的指令（例如 vadd），通过 with 语句进入算子实现代码的上下文，再创建 Tensor 以执行具体操作，样例脚本中已做了详细的注释，其他指令接口说明请参考<a href="https://gitcode.com/Ascend/mskpp/blob/master/docs/zh/api_reference/mskpp_api_reference.md" target="_blank">《msKPP 工具接口说明》</a>。
 
 因是快速入门，将准备好的 msKPP 的 DSL 脚本复制到此即视为开发完成（本教程聚焦工具链使用，实际开发需自行实现）：
 
@@ -246,7 +246,7 @@ echo "export LD_LIBRARY_PATH=${ASCEND_OPP_PATH}/vendors/customize/op_api/lib:$LD
 >[!CAUTION]注意   
 >**关于 NPU 设备选择的说明**   
 >执行以下 `run.sh` 脚本将实际运行算子。为便于学习，假设环境中所有 NPU 卡型号相同，系统将随机选择一张空闲卡执行任务。
->若因随机选定的卡存在故障等原因需指定 NPU 卡，请根据 `npu-smi info` 命令返回的 NPU 逻辑 ID，按如下方式调用，例如固定使用 2 号卡：
+>若因随机选定的卡存在故障等原因需指定 NPU 卡，请根据 `npu-smi info` 命令返回的 NPU 信息，使用其顺序号（取值范围为 [0, NPU 数量 - 1]）按如下方式调用：
 >
 > ```shell
 > bash ./run.sh 2
@@ -268,7 +268,7 @@ result is:
 test pass
 ```
 
-若出现类似如下错误，可能原因包括：NPU卡异常（硬件故障、驱动问题等），/dev/hisi_hdc 设备异常（如容器内未成功挂载、缺乏访问权限、因线程数过多导致设备无法打开等），以及内存等系统资源不足等。    
+若超过 30 秒未返回结果，可能是 NPU 卡繁忙，可按 Ctrl+C 终止后切换至其他空闲卡重试；若出现类似如下错误，可能原因包括：NPU卡异常（硬件故障、驱动问题等），/dev/hisi_hdc 设备异常（如容器内未成功挂载、缺乏访问权限、因线程数过多导致设备无法打开等），以及内存等系统资源不足等。    
 错误码说明请参见：[《ACL错误码表》](https://www.hiascend.com/document/detail/zh/CANNCommunityEdition/850/API/appdevgapi/aclcppdevg_03_1345.html)，
 请先解决 NPU 卡故障或更换为其他正常卡后再继续体验（指定 NPU 卡运行的方法详见上文“关于 NPU 设备选择的说明”）：
 
