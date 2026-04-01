@@ -2,7 +2,9 @@
 
 <br>
 
-MindStudio Operator Tools（msOT）是面向昇腾 AI 处理器的算子开发工具链，提供性能预测（msKPP）、工程生成（msOpGen）、异常检测（msSanitizer）、原生调试（msDebug）、性能分析（msOpProf）和快捷调用（msKL）等工具。本文档介绍 msOT 的安装、卸载与升级方法。
+MindStudio Operator Tools（msOT）是面向昇腾 AI 处理器的算子开发工具链，提供性能预测（msKPP）、工程生成（msOpGen）、异常检测（msSanitizer）、原生调试（msDebug）、性能分析（msOpProf）和快捷调用（msKL）等工具。
+
+本文档主要介绍msOT工具的安装、卸载与升级方法。其中安装方式分为：**二进制安装**和**源码安装**两种方式。
 
 <br>
 

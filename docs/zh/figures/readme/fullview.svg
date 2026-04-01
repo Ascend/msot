@@ -1,0 +1,93 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 262" font-family="'Microsoft YaHei','PingFang SC','Helvetica Neue',Arial,sans-serif">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#f8faff;stop-opacity:1"/>
+      <stop offset="100%" style="stop-color:#eef2ff;stop-opacity:1"/>
+    </linearGradient>
+
+    <linearGradient id="header" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#1a56db"/>
+      <stop offset="100%" style="stop-color:#3b82f6"/>
+    </linearGradient>
+
+    <linearGradient id="stage" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#2563eb"/>
+      <stop offset="100%" style="stop-color:#1d4ed8"/>
+    </linearGradient>
+
+    <linearGradient id="footerBg" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#f8fafc"/>
+      <stop offset="100%" style="stop-color:#eff6ff"/>
+    </linearGradient>
+
+    <filter id="shadow" x="-2%" y="-2%" width="104%" height="108%">
+      <feDropShadow dx="0" dy="2" stdDeviation="3" flood-color="#000" flood-opacity="0.15"/>
+    </filter>
+    <filter id="shadowSm" x="-2%" y="-2%" width="104%" height="108%">
+      <feDropShadow dx="0" dy="1" stdDeviation="2" flood-color="#000" flood-opacity="0.12"/>
+    </filter>
+
+    <clipPath id="round-corner">
+      <rect width="960" height="262" rx="16"/>
+    </clipPath>
+  </defs>
+
+  <rect width="960" height="262" rx="16" fill="url(#bg)"/>
+
+  <rect x="0" y="0" width="960" height="52" fill="url(#header)" clip-path="url(#round-corner)"/>
+
+  <g transform="translate(340, 26)">
+    <circle cx="0" cy="0" r="11" fill="none" stroke="#93c5fd" stroke-width="2"/>
+    <polygon points="3,-9 -5,1 1,1 -3,9 5,-1 -1,-1" fill="#ffffff" stroke="#ffffff" stroke-width="1" stroke-linejoin="round"/>
+  </g>
+
+  <text x="366" y="34" text-anchor="start" fill="white" font-size="18" font-weight="bold">昇腾 AI 算子开发工具链全景图</text>
+
+  <line x1="192" y1="72" x2="192" y2="210" stroke="#cbd5e1" stroke-width="1" stroke-opacity="0.5"/>
+  <line x1="384" y1="72" x2="384" y2="210" stroke="#cbd5e1" stroke-width="1" stroke-opacity="0.5"/>
+  <line x1="576" y1="72" x2="576" y2="210" stroke="#cbd5e1" stroke-width="1" stroke-opacity="0.5"/>
+  <line x1="768" y1="72" x2="768" y2="210" stroke="#cbd5e1" stroke-width="1" stroke-opacity="0.5"/>
+
+  <rect x="24" y="72" width="144" height="36" rx="8" fill="url(#stage)" filter="url(#shadow)"/>
+  <text x="96" y="96" text-anchor="middle" fill="white" font-size="14" font-weight="bold">性能预测</text>
+  <rect x="28" y="120" width="136" height="70" rx="8" fill="white" filter="url(#shadowSm)" stroke="#e2e8f0" stroke-width="1"/>
+  <text x="96" y="142" text-anchor="middle" fill="#1e40af" font-size="13" font-weight="bold">msKPP</text>
+  <text x="96" y="162" text-anchor="middle" fill="#64748b" font-size="11">预测特定算法实现下</text>
+  <text x="96" y="177" text-anchor="middle" fill="#64748b" font-size="11">的性能上限</text>
+
+  <rect x="216" y="72" width="144" height="36" rx="8" fill="url(#stage)" filter="url(#shadow)"/>
+  <text x="288" y="96" text-anchor="middle" fill="white" font-size="14" font-weight="bold">工程生成</text>
+  <rect x="220" y="120" width="136" height="70" rx="8" fill="white" filter="url(#shadowSm)" stroke="#e2e8f0" stroke-width="1"/>
+  <text x="288" y="142" text-anchor="middle" fill="#1e40af" font-size="13" font-weight="bold">msOpGen</text>
+  <text x="288" y="162" text-anchor="middle" fill="#64748b" font-size="11">提供模板工程生成能力</text>
+  <text x="288" y="177" text-anchor="middle" fill="#64748b" font-size="11">简化工程搭建</text>
+
+  <rect x="408" y="72" width="144" height="36" rx="8" fill="url(#stage)" filter="url(#shadow)"/>
+  <text x="480" y="96" text-anchor="middle" fill="white" font-size="14" font-weight="bold">异常检测</text>
+  <rect x="412" y="120" width="136" height="70" rx="8" fill="white" filter="url(#shadowSm)" stroke="#e2e8f0" stroke-width="1"/>
+  <text x="480" y="142" text-anchor="middle" fill="#1e40af" font-size="13" font-weight="bold">msSanitizer</text>
+  <text x="480" y="162" text-anchor="middle" fill="#64748b" font-size="11">内存、竞争、未初始化</text>
+  <text x="480" y="177" text-anchor="middle" fill="#64748b" font-size="11">及同步检测</text>
+
+  <rect x="600" y="72" width="144" height="36" rx="8" fill="url(#stage)" filter="url(#shadow)"/>
+  <text x="672" y="96" text-anchor="middle" fill="white" font-size="14" font-weight="bold">原生调试</text>
+  <rect x="604" y="120" width="136" height="70" rx="8" fill="white" filter="url(#shadowSm)" stroke="#e2e8f0" stroke-width="1"/>
+  <text x="672" y="142" text-anchor="middle" fill="#1e40af" font-size="13" font-weight="bold">msDebug</text>
+  <text x="672" y="162" text-anchor="middle" fill="#64748b" font-size="11">原生环境调试</text>
+  <text x="672" y="177" text-anchor="middle" fill="#64748b" font-size="11">变量查看、单步执行</text>
+
+  <rect x="792" y="72" width="144" height="36" rx="8" fill="url(#stage)" filter="url(#shadow)"/>
+  <text x="864" y="96" text-anchor="middle" fill="white" font-size="14" font-weight="bold">性能分析</text>
+  <rect x="796" y="120" width="136" height="70" rx="8" fill="white" filter="url(#shadowSm)" stroke="#e2e8f0" stroke-width="1"/>
+  <text x="864" y="142" text-anchor="middle" fill="#1e40af" font-size="13" font-weight="bold">msOpProf</text>
+  <text x="864" y="162" text-anchor="middle" fill="#64748b" font-size="11">支持上板与仿真</text>
+  <text x="864" y="177" text-anchor="middle" fill="#64748b" font-size="11">数据采集</text>
+
+  <rect x="16" y="200" width="928" height="36" rx="10" fill="url(#footerBg)" filter="url(#shadow)" stroke="#e2e8f0" stroke-width="1"/>
+
+  <text x="305" y="223" text-anchor="end" fill="#1e40af" font-size="14" font-weight="bold">面向昇腾 NPU</text>
+  <circle cx="325" cy="218" r="2.5" fill="#94a3b8"/>
+  <text x="429" y="223" text-anchor="middle" fill="#1e40af" font-size="14" font-weight="bold">聚焦高效的高性能算子开发</text>
+  <circle cx="530" cy="218" r="2.5" fill="#94a3b8"/>
+  <text x="547" y="223" text-anchor="start" fill="#1e40af" font-size="14" font-weight="bold">工具链覆盖算子开发全生命周期</text>
+</svg>
