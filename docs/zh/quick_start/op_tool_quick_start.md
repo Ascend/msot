@@ -297,7 +297,7 @@ Init acl failed. ERROR: 1
 
 ```shell
 cd ~/ot_demo/workspace/src/AddCustom
-sed -i "1i\\add_ops_compile_options(ALL OPTIONS -sanitizer)" op_kernel/CMakeLists.txt
+printf '%s\n' "if(COMMAND add_ops_compile_options)" "  add_ops_compile_options(ALL OPTIONS -sanitizer)" "elseif(COMMAND npu_op_kernel_options)" "  npu_op_kernel_options(ascendc_kernels ALL OPTIONS -sanitizer)" "endif()" | cat - op_kernel/CMakeLists.txt > tmp && mv -f tmp op_kernel/CMakeLists.txt;
 ```
 
 #### 2.4.2 构造内存越界错误
@@ -387,11 +387,11 @@ echo 1 > /proc/debug_switch
 #### 2.5.2 修改编译选项并重新部署
 
 **1. 修改编译选项**   
-在 Kernel 侧 CMakeLists.txt 首行插入一行配置，用于启用调试信息、禁用编译优化：
+在 Kernel 侧 CMakeLists.txt 首行插入配置，用于启用调试信息、禁用编译优化：
 
 ```shell
 cd ~/ot_demo/workspace/src/AddCustom
-sed -i "1i\\add_ops_compile_options(ALL OPTIONS -g -O0)" op_kernel/CMakeLists.txt
+printf '%s\n' "if(COMMAND add_ops_compile_options)" "  add_ops_compile_options(ALL OPTIONS -g -O0)" "elseif(COMMAND npu_op_kernel_options)" "  npu_op_kernel_options(ascendc_kernels ALL OPTIONS -g -O0)" "endif()" | cat - op_kernel/CMakeLists.txt > tmp && mv -f tmp op_kernel/CMakeLists.txt;
 ```
 
 **2. 重新编译部署算子**
@@ -496,7 +496,7 @@ q
 
 ```shell
 cd ~/ot_demo/workspace/src/AddCustom
-sed -i "1i\\add_ops_compile_options(ALL OPTIONS -g)" op_kernel/CMakeLists.txt
+printf '%s\n' "if(COMMAND add_ops_compile_options)" "  add_ops_compile_options(ALL OPTIONS -g)" "elseif(COMMAND npu_op_kernel_options)" "  npu_op_kernel_options(ascendc_kernels ALL OPTIONS -g)" "endif()" | cat - op_kernel/CMakeLists.txt > tmp && mv -f tmp op_kernel/CMakeLists.txt;
 ```
 
 >[!NOTE]说明   
