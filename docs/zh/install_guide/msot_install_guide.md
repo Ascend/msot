@@ -14,7 +14,7 @@ MindStudio 工具链已集成在 CANN 包中发布，可通过以下方式完成
 
 ### 方式一：依据 CANN 官方文档安装
 
-请参考<a href="https://www.hiascend.com/document/detail/zh/canncommercial/850/softwareinst" target="_blank">《CANN 安装官方文档》</a>，
+请参考<a href="https://www.hiascend.com/cann/download" target="_blank">《CANN 官方安装指南》</a>，
 按文档逐步完成安装与配置。
 
 ### 方式二：使用 CANN 官方容器镜像
