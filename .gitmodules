@@ -1,7 +1,7 @@
 [submodule "thirdparty/makeself"]
 	path = thirdparty/makeself
 	url = https://gitcode.com/cann-src-third-party/makeself.git
-	branch = master
+	branch = v2.5.0.x
 [submodule "mskpp"]
 	path = mskpp
 	url = https://gitcode.com/Ascend/mskpp.git
