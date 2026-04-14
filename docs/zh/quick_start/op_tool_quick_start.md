@@ -1,4 +1,4 @@
-# 算子开发工具链快速入门（核心流程 10 分钟体验）
+# 算子开发工具链快速入门
 
 <br>
 
@@ -7,11 +7,8 @@
 MindStudio 算子开发工具链包含多种工具。本文档以开发一个简单加法算子为例，带您贯穿算子开发全流程，直观体验工具链带来的高效与便捷。
 
 ### 1.1 前言
-
-**📚 预备知识**    
-建议提前阅读 <a href="https://www.hiascend.com/developer/blog/details/0239124507827469022" target="_blank">《昇腾 Ascend C 编程入门教程（纯干货）》</a> ，若已学习过 <a href="https://www.hiascend.com/document/detail/zh/CANNCommunityEdition/850/opdevg/Ascendcopdevg/atlas_ascendc_map_10_0002.html" target="_blank">《Ascend C 算子开发》</a> 则更佳。
  
-**🗺️ 体验地图 (核心操作仅需 10 分钟)**     
+**体验地图 (核心操作仅需 10 分钟)**     
 > **执行顺序建议**：步骤 1 为基础；完成 1 后可体验 2 或 3；步骤 4、5、6 均依赖步骤 3 生成的工程，但这三者之间相互独立，可按需选学。
  
  | 步骤 | 环节 | 核心工具 | 实测纯操作时间 | 建议原理学习 |
@@ -25,27 +22,26 @@ MindStudio 算子开发工具链包含多种工具。本文档以开发一个简
 
 ### 1.2 环境准备
 
-请严格按 [《昇腾 AI 算子开发工具链学习环境安装指南》](installation_guide.md)完成环境与工作区配置。   
+请严格按 《[昇腾 AI 算子开发工具链学习环境安装指南](installation_guide.md)》完成环境与工作区配置。   
 
->💡 <span style="color:#a10000;">**重要提示**</span>：后续体验环节全程支持 Copy/Paste 命令执行。为避免异常，即使已有类似环境，也请按如上指南核验依赖与环境变量。若遇异常请参阅 [第 2.8 节 FAQ](#28-faq常见错误解决) 。
-
-<br>
+>💡 <span style="color:#a10000;">**重要提示**</span>：后续体验环节全程支持 Copy/Paste 命令执行。为避免异常，即使已有类似环境，也请按如上指南核验依赖与环境变量。若遇异常请参阅 [3. FAQ](#3-faq)。
 
 ## 2. 操作步骤
 
-### 2.1 💻【环境】运行环境预检
+### 2.1【环境】运行环境预检
 
 #### 2.1.1 验证环境变量配置
 
-执行如下指令，确认系统输出正确的芯片 SoC 型号（如 910B4、910_9392）：   
+执行如下指令，确认系统输出正确的芯片 SoC 型号（如 910B4、910_9392）：
 
 ```shell
 echo $MY_STUDY_VAR_CHIP_SOC_TYPE
 ```
 
-若该变量为空，请参照[第 1.2 节](#12-环境准备)进行正确设置。
->[!CAUTION]注意    
->请确保 MY_STUDY_VAR_CHIP_SOC_TYPE 环境变量已正确配置，否则后续步骤将频繁报错。此变量为学习环境专用，**正式商用版本中严禁使用**。
+ 若该变量为空，请参照[1.2 环境准备](#12-环境准备)进行正确设置。
+
+> [!CAUTION]注意    
+> 请确保 MY_STUDY_VAR_CHIP_SOC_TYPE 环境变量已正确配置，否则后续步骤将频繁报错。此变量为学习环境专用，**正式商用版本中严禁使用**。
 
 #### 2.1.2 确认 Python 包已安装
 
@@ -55,7 +51,7 @@ echo $MY_STUDY_VAR_CHIP_SOC_TYPE
 python3 -c "import numpy, sympy, scipy, attrs, psutil, decorator; from packaging import version; assert version.parse(numpy.__version__) <= version.parse('1.26.4'); print('All is OK')"
 ```
 
-若报错，请参照[第 1.2 节](#12-环境准备)进行正确安装。
+若报错，请参照[1.2 环境准备](#12-环境准备)进行正确安装。
 
 #### 2.1.3 确认代码仓正常
 
@@ -65,35 +61,36 @@ python3 -c "import numpy, sympy, scipy, attrs, psutil, decorator; from packaging
 ls -al ~/ot_demo/msot/example/quick_start
 ```
 
-若报错，请参照[第 1.2 节](#12-环境准备)完成正确的准备。
+若报错，请参照[1.2 环境准备](#12-环境准备)完成正确的准备。
 
-### 2.2 📐【设计】算子建模设计（msKPP）
+### 2.2【设计】算子建模设计（msKPP）
 
 首先，进行算子算法设计。借助 msKPP 工具，可在秒级时间内获得算子性能建模结果，在无硬件条件下预估性能，快速验证实现方案的可行性。先跟着操作体验效果，原理部分可稍后阅读：
 
->[!NOTE]说明   
+> [!NOTE]说明   
 > **知识点：msKPP 工具原理**   
 > msKPP 并非传统可执行程序，而是一套专用于昇腾的 Python 类库。用户需通过 import 相关模块、编写并执行 Python 脚本，生成性能分析结果文件以完成建模。内部原理是预先采集真实环境中各类指令操作的性能数据，基于用户定义的算子执行流程，对各种性能开销进行建模与估算。
 
 #### 2.2.1 编写 Python 建模脚本
 
-**1. 创建子工作区目录**
+1. 创建子工作区目录
 
-```shell
-mkdir -p ~/ot_demo/workspace/mskpp && cd ~/ot_demo/workspace/mskpp
-```
+    ```shell
+    mkdir -p ~/ot_demo/workspace/mskpp && cd ~/ot_demo/workspace/mskpp
+    ```
 
-**2. 开发 Python 脚本**   
->[!NOTE]说明  
->**知识点（可选阅读）：msKPP 的 DSL 语言方案（Domain-Specific Language，领域特定语言）**   
->这套类库及接口是专为昇腾性能建模而设计的"方言"，需经过专门学习方可掌握，无法仅凭通用 Python 语法直接编写，但用法较简单，稍加学习即可应用。  
->常规开发流程：需先导入 Tensor、Chip 以及算子实现所必需的指令（例如 vadd），通过 with 语句进入算子实现代码的上下文，再创建 Tensor 以执行具体操作，样例脚本中已做了详细的注释，其他指令接口说明请参考<a href="https://gitcode.com/Ascend/mskpp/blob/master/docs/zh/api_reference/mskpp_api_reference.md" target="_blank">《msKPP 工具接口说明》</a>。
+2. 开发 Python 脚本
 
-因是快速入门，将准备好的 msKPP 的 DSL 脚本复制到此即视为开发完成（本教程聚焦工具链使用，实际开发需自行实现）：
+    > [!NOTE]说明  
+    > **知识点（可选阅读）：msKPP 的 DSL 语言方案（Domain-Specific Language，领域特定语言）**   
+    > 这套类库及接口是专为昇腾性能建模而设计的“方言”，需经过专门学习方可掌握，无法仅凭通用 Python 语法直接编写，但用法较简单，稍加学习即可应用。
+    > 常规开发流程：需先导入 Tensor、Chip 以及算子实现所必需的指令（例如 vadd），通过 with 语句进入算子实现代码的上下文，再创建 Tensor 以执行具体操作，样例脚本中已做了详细的注释，其他指令接口说明请参考《[msKPP 工具接口说明](https://gitcode.com/Ascend/mskpp/blob/26.0.0/docs/zh/api_reference/mskpp_api_reference.md)》。
 
-```shell
-\cp -f ~/ot_demo/msot/example/quick_start/mskpp/mskpp_demo.py ./
-```
+    因是快速入门，将准备好的 msKPP 的 DSL 脚本复制到此即视为开发完成（本教程聚焦工具链使用，实际开发需自行实现）：
+
+    ```shell
+    \cp -f ~/ot_demo/msot/example/quick_start/mskpp/mskpp_demo.py ./
+    ```
 
 #### 2.2.2 执行性能建模
 
@@ -103,7 +100,7 @@ mkdir -p ~/ot_demo/workspace/mskpp && cd ~/ot_demo/workspace/mskpp
 python3 mskpp_demo.py
 ```
 
-如果脚本报错，提示 Chip is unsupported，请确认环境变量 `MY_STUDY_VAR_CHIP_SOC_TYPE` 是否正确设置，如变量为空，请参考[第 1.2 节](#12-环境准备)正确设置。
+如果脚本报错，提示 Chip is unsupported，请确认环境变量 `MY_STUDY_VAR_CHIP_SOC_TYPE` 是否正确设置，如变量为空，请参考[1.2 环境准备](#12-环境准备)正确设置。
 
 #### 2.2.3 查看建模结果
 
@@ -126,79 +123,80 @@ MSKPP{timestamp}/
 
 由上述内容可见，MOV-UB_TO_GM（从 UB 搬移到 GM）的耗时（Duration）最长，指令周期数（Cycle）也最多，是性能优化中需重点关注的关键路径。在实际开发中，如果发现此类内存搬运耗时占比过高，应优先考虑优化数据复用（Tiling）或使用更高效的搬运指令。
 
-<br>
-
-### 2.3 🛠️【开发】构建算子工程（msOpGen）
+### 2.3【开发】构建算子工程（msOpGen）
 
 算法设计完成后，即可进入算子代码编写阶段。算子工程较为复杂且包含大量框架代码，msOpGen 工具可自动生成完整的算子工程框架，使开发者聚焦于核心算法实现，避免在项目搭建、编译配置等重复性工作上耗费时间。先跟着操作体验效果，原理部分可稍后阅读：
 
 #### 2.3.1 生成工程框架
 
-**1. 创建子工作区目录**   
-创建名为 `src` 的子目录，作为算子源码根目录，后续所有源码操作均基于此路径开展：
+1. 创建子工作区目录
 
-```shell
-mkdir -p ~/ot_demo/workspace/src && cd ~/ot_demo/workspace/src/
-```
+    创建名为 `src` 的子目录，作为算子源码根目录，后续所有源码操作均基于此路径开展：
 
-**2. 开发算子定义配置文件**   
+    ```shell
+    mkdir -p ~/ot_demo/workspace/src && cd ~/ot_demo/workspace/src/
+    ```
 
->[!NOTE]说明   
->**知识点（可选阅读）：msOpGen 输入配置文件**   
->自定义格式的 json 配置文件，可以简单类比理解为定义了一个 C 语言函数的声明，包括：函数名、入参及返回值的类型信息。
->比如 msopgen_demo.json 中就是定义了算子的名字、输入输出变量的名字、类型、数据排布格式。
->算子函数的声明代码统一由工具生成，即生成一个空函数（只有函数名、入参和返回值），函数体需要用户自己实现。
+2. 开发算子定义配置文件
 
-因是快速入门，将准备好的配置文件拷贝到此即视为开发完成（本教程聚焦工具链使用，实际开发需自行实现）：
+    >[!NOTE]说明   
+    >**知识点（可选阅读）：msOpGen 输入配置文件**   
+    >自定义格式的 json 配置文件，可以简单类比理解为定义了一个 C 语言函数的声明，包括：函数名、入参及返回值的类型信息。
+    >比如 msopgen_demo.json 中就是定义了算子的名字、输入输出变量的名字、类型、数据排布格式。
+    >算子函数的声明代码统一由工具生成，即生成一个空函数（只有函数名、入参和返回值），函数体需要用户自己实现。
 
-```shell
-\cp -f ~/ot_demo/msot/example/quick_start/msopgen/msopgen_demo.json ./
-```
+    因是快速入门，将准备好的配置文件拷贝到此即视为开发完成（本教程聚焦工具链使用，实际开发需自行实现）：
 
-**3. 基于配置生成代码框架**   
-执行以下命令生成 Ascend C 算子工程，参数说明：-lan cpp 表明要生成 Ascend C 代码；-c 为芯片 SoC 型号（不同芯片处理上可能有区别）：
+    ```shell
+    \cp -f ~/ot_demo/msot/example/quick_start/msopgen/msopgen_demo.json ./
+    ```
 
-```shell
-msopgen gen -i msopgen_demo.json -c ai_core-ascend${MY_STUDY_VAR_CHIP_SOC_TYPE} -lan cpp -out AddCustom
-```
+3. 基于配置生成代码框架
 
-**4. 查看生成的结果**   
->[!NOTE]说明   
->**知识点（可选阅读）：关键概念**       
-> Host 侧：运行于 CPU 的代码，负责数据预处理、任务调度及算子调用。   
-> Kernel 侧：运行于 NPU 的代码，负责执行实际的大规模并行计算逻辑。   
-> Tiling：将大规模数据分块处理，以提高 Local Memory 利用率并优化内存访问效率。
+    执行以下命令生成 Ascend C 算子工程，参数说明：-lan cpp 表明要生成 Ascend C 代码；-c 为芯片 SoC 型号（不同芯片处理上可能有区别）：
 
-生成的工程结构看起来庞大而复杂，但我们**仅需关注标记为【用户扩展点】的三个C++文件**，其余均为框架代码，无特殊需求无需查看修改：
+    ```shell
+    msopgen gen -i msopgen_demo.json -c ai_core-ascend${MY_STUDY_VAR_CHIP_SOC_TYPE} -lan cpp -out AddCustom
+    ```
 
-```text
-AddCustom
-├── build.sh                 // 编译入口脚本
-├── cmake                    // 编译工程脚本
-├── CMakeLists.txt           // 算子工程的CMakeLists.txt
-├── scripts                  // 自定义算子工程打包相关脚本所在目录
-├── framework                // 算子插件实现文件目录，单算子模型文件的生成不依赖算子适配插件，无需关注
-│   ├── CMakeLists.txt
-│   └── tf_plugin
-├── op_host                  // Host侧实现文件
-│   ├── add_custom.cpp       // 【用户扩展点】算子原型注册、shape推导、信息库、tiling实现等内容文件
-│   ├── add_custom_tiling.h  // 【用户扩展点】算子tiling定义文件
-│   └── CMakeLists.txt
-├── op_kernel                // Kernel侧实现文件
-│   ├── add_custom.cpp       // 【用户扩展点】算子代码实现文件 
-│   └── CMakeLists.txt
-└── CMakePresets.json        // 编译配置项
-```
+4. 查看生成的结果
+
+    >[!NOTE]说明   
+    >**知识点（可选阅读）：关键概念**       
+    > Host 侧：运行于 CPU 的代码，负责数据预处理、任务调度及算子调用。   
+    > Kernel 侧：运行于 NPU 的代码，负责执行实际的大规模并行计算逻辑。   
+    > Tiling：将大规模数据分块处理，以提高 Local Memory 利用率并优化内存访问效率。
+
+    生成的工程结构看起来庞大而复杂，但我们**仅需关注标记为【用户扩展点】的三个C++文件**，其余均为框架代码，无特殊需求无需查看修改：
+
+    ```text
+    AddCustom
+    ├── build.sh                 // 编译入口脚本
+    ├── cmake                    // 编译工程脚本
+    ├── CMakeLists.txt           // 算子工程的CMakeLists.txt
+    ├── scripts                  // 自定义算子工程打包相关脚本所在目录
+    ├── framework                // 算子插件实现文件目录，单算子模型文件的生成不依赖算子适配插件，无需关注
+    │   ├── CMakeLists.txt
+    │   └── tf_plugin
+    ├── op_host                  // Host侧实现文件
+    │   ├── add_custom.cpp       // 【用户扩展点】算子原型注册、shape推导、信息库、tiling实现等内容文件
+    │   ├── add_custom_tiling.h  // 【用户扩展点】算子tiling定义文件
+    │   └── CMakeLists.txt
+    ├── op_kernel                // Kernel侧实现文件
+    │   ├── add_custom.cpp       // 【用户扩展点】算子代码实现文件 
+    │   └── CMakeLists.txt
+    └── CMakePresets.json        // 编译配置项
+    ```
 
 #### 2.3.2 实现核心逻辑
 
->[!NOTE]说明   
->**知识点（可选阅读）：算子核心代码文件实现原理**    
->op_host/add_custom_tiling.h：定义 Tiling 分块策略的数据结构。   
->op_host/add_custom.cpp：实现 Host 侧的 Tiling 计算逻辑与算子原型注册。   
->op_kernel/add_custom.cpp：实现 Kernel 侧加法算子的具体计算逻辑（GM→UB 搬运→向量加法→UB→GM 写回）。   
->若需深入理解上述三个文件的功能与协作机制，除参考代码注释外，建议详细阅读<a href="https://www.hiascend.com/developer/blog/details/0239124507827469022" target="_blank">《昇腾Ascend C编程入门教程（纯干货）》</a>。    
->如下 `keep_soc_info.py` 用于处理 SoC 信息，由于该信息因环境而异，不可机械覆盖，必须使用当前系统中的实际配置。
+> [!NOTE]说明   
+> **知识点（可选阅读）：算子核心代码文件实现原理**    
+> op_host/add_custom_tiling.h：定义 Tiling 分块策略的数据结构。   
+> op_host/add_custom.cpp：实现 Host 侧的 Tiling 计算逻辑与算子原型注册。   
+> op_kernel/add_custom.cpp：实现 Kernel 侧加法算子的具体计算逻辑（GM→UB 搬运→向量加法→UB→GM 写回）。   
+> 若需深入理解上述三个文件的功能与协作机制，除参考代码注释外，建议详细阅读<a href="https://www.hiascend.com/developer/blog/details/0239124507827469022" target="_blank">《昇腾Ascend C编程入门教程（纯干货）》</a>。    
+> 如下 `keep_soc_info.py` 用于处理 SoC 信息，由于该信息因环境而异，不可机械覆盖，必须使用当前系统中的实际配置。
 
 在上述三个【用户扩展点】文件中实现具体算法逻辑。因是快速入门，将准备好的 3 个 C++ 文件拷贝到此即视为开发完成（本教程聚焦工具链使用，实际开发需自行实现核心逻辑）：  
 
@@ -213,33 +211,35 @@ python3 ~/ot_demo/msot/example/quick_start/msopgen/keep_soc_info.py set ./op_hos
 
 #### 2.3.3 编译与部署算子
 
-**1. 编译算子**  
-执行构建脚本，成功后将在 build_out 目录下生成 .run 格式的算子部署包（sed 命令用于规避某些环境下的并发 pipe 问题，将打包改为串行）：
+1. 编译算子
 
-```shell
-sed -i 's/--target $target -j$(nproc)/--target $target -j1/g' build.sh
-bash ./build.sh
-```
+    执行构建脚本，成功后将在 build_out 目录下生成 .run 格式的算子部署包（sed 命令用于规避某些环境下的并发 pipe 问题，将打包改为串行）：
 
-**2. 部署算子**   
+    ```shell
+    sed -i 's/--target $target -j$(nproc)/--target $target -j1/g' build.sh
+    bash ./build.sh
+    ```
 
->[!NOTE]说明   
->**知识点：什么是部署算子**  
-> 部署算子是指将算子注册到 CANN 框架中，本质上是将算子的二进制文件拷贝至系统公共目录，使其他程序能够通过标准接口（如 CANN API 或 PyTorch 等）自动发现并调用该算子。*.run 的部署包格式可以简单理解为一种自解压的压缩包。
+2. 部署算子  
 
-因各平台生成的算子部署包名称略有差异，执行以下脚本以自动定位并运行部署包（在固定环境中，实际等效于执行类似 ./build_out/custom_opp_ubuntu_aarch64.run 的命令）：
+    >[!NOTE]说明   
+    >**知识点：什么是部署算子**  
+    > 部署算子是指将算子注册到 CANN 框架中，本质上是将算子的二进制文件拷贝至系统公共目录，使其他程序能够通过标准接口（如 CANN API 或 PyTorch 等）自动发现并调用该算子。*.run 的部署包格式可以简单理解为一种自解压的压缩包。
 
-```shell
-MY_OP_PKG=$(find ./build_out -maxdepth 1 -name "custom_opp_*.run" | head -1) && bash $MY_OP_PKG
-```
+    因各平台生成的算子部署包名称略有差异，执行以下脚本以自动定位并运行部署包（在固定环境中，实际等效于执行类似 ./build_out/custom_opp_ubuntu_aarch64.run 的命令）：
 
-**3. 加入动态库路径**   
-部署成功后，按终端提示追加算子依赖的动态库路径：
+    ```shell
+    MY_OP_PKG=$(find ./build_out -maxdepth 1 -name "custom_opp_*.run" | head -1) && bash $MY_OP_PKG
+    ```
 
-```shell
-export LD_LIBRARY_PATH=${ASCEND_OPP_PATH}/vendors/customize/op_api/lib:$LD_LIBRARY_PATH
-echo "export LD_LIBRARY_PATH=${ASCEND_OPP_PATH}/vendors/customize/op_api/lib:$LD_LIBRARY_PATH" >> ~/.bashrc
-```
+3. 加入动态库路径
+      
+    部署成功后，按终端提示追加算子依赖的动态库路径：
+
+    ```shell
+    export LD_LIBRARY_PATH=${ASCEND_OPP_PATH}/vendors/customize/op_api/lib:$LD_LIBRARY_PATH
+    echo "export LD_LIBRARY_PATH=${ASCEND_OPP_PATH}/vendors/customize/op_api/lib:$LD_LIBRARY_PATH" >> ~/.bashrc
+    ```
 
 #### 2.3.4 验证算子功能
 
@@ -269,8 +269,7 @@ test pass
 ```
 
 若超过 30 秒未返回结果，可能是 NPU 卡繁忙，可按 Ctrl+C 终止后切换至其他空闲卡重试；若出现类似如下错误，可能原因包括：NPU卡异常（硬件故障、驱动问题等），/dev/hisi_hdc 设备异常（如容器内未成功挂载、缺乏访问权限、因线程数过多导致设备无法打开等），以及内存等系统资源不足等。    
-错误码说明请参见：[《ACL错误码表》](https://www.hiascend.com/document/detail/zh/CANNCommunityEdition/850/API/appdevgapi/aclcppdevg_03_1345.html)，
-请先解决 NPU 卡故障或更换为其他正常卡后再继续体验（指定 NPU 卡运行的方法详见上文“关于 NPU 设备选择的说明”）：
+错误码说明请参见：[《ACL错误码表》](https://www.hiascend.com/document/detail/zh/CANNCommunityEdition/850/API/appdevgapi/aclcppdevg_03_1345.html)，请先解决 NPU 卡故障或更换为其他正常卡后再继续体验（指定 NPU 卡运行的方法详见上文“关于 NPU 设备选择的说明”）：
 
 ```text
 aclrtSetDevice failed. ERROR: xxxxxx
@@ -285,9 +284,7 @@ Init acl failed. ERROR: 1
 \cp ~/ot_demo/workspace/src/AddCustom/op_kernel/CMakeLists.txt ~/ot_demo/workspace/src/AddCustom/op_kernel/CMakeLists.txt.bak
 ```
 
-<br>
-
-### 2.4 🛡️【检测】算子异常检测（msSanitizer）
+### 2.4【检测】算子异常检测（msSanitizer）
 
 算子开发完成后，可借助 msSanitizer 工具检测是否存在内存越界、竞争条件、未初始化变量或同步异常等严重运行时缺陷，从而高效定位潜在的隐蔽性错误。先跟着操作体验效果，原理部分可稍后阅读：
 
@@ -326,7 +323,7 @@ MY_OP_PKG=$(find ./build_out -maxdepth 1 -name "custom_opp_*.run" | head -1) && 
 
 ```shell
 cd ~/ot_demo/workspace/src/caller
-mssanitizer --tool=memcheck bash run.sh
+mssanitizer --tool=memcheck -- bash run.sh
 ```
 
 工具输出如下错误报告，则表明已成功执行：  
@@ -357,9 +354,7 @@ mssanitizer --tool=memcheck bash run.sh
 \cp -f ~/ot_demo/workspace/src/AddCustom/op_kernel/CMakeLists.txt.bak ~/ot_demo/workspace/src/AddCustom/op_kernel/CMakeLists.txt
 ```
 
-<br>
-
-### 2.5 🐞【调试】断点调试算子代码（msDebug）
+### 2.5【调试】断点调试算子代码（msDebug）
 
 若算子功能异常，可借助 msDebug 工具进行断点调试，高效定位问题。先跟着操作体验效果，原理部分可稍后阅读：
 
@@ -386,20 +381,21 @@ echo 1 > /proc/debug_switch
 
 #### 2.5.2 修改编译选项并重新部署
 
-**1. 修改编译选项**   
-在 Kernel 侧 CMakeLists.txt 首行插入配置，用于启用调试信息、禁用编译优化：
+1. 修改编译选项
 
-```shell
-cd ~/ot_demo/workspace/src/AddCustom
-printf '%s\n' "if(COMMAND add_ops_compile_options)" "  add_ops_compile_options(ALL OPTIONS -g -O0)" "elseif(COMMAND npu_op_kernel_options)" "  npu_op_kernel_options(ascendc_kernels ALL OPTIONS -g -O0)" "endif()" | cat - op_kernel/CMakeLists.txt > tmp && mv -f tmp op_kernel/CMakeLists.txt;
-```
+    在 Kernel 侧 CMakeLists.txt 首行插入配置，用于启用调试信息、禁用编译优化：
 
-**2. 重新编译部署算子**
+    ```shell
+    cd ~/ot_demo/workspace/src/AddCustom
+    printf '%s\n' "if(COMMAND add_ops_compile_options)" "  add_ops_compile_options(ALL OPTIONS -g -O0)" "elseif(COMMAND npu_op_kernel_options)" "  npu_op_kernel_options(ascendc_kernels ALL OPTIONS -g -O0)" "endif()" | cat - op_kernel/CMakeLists.txt > tmp && mv -f tmp op_kernel/CMakeLists.txt;
+    ```
 
-```shell
-bash ./build.sh
-MY_OP_PKG=$(find ./build_out -maxdepth 1 -name "custom_opp_*.run" | head -1) && bash $MY_OP_PKG
-```
+2. 重新编译部署算子
+
+    ```shell
+    bash ./build.sh
+    MY_OP_PKG=$(find ./build_out -maxdepth 1 -name "custom_opp_*.run" | head -1) && bash $MY_OP_PKG
+    ```
 
 #### 2.5.3 设置调试环境变量
 
@@ -411,69 +407,72 @@ source ~/ot_demo/msot/example/quick_start/msdebug/set_kernel_obj_env.sh
 
 #### 2.5.4 断点调试与变量查看
 
-**1. 启动调试器**
+1. 启动调试器
 
-```shell
-cd ~/ot_demo/workspace/src/caller/build
-msdebug execute_add_op
-```
+    ```shell
+    cd ~/ot_demo/workspace/src/caller/build
+    msdebug execute_add_op
+    ```
 
-**2. 设置断点**   
-待 (msdebug) 提示符出现后，设置断点于 add_custom.cpp 第 34 行：
+2. 设置断点
+      
+    待 (msdebug) 提示符出现后，设置断点于 add_custom.cpp 第 34 行：
 
-```text
-b add_custom.cpp:34
-```
+    ```text
+    b add_custom.cpp:34
+    ```
 
->[!CAUTION]注意   
->**若在云平台直接申请的托管容器环境中操作，需特别留意 `/proc/debug_switch = 1` 可能为虚假状态。**       
-> 即使在容器内成功将 `/proc/debug_switch` 设置并查询为 `1`，该值仍可能未真实生效。出于安全隔离考虑，底层宿主机通常通过写时复制（Copy-on-Write, CoW）、
-> 影子文件或覆盖挂载（overlay mount）等机制对 `/proc` 目录进行虚拟化或拦截，导致写入操作仅作用于容器视图，而未反映至内核实际状态。    
-> 在此情况下，执行上一节所述的断点设置将触发警告；而按照后续章节运行 `run` 命令时，则会报出如下错误：
-> 
-> ```text
-> error: 'A' packet returned an error: 8
-> ```
-> 
-> 请登录**宿主机**，以root权限执行 `echo 1 > /proc/debug_switch`, 然后执行 `cat /proc/debug_switch` 确认是否成功设置为 1。    
-> 若无法登录宿主机，或在宿主机没有成功设置，或不具备切换至其它合适环境的条件，则只能跳过本节关于 msDebug 的实操体验。
+    >[!CAUTION]注意   
+    >**若在云平台直接申请的托管容器环境中操作，需特别留意 `/proc/debug_switch = 1` 可能为虚假状态。**       
+    > 即使在容器内成功将 `/proc/debug_switch` 设置并查询为 `1`，该值仍可能未真实生效。出于安全隔离考虑，底层宿主机通常通过写时复制（Copy-on-Write, CoW）、
+    > 影子文件或覆盖挂载（overlay mount）等机制对 `/proc` 目录进行虚拟化或拦截，导致写入操作仅作用于容器视图，而未反映至内核实际状态。    
+    > 在此情况下，执行上一节所述的断点设置将触发警告；而按照后续章节运行 `run` 命令时，则会报出如下错误：
+    > 
+    > ```text
+    > error: 'A' packet returned an error: 8
+    > ```
+    > 
+    > 请登录**宿主机**，以root权限执行 `echo 1 > /proc/debug_switch`, 然后执行 `cat /proc/debug_switch` 确认是否成功设置为 1。    
+    > 若无法登录宿主机，或在宿主机没有成功设置，或不具备切换至其它合适环境的条件，则只能跳过本节关于 msDebug 的实操体验。
 
-**3. 运行算子**   
-输入 run 启动程序，等待命中断点：
+3. 运行算子
+      
+    输入 run 启动程序，等待命中断点：
 
-```shell
-run
-```
+    ```shell
+    run
+    ```
 
-显示如下信息，则成功命中断点：
+    显示如下信息，则成功命中断点：
 
-```text
-Process 163027 launched: '/root/ot_demo/workspace/src/caller/build/execute_add_op' (aarch64)
-[Launch of Kernel AddCustom_ab1b6750d7f510985325b603cb06dc8b_0 on Device 0]
-Process 163027 stopped
-[Switching to focus on Kernel AddCustom_ab1b6750d7f510985325b603cb06dc8b_0, CoreId 1, Type aiv]
-* thread #1, name = 'execute_add_op', stop reason = breakpoint 1.1
-    frame #0: 0x00000000000007e0 AddCustom_ab1b6750d7f510985325b603cb06dc8b.o`KernelAdd::Init(this=0x00000000001d78a8, x=0x12c0c0013000, y=0x12c0c001c000, z=0x12c0c0025000, totalLength=16384, tileNum=8) (.vector) at add_custom.cpp:34:9
-   31           this->tileLength = this->blockLength / tileNum / BUFFER_NUM;
-   32  
-   33           // 设置全局内存缓冲区，为当前AI Core分配其负责的全局共享内存区域
--> 34           xGm.SetGlobalBuffer((__gm__ DTYPE_X *)x + this->blockLength * AscendC::GetBlockIdx(), this->blockLength);
-   35           yGm.SetGlobalBuffer((__gm__ DTYPE_Y *)y + this->blockLength * AscendC::GetBlockIdx(), this->blockLength);
-   36           zGm.SetGlobalBuffer((__gm__ DTYPE_Z *)z + this->blockLength * AscendC::GetBlockIdx(), this->blockLength);
-```
+    ```text
+    Process 163027 launched: '/root/ot_demo/workspace/src/caller/build/execute_add_op' (aarch64)
+    [Launch of Kernel AddCustom_ab1b6750d7f510985325b603cb06dc8b_0 on Device 0]
+    Process 163027 stopped
+    [Switching to focus on Kernel AddCustom_ab1b6750d7f510985325b603cb06dc8b_0, CoreId 1, Type aiv]
+    * thread #1, name = 'execute_add_op', stop reason = breakpoint 1.1
+        frame #0: 0x00000000000007e0 AddCustom_ab1b6750d7f510985325b603cb06dc8b.o`KernelAdd::Init(this=0x00000000001d78a8, x=0x12c0c0013000, y=0x12c0c001c000, z=0x12c0c0025000, totalLength=16384, tileNum=8) (.vector) at add_custom.cpp:34:9
+      31           this->tileLength = this->blockLength / tileNum / BUFFER_NUM;
+      32  
+      33           // 设置全局内存缓冲区，为当前AI Core分配其负责的全局共享内存区域
+    -> 34           xGm.SetGlobalBuffer((__gm__ DTYPE_X *)x + this->blockLength * AscendC::GetBlockIdx(), this->blockLength);
+      35           yGm.SetGlobalBuffer((__gm__ DTYPE_Y *)y + this->blockLength * AscendC::GetBlockIdx(), this->blockLength);
+      36           zGm.SetGlobalBuffer((__gm__ DTYPE_Z *)z + this->blockLength * AscendC::GetBlockIdx(), this->blockLength);
+    ```
 
-**4. 查看变量的值**   
-在断点处执行以下命令，显示当前作用域内的所有局部变量：
+4. 查看变量的值
+      
+    在断点处执行以下命令，显示当前作用域内的所有局部变量：
 
-```text
-var
-```
+    ```text
+    var
+    ```
 
-**5. 退出调试器**
+5. 退出调试器
 
-```text
-q
-```
+    ```text
+    q
+    ```
 
 #### 2.5.5 恢复手工修改
 
@@ -483,32 +482,31 @@ q
 \cp -f ~/ot_demo/workspace/src/AddCustom/op_kernel/CMakeLists.txt.bak ~/ot_demo/workspace/src/AddCustom/op_kernel/CMakeLists.txt
 ```
 
-<br>
-
-### 2.6 📈【调优】分析算子性能（msOpProf）
+### 2.6【调优】分析算子性能（msOpProf）
 
 若算子性能未达预期，可借助 msOpProf 工具采集运行时性能数据，进行深入分析与优化，确保算子在不同昇腾硬件平台上高效执行。先跟着操作体验效果，原理部分可稍后阅读：
 
 #### 2.6.1 修改编译选项并重新编译部署
 
-**1. 修改编译选项**   
-在 Kernel 侧 CMakeLists.txt 首行插入一行配置，开启调试信息：
+1. 修改编译选项
+    
+    在 Kernel 侧 CMakeLists.txt 首行插入一行配置，开启调试信息：
 
-```shell
-cd ~/ot_demo/workspace/src/AddCustom
-printf '%s\n' "if(COMMAND add_ops_compile_options)" "  add_ops_compile_options(ALL OPTIONS -g)" "elseif(COMMAND npu_op_kernel_options)" "  npu_op_kernel_options(ascendc_kernels ALL OPTIONS -g)" "endif()" | cat - op_kernel/CMakeLists.txt > tmp && mv -f tmp op_kernel/CMakeLists.txt;
-```
+    ```shell
+    cd ~/ot_demo/workspace/src/AddCustom
+    printf '%s\n' "if(COMMAND add_ops_compile_options)" "  add_ops_compile_options(ALL OPTIONS -g)" "elseif(COMMAND npu_op_kernel_options)" "  npu_op_kernel_options(ascendc_kernels ALL OPTIONS -g)" "endif()" | cat - op_kernel/CMakeLists.txt > tmp && mv -f tmp op_kernel/CMakeLists.txt;
+    ```
 
->[!NOTE]说明   
->**知识点（可选阅读）：为何 -O 优化等级在各工具间切来切去**   
->调试阶段为支持断点与变量查看，必须使用 -O0 关闭优化，以保留准确的符号映射；但 -O0 与 -O2 的性能差距可达数倍，因此性能分析必须基于 -O2（或默认优化级别）编译的代码，否则采集的数据将严重偏离真实场景，失去参考价值。
+    >[!NOTE]说明   
+    >**知识点（可选阅读）：为何 -O 优化等级在各工具间切来切去**   
+    >调试阶段为支持断点与变量查看，必须使用 -O0 关闭优化，以保留准确的符号映射；但 -O0 与 -O2 的性能差距可达数倍，因此性能分析必须基于 -O2（或默认优化级别）编译的代码，否则采集的数据将严重偏离真实场景，失去参考价值。
 
-**2. 重新编译部署算子**   
+2. 重新编译部署算子
 
-```shell
-bash ./build.sh
-MY_OP_PKG=$(find ./build_out -maxdepth 1 -name "custom_opp_*.run" | head -1) && bash $MY_OP_PKG
-```
+    ```shell
+    bash ./build.sh
+    MY_OP_PKG=$(find ./build_out -maxdepth 1 -name "custom_opp_*.run" | head -1) && bash $MY_OP_PKG
+    ```
 
 #### 2.6.2 启动真机与仿真采集
 
@@ -518,18 +516,18 @@ MY_OP_PKG=$(find ./build_out -maxdepth 1 -name "custom_opp_*.run" | head -1) && 
 > 仿真：在指令流追踪、代码热点定位等方面提供更完整、稳定的分析能力，但对内存访问延迟、带宽瓶颈等硬件相关行为的模拟精度有限。  
 > 因此，建议结合两种方式，互补优势，实现全面性能诊断。若某些场景下您没有真实硬件（NPU 卡），可以使用仿真模式进行初步的性能估算和热点分析。
 
-**1. 上板性能采集**  
+1. 上板性能采集 
 
-```shell
-cd ~/ot_demo/workspace/src/caller/build
-msprof op --output=./msprof_output_npu ./execute_add_op
-```
+    ```shell
+    cd ~/ot_demo/workspace/src/caller/build
+    msprof op --output=./msprof_output_npu ./execute_add_op
+    ```
 
-**2. 仿真器性能采集**   
+2. 仿真器性能采集
 
-```shell
-msprof op simulator --soc-version=Ascend${MY_STUDY_VAR_CHIP_SOC_TYPE} --output=./msprof_output_sim ./execute_add_op
-```
+    ```shell
+    msprof op simulator --soc-version=Ascend${MY_STUDY_VAR_CHIP_SOC_TYPE} --output=./msprof_output_sim ./execute_add_op
+    ```
 
 #### 2.6.3 查看性能数据结果
 
@@ -539,22 +537,22 @@ msprof op simulator --soc-version=Ascend${MY_STUDY_VAR_CHIP_SOC_TYPE} --output=.
 例如 MemoryUB.csv，打开可以看到如下信息：  
 数据显示任务被均分为 8 个 block，全部调度至 Vector Core 执行。例如 Block 0 的带宽（1.02 GB/s）明显高于 Block 1（0.77 GB/s），如果差异过大，可能提示存在优化空间：
 
-| block_id | sub_block_id | aiv_time(us) | aiv_total_cycles | aiv_ub_read_bw_vector(GB/s) | aiv_ub_write_bw_vector(GB/s) | 
-|:--------:|:------------:|:------------:|:----------------:|:---------------------------:|:----------------------------:|
-|    0     |   vector0    |  7.456666  |      13422      |          1.023164           |           0.511582           | 
-|    1     |   vector0    |  9.914444  |      17846      |          0.769523           |           0.384762           | 
-|    2     |   vector0    |  10.001111 |      18002      |          0.762855           |           0.381427           | 
-|    3     |   vector0    |  9.684444  |      17432      |          0.787799           |           0.393899           | 
-|    4     |   vector0    |  9.747222  |      17545      |          0.782725           |           0.391363           | 
-|    5     |   vector0    |  9.062222  |      16312      |          0.84189            |           0.420945           | 
-|    6     |   vector0    |  9.293889  |      16729      |          0.820904           |           0.410452           | 
-|    7     |   vector0    |  8.658889  |      15586      |          0.881105           |           0.440553           | 
+  | block_id | sub_block_id | aiv_time(us) | aiv_total_cycles | aiv_ub_read_bw_vector(GB/s) | aiv_ub_write_bw_vector(GB/s) | 
+  |:--------:|:------------:|:------------:|:----------------:|:---------------------------:|:----------------------------:|
+  |    0     |   vector0    |  7.456666  |      13422      |          1.023164           |           0.511582           | 
+  |    1     |   vector0    |  9.914444  |      17846      |          0.769523           |           0.384762           | 
+  |    2     |   vector0    |  10.001111 |      18002      |          0.762855           |           0.381427           | 
+  |    3     |   vector0    |  9.684444  |      17432      |          0.787799           |           0.393899           | 
+  |    4     |   vector0    |  9.747222  |      17545      |          0.782725           |           0.391363           | 
+  |    5     |   vector0    |  9.062222  |      16312      |          0.84189            |           0.420945           | 
+  |    6     |   vector0    |  9.293889  |      16729      |          0.820904           |           0.410452           | 
+  |    7     |   vector0    |  8.658889  |      15586      |          0.881105           |           0.440553           | 
 
 - bin 文件   
-可使用 `MindStudio Insight` 工具打开，以图形化方式直观展示各类性能视图，例如：计算内存热力图、Cache 热力图以及算子代码热点图等。      
+可使用 `MindStudio Insight` 工具打开，以图形化方式直观展示各类性能视图，例如：计算内存热力图、Cache 热力图以及算子代码热点图等。
 
->[!NOTE]说明  
->若想体验可视化的图表查看，请参考<a href="https://gitcode.com/Ascend/msinsight/blob/master/docs/zh/user_guide/mindstudio_insight_install_guide.md" target="_blank">《MindStudio Insight工具文档》</a>安装 Insight 工具。
+  >[!NOTE]说明  
+  >若想体验可视化的图表查看，请参考<a href="https://gitcode.com/Ascend/msinsight/blob/26.0.0/docs/zh/user_guide/mindstudio_insight_install_guide.md" target="_blank">《MindStudio Insight工具文档》</a>安装 Insight 工具。
 
 #### 2.6.4 恢复手工修改
 
@@ -564,11 +562,11 @@ msprof op simulator --soc-version=Ascend${MY_STUDY_VAR_CHIP_SOC_TYPE} --output=.
 \cp -f ~/ot_demo/workspace/src/AddCustom/op_kernel/CMakeLists.txt.bak ~/ot_demo/workspace/src/AddCustom/op_kernel/CMakeLists.txt
 ```
 
-<br>
+### 2.7【结业】后续进阶路径
 
-### 2.7 🎉【结业】恭喜您完成算子开发工具链入门体验
+恭喜您完成算子开发工具链入门体验。
 
-至此，您已完整走通"设计 → 开发 → 检测 → 调试 → 调优"的算子开发全流程，并实际体验了以下五个核心工具的基本用法：
+至此，您已完整走通“设计 → 开发 → 检测 → 调试 → 调优”的算子开发全流程，并实际体验了以下五个核心工具的基本用法：
 
 | 工具          | 您已掌握的核心能力                         |
 | ----------- | --------------------------------- |
@@ -578,31 +576,33 @@ msprof op simulator --soc-version=Ascend${MY_STUDY_VAR_CHIP_SOC_TYPE} --output=.
 | **msDebug**     | 启动断点调试，在 NPU 算子代码中设置断点并查看变量       |
 | **msOpProf**    | 通过上板与仿真两种模式采集性能数据，分析各 Block 的执行效率 |
 
-#### 后续进阶路径
+如果您想继续进阶体验，可参考以下步骤：
 
-##### **第一步：巩固基础 —— 独立开发一个新算子**  
+**第一步：巩固基础 —— 独立开发一个新算子**  
 
 参考本教程中的 AddCustom，尝试独立实现一个减法算子（SubCustom）或乘法算子（MulCustom），重点关注：Tiling 策略的设计差异、不同计算指令（如 `vsub`、`vmul`）的使用，以及端到端的编译部署流程。
 
-##### **第二步：深入工具 —— 掌握各工具的高级功能**  
+**第二步：深入工具 —— 掌握各工具的高级功能**  
 
 本教程仅覆盖了各工具的入门用法，每个工具都提供了更丰富的高级能力，建议按需访问对应仓的《使用指南》等深入学习：
 
 | 工具 | 高级能力说明 |
 |------|--------------|
-| **msKPP** | 使用Cache命中率、随路转换等建模、多种 Tiling 方案的性能对比分析等。 |
-| **msOpGen** | 复杂算子模板定制、多输入多输出算子的工程生成等。 |
-| **msSanitizer** | 竞争条件检测、同步异常诊断、未初始化变量检查等更多检测模式。 |
-| **msDebug** | 内存查看、核切换、解析Core dump文件等高级调试技巧。 |
-| **msOpProf** | 结合 [MindStudio Insight](https://gitcode.com/Ascend/msinsight/blob/master/docs/zh/user_guide/mindstudio_insight_install_guide.md) 进行可视化性能分析，包括计算内存热力图、Cache 热力图及代码热点图。 |
+| [msKPP](https://gitcode.com/Ascend/mskpp/blob/26.0.0/docs/zh/user_guide/mskpp_user_guide.md) | 使用Cache命中率、随路转换等建模、多种 Tiling 方案的性能对比分析等。 |
+| [msOpGen](https://gitcode.com/Ascend/msopgen/blob/26.0.0/docs/zh/user_guide/msopgen_user_guide.md) | 复杂算子模板定制、多输入多输出算子的工程生成等。 |
+| [msSanitizer](https://gitcode.com/Ascend/mssanitizer/blob/26.0.0/docs/zh/user_guide/mssanitizer_user_guide.md) | 竞争条件检测、同步异常诊断、未初始化变量检查等更多检测模式。 |
+| [msDebug](https://gitcode.com/Ascend/msdebug/blob/26.0.0/docs/zh/user_guide/msdebug_user_guide.md) | 内存查看、核切换、解析Core dump文件等高级调试技巧。 |
+| [msOpProf](https://gitcode.com/Ascend/msopprof/blob/26.0.0/docs/zh/user_guide/msopprof_user_guide.md) | 结合 [MindStudio Insight](https://gitcode.com/Ascend/msinsight/blob/26.0.0/docs/zh/user_guide/mindstudio_insight_install_guide.md) 进行可视化性能分析，包括计算内存热力图、Cache 热力图及代码热点图。 |
 
-##### **第三步：落地真实业务 —— 从教学走向生产**  
+**第三步：落地真实业务 —— 从教学走向生产**  
 
 深入研读[《Ascend C 编程指南（官方教程）》](https://www.hiascend.com/zh/ascend-c?utm_source=cann&utm_medium=article&utm_campaign=alll)，系统掌握多级流水、数据排布、内存管理等核心概念，在此基础上尝试将工具链应用于实际业务算子的开发与调优，逐步构建从原型验证到生产级交付的完整能力。
 
-### 2.8 ❓【FAQ】常见错误解决
+## 3. FAQ
 
-#### 2.8.1 执行 mskpp_demo.py 报错如下，怎么解决？
+### 执行 mskpp_demo.py 报错：Exception: Parameter chip_name in Chip is unsupported
+
+**问题现象**
 
 ```text
 root@localhost:~/ot_demo/workspace/mskpp# python3 mskpp_demo.py
@@ -617,10 +617,17 @@ Traceback (most recent call last):
 Exception: Parameter chip_name in Chip is unsupported
 ```
 
-**问题原因：** `MY_STUDY_VAR_CHIP_SOC_TYPE` 环境变量丢失。   
-**解决方法：** 参考[第 1.2 节](#12-环境准备)中《安装指南》的 1.3 节重新设置。
+**问题原因** 
 
-#### 2.8.2 编译调用算子程序时报错如下，怎么解决？
+`MY_STUDY_VAR_CHIP_SOC_TYPE` 环境变量丢失。
+
+**解决方法** 
+
+参考《[算子开发工具链学习环境安装指南](https://gitcode.com/luyq11/MindStudio-Operator-Tools_ky/blob/26.0.0/docs/zh/quick_start/installation_guide.md)》的第1.3节重新设置。
+
+### 编译调用算子程序时报错：fatal error: aclnn_add_custom.h: No such file or directory
+
+**问题现象**
 
 ```text
 -- Build files have been written to: /root/ot_demo/workspace/src/caller/build
@@ -633,19 +640,33 @@ gmake[2]: *** [CMakeFiles/execute_add_op.dir/build.make:76: CMakeFiles/execute_a
 gmake[1]: *** [CMakeFiles/Makefile2:83: CMakeFiles/execute_add_op.dir/all] Error 2
 ```
 
-**问题原因：** 算子部署时没有将 op_api/include/aclnn_add_custom.h 部署到正确位置，导致找不到头文件。一种可能的原因是环境中存在环境变量 `ASCEND_CUSTOM_OPP_PATH`，且其值不正确或包含多个以冒号间隔的路径，但部署头文件时只会成功拷贝到第一个路径，后续目录均未部署。   
-**解决方法：** 删除该环境变量（执行 `unset ASCEND_CUSTOM_OPP_PATH`），然后重新部署算子。   
+**问题原因** 
 
-#### 2.8.3 执行 execute_add_op 时异常，报错如下，怎么解决？
+算子部署时没有将 op_api/include/aclnn_add_custom.h 部署到正确位置，导致找不到头文件。一种可能的原因是环境中存在环境变量 `ASCEND_CUSTOM_OPP_PATH`，且其值不正确或包含多个以冒号间隔的路径，但部署头文件时只会成功拷贝到第一个路径，后续目录均未部署。
+
+**解决方法** 
+
+删除该环境变量（执行 `unset ASCEND_CUSTOM_OPP_PATH`），然后重新部署算子。
+
+### 执行 execute_add_op 时异常报错：undefined symbol: aclnnAddCustomGetWorkspaceSize
+
+**问题现象**
 
 ```text
 execute_add_op: symbol lookup error: ./build/execute_add_op: undefined symbol: aclnnAddCustomGetWorkspaceSize
 ```
 
-**问题原因：** 部署完算子后，没有按输出提示将 so 加入环境变量 LD_LIBRARY_PATH 中。   
-**解决方法：** 按[第 2.3.3 节](#233-编译与部署算子)第 3 步，重新设置 LD_LIBRARY_PATH 环境变量。   
+**问题原因** 
 
-#### 2.8.4 执行 msDebug 设置断点时报错如下，怎么解决？
+部署完算子后，没有按输出提示将 so 加入环境变量 LD_LIBRARY_PATH 中。
+
+**解决方法** 
+
+按[2.3.3 编译与部署算子](#233-编译与部署算子)第 3 步，重新设置 LD_LIBRARY_PATH 环境变量。
+
+### 执行 msDebug 设置断点时报错：WARNING:  Unable to resolve breakpoint to any actual locations
+
+**问题现象**
 
 ```text
 (msdebug) b add_custom.cpp:23
@@ -653,15 +674,27 @@ Breakpoint 1: no locations (pending on future shared library load).
 WARNING:  Unable to resolve breakpoint to any actual locations.
 ```
 
-**问题原因：** 指定的断点行可能是空行或注释等无法设置断点的行，或者 `/proc/debug_switch` 没有成功设置，原因参考下节说明。       
-**解决方法：** 查看代码源文件，确认代码的真实行号；按 [2.5.1 节](#251-开启内核调试开关) 以 root 权限在宿主机上（注意不是容器内）设置 `/proc/debug_switch` = 1。
+**问题原因** 
 
-#### 2.8.5 执行 msDebug 的 run 时提示如下错误？
+指定的断点行可能是空行或注释等无法设置断点的行，或者 `/proc/debug_switch` 没有成功设置，原因参考下节说明。
+
+**解决方法** 
+
+查看代码源文件，确认代码的真实行号；按 [2.5.1 开启内核调试开关](#251-开启内核调试开关) 以 root 权限在宿主机上（注意不是容器内）设置 `/proc/debug_switch` = 1。
+
+### 执行 msDebug 的 run 时报错：error: 'A' packet returned an error: 8
+
+**问题现象**
 
 ```text
 error: 'A' packet returned an error: 8
 ```
 
-**问题原因：** 没有成功设置`/proc/debug_switch = 1`。确认宿主机上是否被修改回0了，或者若您在云服务商提供的容器环境中操作的，这种场景即使在容器内成功将 `/proc/debug_switch` 设置并查询为 1，
-该状态也可能是虚假的。因出于安全考虑，底层宿主机通常会通过写时复制（CoW）、影子文件或覆盖挂载（overlay mount）等机制对 /proc 目录进行隔离，导致设置未实际生效。    
-**解决方法：** 以 root 权限登录到宿主机上（注意不是容器内），按 [2.5.1 节](#251-开启内核调试开关) 设置 `/proc/debug_switch` = 1，如果不能设置成功只能跳过此工具体验。
+**问题原因** 
+
+没有成功设置`/proc/debug_switch = 1`。确认宿主机上是否被修改回0了，或者若您在云服务商提供的容器环境中操作的，这种场景即使在容器内成功将 `/proc/debug_switch` 设置并查询为 1，
+该状态也可能是虚假的。因出于安全考虑，底层宿主机通常会通过写时复制（CoW）、影子文件或覆盖挂载（overlay mount）等机制对 /proc 目录进行隔离，导致设置未实际生效。
+
+**解决方法** 
+
+以 root 权限登录到宿主机上（注意不是容器内），按 [2.5.1 开启内核调试开关](#251-开启内核调试开关) 设置 `/proc/debug_switch` = 1，如果不能设置成功只能跳过此工具体验。
