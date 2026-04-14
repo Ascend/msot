@@ -18,7 +18,8 @@
 
 请使用 CANN 官方容器镜像作为编译环境，镜像详情可参见<a href="https://www.hiascend.com/developer/ascendhub/detail/17da20d1c2b6493cb38765adeba85884" target="_blank">《CANN 官方镜像仓库》</a>。   
 请选用类似以下版本的 `openEuler` 镜像：`8.5.0-xxx-openeuler24.03-py3.11`（其中 xxx 需根据您的昇腾 AI 处理器型号填写）。   
-以昇腾 910B 为例，拉取命令如下：
+以Atlas A2 训练系列产品/Atlas A2 推理系列产品
+为例，拉取命令如下：
 
 ```shell
 docker pull swr.cn-south-1.myhuaweicloud.com/ascendhub/cann:8.5.0-910b-openeuler24.03-py3.11

@@ -14,13 +14,11 @@ MindStudio 工具链已集成在 CANN 包中发布，可通过以下方式完成
 
 ### 方式一：依据 CANN 官方文档安装
 
-请参考<a href="https://www.hiascend.com/cann/download" target="_blank">《CANN 官方安装指南》</a>，
-按文档逐步完成安装与配置。
+请参考《[CANN 官方安装指南](https://www.hiascend.com/cann/download)》，按文档逐步完成安装与配置。
 
 ### 方式二：使用 CANN 官方容器镜像
 
-请访问<a href="https://www.hiascend.com/developer/ascendhub/detail/17da20d1c2b6493cb38765adeba85884" target="_blank">《CANN 官方镜像仓库》</a>，
-按仓库中的指引完成镜像拉取及容器启动。
+请访问《[CANN 官方镜像仓库](https://www.hiascend.com/developer/ascendhub/detail/17da20d1c2b6493cb38765adeba85884)》，按仓库中的指引完成镜像拉取及容器启动。
 
 <br>
 
@@ -30,7 +28,7 @@ MindStudio 工具链已集成在 CANN 包中发布，可通过以下方式完成
 
 ### 2.1 编译环境准备
 
-请按照以下文档进行环境配置：[《算子工具开发环境安装指导》](../common/dev_env_setup.md)。
+请按照以下文档进行环境配置：《[算子工具开发环境安装指导](../common/dev_env_setup.md)》。
 
 ### 2.2 克隆本仓库
 
@@ -79,7 +77,7 @@ chmod +x ascend-mindstudio-operator-tools_*.run
 
 ```text
 [mindstudio-operator-tools] [2026-03-02 12:16:42] [INFO]: all subpackage installed succeed
-[mindstudio-operator-tools] [2026-03-02 12:16:42] [INFO]: InstallPath: /usr/local/Ascend/cann-8.5.0
+[mindstudio-operator-tools] [2026-03-02 12:16:42] [INFO]: InstallPath: /usr/local/Ascend/cann-xxx
 [mindstudio-operator-tools] [2026-03-02 12:16:42] [INFO]: mindstudio-operator-tools package install success! The new version takes effect immediately.
 ```
 
@@ -123,9 +121,9 @@ chmod +x ascend-mindstudio-operator-tools_*.run
 
 升级操作等同于覆盖安装：使用新版本的 run 包执行 [2.4.2 安装](#242-安装) 中的安装命令即可，安装程序会自动处理旧版本的替换。
 
-### 2.5 FAQ
+## 3. FAQ
 
-#### 2.5.1 安装完成后，执行命令时未调用新编译的工具
+### 安装完成后，执行命令时未调用新编译的工具
 
 请检查并配置以下环境变量，确保系统优先使用新安装的工具：
 
@@ -137,7 +135,7 @@ export LD_LIBRARY_PATH=$ASCEND_HOME_PATH/lib64:$LD_LIBRARY_PATH
 
 若使用了 `--install-path` 指定了自定义路径，请将 `$HOME/Ascend` 替换为对应的安装路径。
 
-#### 2.5.2 run 包已删除时如何卸载？
+### run包已删除时如何卸载
 
 可通过安装目录下的卸载脚本执行卸载：
 

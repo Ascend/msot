@@ -37,11 +37,11 @@ MindStudio Operator Tools（msOT）算子开发工具链，聚焦算子开发中
 
 ## 🚀 快速入门
 
-以简易加法算子为例，完整贯穿算子开发全流程，请参见 [《算子开发工具链快速入门》](docs/zh/quick_start/op_tool_quick_start.md)。
+以简易加法算子为例，完整贯穿算子开发全流程，请参见《[算子开发工具链快速入门](docs/zh/quick_start/op_tool_quick_start.md)》。
 
 ## 📦 安装指南
 
-介绍 msOT 工具的环境依赖与安装方法，请参见 [《msOT 安装指南》](./docs/zh/install_guide/msot_install_guide.md)。
+介绍 msOT 工具的环境依赖与安装方法，请参见《[msOT 安装指南](./docs/zh/install_guide/msot_install_guide.md)》。
 
 ## 📘 使用指南
 
@@ -49,14 +49,14 @@ MindStudio Operator Tools（msOT）算子开发工具链，聚焦算子开发中
 
 ## 🛠️ 贡献指南
 
-欢迎参与项目贡献，请参见 [《贡献指南》](./docs/zh/contributing/contributing_guide.md)。
+欢迎参与项目贡献，请参见《[贡献指南](./docs/zh/contributing/contributing_guide.md)》。
 
 ## ⚖️ 相关说明
 
-🔹 [《版本说明》](./docs/zh/release_notes/release_notes.md)   
-🔹 [《许可证声明》](./docs/zh/legal/license_notice.md)     
-🔹 [《安全声明》](./docs/zh/legal/security_statement.md)     
-🔹 [《免责声明》](./docs/zh/legal/disclaimer.md)     
+🔹《[版本说明](./docs/zh/release_notes/release_notes.md)》   
+🔹《[许可证声明](./docs/zh/legal/license_notice.md)》    
+🔹《[安全声明](./docs/zh/legal/security_statement.md)》     
+🔹《[免责声明](./docs/zh/legal/disclaimer.md)》     
 
 ## 🤝 建议与交流
 
@@ -64,7 +64,7 @@ MindStudio Operator Tools（msOT）算子开发工具链，聚焦算子开发中
 
 |                                      📱 关注 MindStudio 公众号                                       | 💬 更多交流与支持                                                                                                                                                                                                                                                                                                                                                                                                                     |
 |:-----------------------------------------------------------------------------------------------:|:-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| <img src="./docs/zh/figures/readme/officialAccount.png" width="120"><br><sub>*扫码关注获取最新动态*</sub> | 💡 **加入微信交流群**：<br>关注公众号，回复“交流群”即可获取入群二维码。<br><br>🛠️ **其他渠道**：<br>👉 昇腾助手：[![WeChat](https://img.shields.io/badge/WeChat-07C160?style=flat-square&logo=wechat&logoColor=white)](https://gitcode.com/Ascend/msot/blob/master/docs/zh/figures/readme/xiaozhushou.png)<br>👉 昇腾论坛：[![Website](https://img.shields.io/badge/Website-%231e37ff?style=flat-square&logo=RSS&logoColor=white)](https://www.hiascend.com/forum/) |
+| <img src="./docs/zh/figures/readme/officialAccount.png" width="120"><br><sub>*扫码关注获取最新动态*</sub> | 💡 **加入微信交流群**：<br>关注公众号，回复“交流群”即可获取入群二维码。<br><br>🛠️ **其他渠道**：<br>👉 昇腾助手：[![WeChat](https://img.shields.io/badge/WeChat-07C160?style=flat-square&logo=wechat&logoColor=white)](docs/zh/figures/readme/xiaozhushou.png)<br>👉 昇腾论坛：[![Website](https://img.shields.io/badge/Website-%231e37ff?style=flat-square&logo=RSS&logoColor=white)](https://www.hiascend.com/forum/) |
 
 ## 🙏 致谢
 
