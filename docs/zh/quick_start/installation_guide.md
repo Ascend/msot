@@ -2,7 +2,7 @@
 
 <br>
 
->[!CAUTION]注意   
+>[!CAUTION]注意
 >**免责声明**   
 >本文档及相关脚本仅供学习使用，不承诺生产环境的稳定性和安全性，使用者需自行评估风险并承担相应责任。
 
@@ -20,7 +20,7 @@
 ### 1.2 工作区目录初始化
 
 **1. 创建工作区**   
-创建 `workspace` 目录，用于存放示例执行过程中生成的各类文件，路径为`~/ot_demo/workspace`（其中 “ot” 为 Operator Tool 算子工具的首字母缩写）：
+创建 `workspace` 目录，用于存放示例执行过程中生成的各类文件，路径为`~/ot_demo/workspace`（其中“ot”为 Operator Tool 算子工具的首字母缩写）：
 
 ```shell
 mkdir -p ~/ot_demo/workspace
@@ -39,7 +39,7 @@ git clone https://gitcode.com/Ascend/msot.git ~/ot_demo/msot
 
 因芯片 SoC 型号在后续多条命令中频繁使用，且获取方式较复杂，此处统一获取并存入环境变量 `MY_STUDY_VAR_CHIP_SOC_TYPE`，便于后续引用。
 
->[!CAUTION]注意   
+>[!CAUTION]注意
 >环境变量 `MY_STUDY_VAR_CHIP_SOC_TYPE` 仅用于本次快速入门学习，商用开发请勿使用此变量。
 
 #### 1.3.1 自动获取芯片 SoC 型号
@@ -66,9 +66,9 @@ source set_chip_env_var.sh
 echo "export MY_STUDY_VAR_CHIP_SOC_TYPE=<YOUR_CHIP_NAME>" >> ~/.bashrc && source ~/.bashrc
 ```
 
->[!CAUTION]注意    
->`MY_STUDY_VAR_CHIP_SOC_TYPE` 的值为去掉 Ascend 前缀后的值：   
->正确值：910B4、910_9392；  
+>[!CAUTION]注意
+>`MY_STUDY_VAR_CHIP_SOC_TYPE` 的值为去掉 Ascend 前缀后的值：
+>正确值：910B4、910_9392；
 >错误值：Ascend910B4、Ascend910_9392。
 
 ### 1.4 安装 Python 库
@@ -80,5 +80,5 @@ pip3 install -r ~/ot_demo/msot/example/quick_start/public/requirements.txt -i ht
 ln -sf /usr/local/bin/python3 /usr/bin/python3
 ```
 
->[!NOTE]说明   
+>[!NOTE]说明
 >由于官网下载速度较慢，上述命令使用了阿里源进行安装。若您的环境无法访问阿里源，或出于安全考虑不信任该源，可移除 -i xxx 参数以恢复默认源。

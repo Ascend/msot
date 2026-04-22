@@ -4,7 +4,7 @@
 
 本指南基于 **昇腾 CANN 官方镜像**，帮助您通过 Docker 容器化方式快速搭建面向昇腾 AI 算子开发环境。
 
-> [!CAUTION] 注意    
+> [!CAUTION] 注意
 > **免责声明**
 > 本文档及相关脚本仅供学习参考，不保证生产环境的稳定性与安全性，使用者需自行评估风险并承担相应责任。
  
@@ -44,7 +44,7 @@ swr.cn-south-1.myhuaweicloud.com/ascendhub/cann     8.5.1-910b-openeuler24.03-py
 
 若本地无可用镜像，请按以下步骤操作。
 
-**Step 1** — 访问 [CANN 镜像仓库](https://www.hiascend.com/developer/ascendhub/detail/17da20d1c2b6493cb38765adeba85884)，切换至 **"镜像版本"** 标签页，浏览可用版本列表：   
+**Step 1** — 访问 [CANN 镜像仓库](https://www.hiascend.com/developer/ascendhub/detail/17da20d1c2b6493cb38765adeba85884)，切换至 **"镜像版本"** 标签页，浏览可用版本列表：
 
 ![image.png](https://raw.gitcode.com/user-images/assets/8763895/f2a0ae4f-4a7a-4c0e-ada9-ec4a0ab71403/image.png 'image.png')   
 
@@ -68,7 +68,7 @@ docker pull swr.cn-south-1.myhuaweicloud.com/ascendhub/cann:<镜像版本号>
 docker pull swr.cn-south-1.myhuaweicloud.com/ascendhub/cann:8.5.1-910b-openeuler24.03-py3.11
 ```
 
-> [!NOTE] 说明    
+> [!NOTE] 说明
 > **为什么镜像名（swr.cn-south-1.myhuaweicloud.com/ascendhub/cann）这么长？**    
 > 因为全路径格式包含了完整的注册中心地址，可直接拉取而无需额外配置 Docker Registry，实现开箱即用。
 
@@ -85,9 +85,9 @@ cd ~
 curl -fLO --retry 10 --retry-all-errors --retry-delay 3 -A "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36" https://raw.gitcode.com/Ascend/msot/raw/master/example/quick_start/public/ctr_in.py && chmod +x ctr_in.py
 ```
 
-> [!NOTE] 说明  
-> 1.若提示 `--retry-all-errors` 参数不存在，说明 curl 版本过低，可移除该参数后重试；      
-> 2.若多次下载仍失败，可能是触发了防止自动化脚本恶意爬取代码的 CDN 防护机制，可手动从仓库下载 [ctr_in.py](../../../example/quick_start/public/ctr_in.py) 文件；   
+> [!NOTE] 说明
+> 1.若提示 `--retry-all-errors` 参数不存在，说明 curl 版本过低，可移除该参数后重试。
+> 2.若多次下载仍失败，可能是触发了防止自动化脚本恶意爬取代码的 CDN 防护机制，可手动从仓库下载 [ctr_in.py](../../../example/quick_start/public/ctr_in.py) 文件。
 
 ### 2.2 执行启动命令
 
@@ -131,7 +131,7 @@ Users online:   0
 [root@localhost alice]#
 ```
 
-> [!NOTE] 说明    
+> [!NOTE] 说明
 > **退出后如何重新进入容器？**
 >
 > 1. 执行：`python3 ~/ctr_in.py op_dev_alice`，当仅传入 1 个参数时，该脚本将执行进入已有容器的操作，且支持模糊匹配容器名。
