@@ -7,7 +7,7 @@
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
  */
-#include "add_custom_tiling.h"
+#include "../op_kernel/add_custom_tiling.h"
 #include "register/op_def_registry.h"
 
 namespace optiling {
