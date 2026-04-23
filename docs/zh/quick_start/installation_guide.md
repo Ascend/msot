@@ -76,9 +76,6 @@ echo "export MY_STUDY_VAR_CHIP_SOC_TYPE=<YOUR_CHIP_NAME>" >> ~/.bashrc && source
 算子工程构建依赖以下库，请执行如下命令安装：
 
 ```shell
-pip3 install -r ~/ot_demo/msot/example/quick_start/public/requirements.txt -i https://mirrors.aliyun.com/pypi/simple/
+pip3 install -r ~/ot_demo/msot/example/quick_start/public/requirements.txt -i https://repo.huaweicloud.com/repository/pypi/simple/
 ln -sf /usr/local/bin/python3 /usr/bin/python3
 ```
-
->[!NOTE]说明   
->由于官网下载速度较慢，上述命令使用了阿里源进行安装。若您的环境无法访问阿里源，或出于安全考虑不信任该源，可移除 -i xxx 参数以恢复默认源。

@@ -172,18 +172,16 @@ MSKPP{timestamp}/
     ```text
     AddCustom
     ├── build.sh                 // 编译入口脚本
-    ├── cmake                    // 编译工程脚本
     ├── CMakeLists.txt           // 算子工程的CMakeLists.txt
-    ├── scripts                  // 自定义算子工程打包相关脚本所在目录
     ├── framework                // 算子插件实现文件目录，单算子模型文件的生成不依赖算子适配插件，无需关注
     │   ├── CMakeLists.txt
     │   └── tf_plugin
     ├── op_host                  // Host侧实现文件
     │   ├── add_custom.cpp       // 【用户扩展点】算子原型注册、shape推导、信息库、tiling实现等内容文件
-    │   ├── add_custom_tiling.h  // 【用户扩展点】算子tiling定义文件
     │   └── CMakeLists.txt
     ├── op_kernel                // Kernel侧实现文件
     │   ├── add_custom.cpp       // 【用户扩展点】算子代码实现文件 
+    │   ├── add_custom_tiling.h  // 【用户扩展点】算子tiling定义文件   
     │   └── CMakeLists.txt
     └── CMakePresets.json        // 编译配置项
     ```
@@ -191,9 +189,9 @@ MSKPP{timestamp}/
 #### 2.3.2 实现核心逻辑
 
 > [!NOTE]说明   
-> **知识点（可选阅读）：算子核心代码文件实现原理**    
-> op_host/add_custom_tiling.h：定义 Tiling 分块策略的数据结构。   
-> op_host/add_custom.cpp：实现 Host 侧的 Tiling 计算逻辑与算子原型注册。   
+> **知识点（可选阅读）：算子核心代码文件实现原理**  
+> op_host/add_custom.cpp：实现 Host 侧的 Tiling 计算逻辑与算子原型注册。  
+> op_kernel/add_custom_tiling.h：定义 Tiling 分块策略的数据结构。  
 > op_kernel/add_custom.cpp：实现 Kernel 侧加法算子的具体计算逻辑（GM→UB 搬运→向量加法→UB→GM 写回）。   
 > 若需深入理解上述三个文件的功能与协作机制，除参考代码注释外，建议详细阅读<a href="https://www.hiascend.com/developer/blog/details/0239124507827469022" target="_blank">《昇腾Ascend C编程入门教程（纯干货）》</a>。    
 > 如下 `keep_soc_info.py` 用于处理 SoC 信息，由于该信息因环境而异，不可机械覆盖，必须使用当前系统中的实际配置。
@@ -203,8 +201,8 @@ MSKPP{timestamp}/
 ```shell
 cd ~/ot_demo/workspace/src/AddCustom/
 python3 ~/ot_demo/msot/example/quick_start/msopgen/keep_soc_info.py get ./op_host/add_custom.cpp
-\cp -f ~/ot_demo/msot/example/quick_start/msopgen/code/op_host/add_custom_tiling.h ./op_host/
 \cp -f ~/ot_demo/msot/example/quick_start/msopgen/code/op_host/add_custom.cpp ./op_host/
+\cp -f ~/ot_demo/msot/example/quick_start/msopgen/code/op_kernel/add_custom_tiling.h ./op_kernel/
 \cp -f ~/ot_demo/msot/example/quick_start/msopgen/code/op_kernel/add_custom.cpp ./op_kernel/
 python3 ~/ot_demo/msot/example/quick_start/msopgen/keep_soc_info.py set ./op_host/add_custom.cpp
 ```
@@ -246,11 +244,7 @@ python3 ~/ot_demo/msot/example/quick_start/msopgen/keep_soc_info.py set ./op_hos
 >[!CAUTION]注意   
 >**关于 NPU 设备选择的说明**   
 >执行以下 `run.sh` 脚本将实际运行算子。为便于学习，假设环境中所有 NPU 卡型号相同，系统将随机选择一张空闲卡执行任务。
->若因随机选定的卡存在故障等原因需指定 NPU 卡，请根据 `npu-smi info` 命令返回的 NPU 信息，使用其顺序号（取值范围为 [0, NPU 数量 - 1]）按如下方式调用：
->
-> ```shell
-> bash ./run.sh 2
-> ```
+>若因随机选定的卡存在故障等原因需指定 NPU 卡，请根据 `npu-smi info` 命令返回的 NPU 信息，使用其顺序号（取值范围为 [0, NPU 数量 - 1]）按如下方式调用：`bash ./run.sh 2`
 
 执行算子调用工程，验证算子功能（本例执行 1.0 + 2.0，预期结果为 3.0）：
 
@@ -520,14 +514,17 @@ source ~/ot_demo/msot/example/quick_start/msdebug/set_kernel_obj_env.sh
 
     ```shell
     cd ~/ot_demo/workspace/src/caller/build
-    msprof op --output=./msprof_output_npu ./execute_add_op
+    msopprof --output=./msopprof_output_npu ./execute_add_op
     ```
 
 2. 仿真器性能采集
 
     ```shell
-    msprof op simulator --soc-version=Ascend${MY_STUDY_VAR_CHIP_SOC_TYPE} --output=./msprof_output_sim ./execute_add_op
+    msopprof op simulator --soc-version=Ascend${MY_STUDY_VAR_CHIP_SOC_TYPE} --output=./msopprof_output_sim ./execute_add_op
     ```
+
+>[!NOTE]说明   
+> 如果执行时报`msopprof: command not found`，说明环境版本较旧，尝试将命令`msopprof`替换为`msprof op`，例如：`msprof op --output=./msprof_output_npu ./execute_add_op`
 
 #### 2.6.3 查看性能数据结果
 
