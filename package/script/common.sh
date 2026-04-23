@@ -18,6 +18,8 @@ LINK_ARRAY=("bin" "lib64")
 SUBWHL=("mindstudio_kpp" "mindstudio_kl" "mindstudio_opgen" "mindstudio_opst")
 # run子包列表
 SUBRUN=("mindstudio-opprof" "mindstudio-sanitizer" "mindstudio-debugger")
+# 需要指定卸载的文件
+UNINSTALL_FILE=("msopgen" "msopst" "msopst.ini")
 
 export log_file=""
 
@@ -540,10 +542,16 @@ function install_subpackage() {
 }
 
 function uninstall_subpackage() {
+    local python_path_="${install_path}/python/site-packages"
     # 卸载SUBWHL中定义的whl包
     for whl in "${SUBWHL[@]}"; do
-        whlUninstallPackage ${whl} ${install_path}/python/site-packages
+        whlUninstallPackage ${whl} ${python_path_}
     done
+    # 卸载残留文件
+    for file in "${UNINSTALL_FILE[@]}"; do
+        remove_if_file_exist ${python_path_}/bin/${file}
+    done
+    remove_empty_dir ${python_path_}/bin
     # 卸载SUBRUN中定义的子run包
     for run in "${SUBRUN[@]}"; do
         local _uninstall_file=${install_path}/share/info/${run}/script/uninstall.sh
