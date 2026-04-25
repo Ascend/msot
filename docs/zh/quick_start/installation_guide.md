@@ -2,9 +2,9 @@
 
 <br>
 
->[!CAUTION]注意   
->**免责声明**   
->本文档及相关脚本仅供学习使用，不承诺生产环境的稳定性和安全性，使用者需自行评估风险并承担相应责任。
+> [!NOTE]
+> 
+> 本文档及相关脚本仅供学习使用，不承诺生产环境的稳定性和安全性，使用者需自行评估风险并承担相应责任。
 
 ## 1. 算子工具学习环境安装
 
@@ -39,8 +39,8 @@ git clone https://gitcode.com/Ascend/msot.git ~/ot_demo/msot
 
 因芯片 SoC 型号在后续多条命令中频繁使用，且获取方式较复杂，此处统一获取并存入环境变量 `MY_STUDY_VAR_CHIP_SOC_TYPE`，便于后续引用。
 
->[!CAUTION]注意   
->环境变量 `MY_STUDY_VAR_CHIP_SOC_TYPE` 仅用于本次快速入门学习，商用开发请勿使用此变量。
+> [!NOTE]  
+> 注意：环境变量 `MY_STUDY_VAR_CHIP_SOC_TYPE` 仅用于本次快速入门学习，商用开发请勿使用此变量。
 
 #### 1.3.1 自动获取芯片 SoC 型号
 
@@ -66,10 +66,11 @@ source set_chip_env_var.sh
 echo "export MY_STUDY_VAR_CHIP_SOC_TYPE=<YOUR_CHIP_NAME>" >> ~/.bashrc && source ~/.bashrc
 ```
 
->[!CAUTION]注意    
+> [!NOTE]
+> 
 >`MY_STUDY_VAR_CHIP_SOC_TYPE` 的值为去掉 Ascend 前缀后的值：   
->正确值：910B4、910_9392；  
->错误值：Ascend910B4、Ascend910_9392。
+> 正确值：910B4、910_9392；  
+> 错误值：Ascend910B4、Ascend910_9392。
 
 ### 1.4 安装 Python 库
 

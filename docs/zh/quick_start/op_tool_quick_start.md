@@ -40,8 +40,8 @@ echo $MY_STUDY_VAR_CHIP_SOC_TYPE
 
  若该变量为空，请参照[1.2 环境准备](#12-环境准备)进行正确设置。
 
-> [!CAUTION]注意    
-> 请确保 MY_STUDY_VAR_CHIP_SOC_TYPE 环境变量已正确配置，否则后续步骤将频繁报错。此变量为学习环境专用，**正式商用版本中严禁使用**。
+> [!NOTE]    
+> 注意：请确保 MY_STUDY_VAR_CHIP_SOC_TYPE 环境变量已正确配置，否则后续步骤将频繁报错。此变量为学习环境专用，**正式商用版本中严禁使用**。
 
 #### 2.1.2 确认 Python 包已安装
 
@@ -67,7 +67,8 @@ ls -al ~/ot_demo/msot/example/quick_start
 
 首先，进行算子算法设计。借助 msKPP 工具，可在秒级时间内获得算子性能建模结果，在无硬件条件下预估性能，快速验证实现方案的可行性。先跟着操作体验效果，原理部分可稍后阅读：
 
-> [!NOTE]说明   
+> [!NOTE]
+> 
 > **知识点：msKPP 工具原理**   
 > msKPP 并非传统可执行程序，而是一套专用于昇腾的 Python 类库。用户需通过 import 相关模块、编写并执行 Python 脚本，生成性能分析结果文件以完成建模。内部原理是预先采集真实环境中各类指令操作的性能数据，基于用户定义的算子执行流程，对各种性能开销进行建模与估算。
 
@@ -81,7 +82,8 @@ ls -al ~/ot_demo/msot/example/quick_start
 
 2. 开发 Python 脚本
 
-    > [!NOTE]说明  
+    > [!NOTE]
+    > 
     > **知识点（可选阅读）：msKPP 的 DSL 语言方案（Domain-Specific Language，领域特定语言）**   
     > 这套类库及接口是专为昇腾性能建模而设计的“方言”，需经过专门学习方可掌握，无法仅凭通用 Python 语法直接编写，但用法较简单，稍加学习即可应用。
     > 常规开发流程：需先导入 Tensor、Chip 以及算子实现所必需的指令（例如 vadd），通过 with 语句进入算子实现代码的上下文，再创建 Tensor 以执行具体操作，样例脚本中已做了详细的注释，其他指令接口说明请参考《[msKPP 工具接口说明](https://gitcode.com/Ascend/mskpp/blob/26.0.0/docs/zh/api_reference/mskpp_api_reference.md)》。
@@ -139,11 +141,12 @@ MSKPP{timestamp}/
 
 2. 开发算子定义配置文件
 
-    >[!NOTE]说明   
-    >**知识点（可选阅读）：msOpGen 输入配置文件**   
-    >自定义格式的 json 配置文件，可以简单类比理解为定义了一个 C 语言函数的声明，包括：函数名、入参及返回值的类型信息。
-    >比如 msopgen_demo.json 中就是定义了算子的名字、输入输出变量的名字、类型、数据排布格式。
-    >算子函数的声明代码统一由工具生成，即生成一个空函数（只有函数名、入参和返回值），函数体需要用户自己实现。
+    > [!NOTE]
+    > 
+    > **知识点（可选阅读）：msOpGen 输入配置文件**   
+    > 自定义格式的 json 配置文件，可以简单类比理解为定义了一个 C 语言函数的声明，包括：函数名、入参及返回值的类型信息。
+    > 比如 msopgen_demo.json 中就是定义了算子的名字、输入输出变量的名字、类型、数据排布格式。
+    > 算子函数的声明代码统一由工具生成，即生成一个空函数（只有函数名、入参和返回值），函数体需要用户自己实现。
 
     因是快速入门，将准备好的配置文件拷贝到此即视为开发完成（本教程聚焦工具链使用，实际开发需自行实现）：
 
@@ -161,8 +164,9 @@ MSKPP{timestamp}/
 
 4. 查看生成的结果
 
-    >[!NOTE]说明   
-    >**知识点（可选阅读）：关键概念**       
+    > [!NOTE]
+    > 
+    > **知识点（可选阅读）：关键概念**       
     > Host 侧：运行于 CPU 的代码，负责数据预处理、任务调度及算子调用。   
     > Kernel 侧：运行于 NPU 的代码，负责执行实际的大规模并行计算逻辑。   
     > Tiling：将大规模数据分块处理，以提高 Local Memory 利用率并优化内存访问效率。
@@ -188,7 +192,8 @@ MSKPP{timestamp}/
 
 #### 2.3.2 实现核心逻辑
 
-> [!NOTE]说明   
+> [!NOTE]
+> 
 > **知识点（可选阅读）：算子核心代码文件实现原理**  
 > op_host/add_custom.cpp：实现 Host 侧的 Tiling 计算逻辑与算子原型注册。  
 > op_kernel/add_custom_tiling.h：定义 Tiling 分块策略的数据结构。  
@@ -220,8 +225,9 @@ python3 ~/ot_demo/msot/example/quick_start/msopgen/keep_soc_info.py set ./op_hos
 
 2. 部署算子  
 
-    >[!NOTE]说明   
-    >**知识点：什么是部署算子**  
+    > [!NOTE]
+    > 
+    > **知识点：什么是部署算子**  
     > 部署算子是指将算子注册到 CANN 框架中，本质上是将算子的二进制文件拷贝至系统公共目录，使其他程序能够通过标准接口（如 CANN API 或 PyTorch 等）自动发现并调用该算子。*.run 的部署包格式可以简单理解为一种自解压的压缩包。
 
     因各平台生成的算子部署包名称略有差异，执行以下脚本以自动定位并运行部署包（在固定环境中，实际等效于执行类似 ./build_out/custom_opp_ubuntu_aarch64.run 的命令）：
@@ -241,10 +247,10 @@ python3 ~/ot_demo/msot/example/quick_start/msopgen/keep_soc_info.py set ./op_hos
 
 #### 2.3.4 验证算子功能
 
->[!CAUTION]注意   
->**关于 NPU 设备选择的说明**   
->执行以下 `run.sh` 脚本将实际运行算子。为便于学习，假设环境中所有 NPU 卡型号相同，系统将随机选择一张空闲卡执行任务。
->若因随机选定的卡存在故障等原因需指定 NPU 卡，请根据 `npu-smi info` 命令返回的 NPU 信息，使用其顺序号（取值范围为 [0, NPU 数量 - 1]）按如下方式调用：`bash ./run.sh 2`
+> [!NOTE]   
+> **关于 NPU 设备选择的说明**   
+> 执行以下 `run.sh` 脚本将实际运行算子。为便于学习，假设环境中所有 NPU 卡型号相同，系统将随机选择一张空闲卡执行任务。
+> 若因随机选定的卡存在故障等原因需指定 NPU 卡，请根据 `npu-smi info` 命令返回的 NPU 信息，使用其顺序号（取值范围为 [0, NPU 数量 - 1]）按如下方式调用：`bash ./run.sh 2`
 
 执行算子调用工程，验证算子功能（本例执行 1.0 + 2.0，预期结果为 3.0）：
 
@@ -354,8 +360,9 @@ mssanitizer --tool=memcheck -- bash run.sh
 
 #### 2.5.1 开启内核调试开关
 
->[!CAUTION]注意   
->**msDebug 需要 root 权限**       
+> [!NOTE]
+> 
+> **msDebug 需要 root 权限**       
 > msDebug 需要内核调试开关 /proc/debug_switch 开启才能正常工作，但出于安全考虑默认关闭，且需要 root 权限才能打开。   
 > 这在很多环境（如共享开发机、容器）中可能无法满足，此时请联系系统管理员开启，或在拥有特权的容器中体验此部分。
 
@@ -416,8 +423,9 @@ source ~/ot_demo/msot/example/quick_start/msdebug/set_kernel_obj_env.sh
     b add_custom.cpp:34
     ```
 
-    >[!CAUTION]注意   
-    >**若在云平台直接申请的托管容器环境中操作，需特别留意 `/proc/debug_switch = 1` 可能为虚假状态。**       
+    > [!NOTE]
+    > 
+    > **若在云平台直接申请的托管容器环境中操作，需特别留意 `/proc/debug_switch = 1` 可能为虚假状态。**     
     > 即使在容器内成功将 `/proc/debug_switch` 设置并查询为 `1`，该值仍可能未真实生效。出于安全隔离考虑，底层宿主机通常通过写时复制（Copy-on-Write, CoW）、
     > 影子文件或覆盖挂载（overlay mount）等机制对 `/proc` 目录进行虚拟化或拦截，导致写入操作仅作用于容器视图，而未反映至内核实际状态。    
     > 在此情况下，执行上一节所述的断点设置将触发警告；而按照后续章节运行 `run` 命令时，则会报出如下错误：
@@ -491,9 +499,10 @@ source ~/ot_demo/msot/example/quick_start/msdebug/set_kernel_obj_env.sh
     printf '%s\n' "if(COMMAND add_ops_compile_options)" "  add_ops_compile_options(ALL OPTIONS -g)" "elseif(COMMAND npu_op_kernel_options)" "  npu_op_kernel_options(ascendc_kernels ALL OPTIONS -g)" "endif()" | cat - op_kernel/CMakeLists.txt > tmp && mv -f tmp op_kernel/CMakeLists.txt;
     ```
 
-    >[!NOTE]说明   
-    >**知识点（可选阅读）：为何 -O 优化等级在各工具间切来切去**   
-    >调试阶段为支持断点与变量查看，必须使用 -O0 关闭优化，以保留准确的符号映射；但 -O0 与 -O2 的性能差距可达数倍，因此性能分析必须基于 -O2（或默认优化级别）编译的代码，否则采集的数据将严重偏离真实场景，失去参考价值。
+    > [!NOTE]
+    > 
+    > **知识点（可选阅读）：为何 -O 优化等级在各工具间切来切去**   
+    > 调试阶段为支持断点与变量查看，必须使用 -O0 关闭优化，以保留准确的符号映射；但 -O0 与 -O2 的性能差距可达数倍，因此性能分析必须基于 -O2（或默认优化级别）编译的代码，否则采集的数据将严重偏离真实场景，失去参考价值。
 
 2. 重新编译部署算子
 
@@ -504,8 +513,9 @@ source ~/ot_demo/msot/example/quick_start/msdebug/set_kernel_obj_env.sh
 
 #### 2.6.2 启动真机与仿真采集
 
->[!NOTE]说明   
->**知识点：上板和仿真采集信息的区别**   
+> [!NOTE]
+> 
+> **知识点：上板和仿真采集信息的区别**   
 > 上板：可精确捕获算子运行耗时、各 Pipe 使用情况、内存带宽、Cache 行为等真实硬件特性，而这些往往是仿真器难以高保真复现的关键指标。  
 > 仿真：在指令流追踪、代码热点定位等方面提供更完整、稳定的分析能力，但对内存访问延迟、带宽瓶颈等硬件相关行为的模拟精度有限。  
 > 因此，建议结合两种方式，互补优势，实现全面性能诊断。若某些场景下您没有真实硬件（NPU 卡），可以使用仿真模式进行初步的性能估算和热点分析。
@@ -523,7 +533,8 @@ source ~/ot_demo/msot/example/quick_start/msdebug/set_kernel_obj_env.sh
     msopprof op simulator --soc-version=Ascend${MY_STUDY_VAR_CHIP_SOC_TYPE} --output=./msopprof_output_sim ./execute_add_op
     ```
 
->[!NOTE]说明   
+> [!NOTE]
+> 
 > 如果执行时报`msopprof: command not found`，说明环境版本较旧，尝试将命令`msopprof`替换为`msprof op`，例如：`msprof op --output=./msprof_output_npu ./execute_add_op`
 
 #### 2.6.3 查看性能数据结果
@@ -548,8 +559,9 @@ source ~/ot_demo/msot/example/quick_start/msdebug/set_kernel_obj_env.sh
 - bin 文件   
 可使用 `MindStudio Insight` 工具打开，以图形化方式直观展示各类性能视图，例如：计算内存热力图、Cache 热力图以及算子代码热点图等。
 
-  >[!NOTE]说明  
-  >若想体验可视化的图表查看，请参考<a href="https://gitcode.com/Ascend/msinsight/blob/26.0.0/docs/zh/user_guide/mindstudio_insight_install_guide.md" target="_blank">《MindStudio Insight工具文档》</a>安装 Insight 工具。
+  > [!NOTE]
+  > 
+  > 若想体验可视化的图表查看，请参考<a href="https://gitcode.com/Ascend/msinsight/blob/26.0.0/docs/zh/user_guide/mindstudio_insight_install_guide.md" target="_blank">《MindStudio Insight工具文档》</a>安装 Insight 工具。
 
 #### 2.6.4 恢复手工修改
 
