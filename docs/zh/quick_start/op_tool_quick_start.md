@@ -530,7 +530,7 @@ source ~/ot_demo/msot/example/quick_start/msdebug/set_kernel_obj_env.sh
 2. 仿真器性能采集
 
     ```shell
-    msopprof op simulator --soc-version=Ascend${MY_STUDY_VAR_CHIP_SOC_TYPE} --output=./msopprof_output_sim ./execute_add_op
+    msopprof simulator --soc-version=Ascend${MY_STUDY_VAR_CHIP_SOC_TYPE} --output=./msopprof_output_sim ./execute_add_op
     ```
 
 > [!NOTE]
