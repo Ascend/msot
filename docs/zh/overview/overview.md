@@ -21,4 +21,4 @@ MindStudio Operator Tools（msOT）算子开发工具链，致力于解决算子
 - msKL（MindStudio-Kernel-Launcher）  
 快捷调用工具：提供 Python 接口，快速实现 Kernel 的代码生成、编译及下发运行。详细介绍请参见：《[算子 Kernel 轻量化调用](https://gitcode.com/Ascend/mskl/blob/26.0.0/docs/zh/quick_start/mskl_quick_start.md)》。
 - msTX（MindStudio Tools Extension Library）  
-工具扩展SDK：介绍msTX打点接口。可以自定义采集时间段或者关键函数的开始和结束时间点，识别关键函数或迭代等信息，对性能和算子问题快速定界。接口详细介绍请参见《[工具扩展SDK msTX](https://gitcode.com/Ascend/mstx/blob/26.0.0/docs/zh/api_reference/mstx_api_reference.md)》。
+工具扩展SDK：介绍msTX打点接口。可以自定义采集时间段或者关键函数的开始和结束时间点，识别关键函数或迭代等信息，对性能和算子问题快速定界。接口详细介绍请参见《[工具扩展SDK msTX](https://gitcode.com/Ascend/mstx/blob/26.0.0/docs/zh/api_reference/README.md)》。
