@@ -19,6 +19,34 @@ msOT工具的安装方式包括：
 
 请按照以下文档进行环境配置：《[算子工具开发环境安装指导](../common/dev_env_setup.md)》。
 
+若为root用户，则执行以下命令进行依赖安装：
+
+- OpenEuler环境：
+
+    ```sh
+    yum install git-lfs
+    ```
+
+- Ubuntu环境：
+
+    ```sh
+    apt-get install git-lfs
+    ```
+
+若为非root用户，则执行以下命令进行依赖安装：
+
+- OpenEuler环境：
+
+    ```sh
+    sudo yum install git-lfs
+    ```
+
+- Ubuntu环境：
+
+    ```sh
+    sudo apt-get install git-lfs
+    ```    
+
 ### 2.2 克隆本仓库
 
 ```shell
