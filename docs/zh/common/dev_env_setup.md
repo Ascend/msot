@@ -25,7 +25,7 @@
 为例，拉取命令如下：
 
 ```shell
-docker pull swr.cn-south-1.myhuaweicloud.com/ascendhub/cann:9.0.0-beta.2-910-openeuler24.03-py3.11
+docker pull swr.cn-south-1.myhuaweicloud.com/ascendhub/cann:9.0.0-beta.2-910b-openeuler24.03-py3.11
 ```
 
 ### 场景二：针对老旧操作系统的打包与部署
@@ -83,7 +83,7 @@ python3 ~/ctr_in.py <CONTAINER_NAME> <USER_NAME> <IMAGE>
 python3 ~/ctr_in.py op_dev_alice alice 6df0c5bbc16f
 
 # 使用镜像全名
-python3 ~/ctr_in.py op_dev_alice alice swr.cn-south-1.myhuaweicloud.com/ascendhub/cann:8.5.1-910b-openeuler24.03-py3.11
+python3 ~/ctr_in.py op_dev_alice alice swr.cn-south-1.myhuaweicloud.com/ascendhub/cann:9.0.0-beta.2-910b-openeuler24.03-py3.11
 ```
 
 **预期输出：**    
