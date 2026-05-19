@@ -2,75 +2,99 @@
 
 <br>
 
-本指南基于 **昇腾 CANN 官方镜像**，帮助您通过 Docker 容器化方式快速搭建面向昇腾 AI 算子开发环境。
+本指南基于**昇腾 CANN 官方镜像**，帮助您通过 Docker 容器化方式，快速搭建面向昇腾 AI 的算子开发环境。
 
-> [!CAUTION] 注意
-> **免责声明**
-> 本文档及相关脚本仅供学习参考，不保证生产环境的稳定性与安全性，使用者需自行评估风险并承担相应责任。
- 
 ## 前置条件
 
-在开始之前，请确认以下环境已就绪：
+请确保以下环境已就绪：
 
-| 条件            | 说明              | 验证命令           |
-| ------------- | --------------- | -------------- |
-| Docker Engine | 已安装且守护进程处于运行状态  | `docker info`  |
-| 网络连通性        | 可访问华为云镜像仓库，用于拉取镜像与下载脚本 | `ping swr.cn-south-1.myhuaweicloud.com` |
+| 条件            | 说明                     | 验证命令         |
+|----------------|------------------------|----------------|
+| Docker Engine  | 已安装且守护进程正在运行       | `docker info`  |
 
-满足以上前置条件后，按本文完成环境搭建与容器启动通常仅需 **5 分钟** 以内（视网速而定）；若本地已有 CANN 镜像，则**秒级**即可完成。
+满足上述条件后，完整部署通常 **5 分钟内完成**（取决于网络速度）；若本地已有 CANN 镜像，则可 **秒级完成启动**。
 
 <br>
 
-## 1. 准备镜像
+## 1. 获取 CANN 开发镜像
 
-### 1.1 查询本地已有镜像
+> [!CAUTION]注意   
+> 算子开发**必须**使用带有 `-devel` 后缀的镜像（包含完整的编译工具链）。请勿使用普通运行时镜像。
 
-执行以下命令查询当前环境中已有的 CANN 镜像：
+### 1.1 查询本地镜像
 
-```shell
-docker images | grep cann
+运行以下命令检查是否已存在 CANN 开发镜像：
+
+```bash
+docker images | grep cann | grep devel
 ```
 
-若返回结果中包含 CANN 镜像，示例输出如下：
+示例输出：
 
 ```text
 REPOSITORY                                          TAG                                               IMAGE ID            CREATED             SIZE
-swr.cn-south-1.myhuaweicloud.com/ascendhub/cann     8.5.1-910b-openeuler24.03-py3.11                  6df0c5bbc16f        2 weeks ago         17.1GB
+swr.cn-south-1.myhuaweicloud.com/ascendhub/cann     9.0.0-910b-openeuler24.03-py3.11-devel            6df0c5bbc16f        2 weeks ago         11.9GB
 ```
 
 若已有合适版本，可直接跳转至 [第 2 节：启动容器](#2-启动容器)。
 
 ### 1.2 拉取 CANN 镜像
 
-若本地无可用镜像，请按以下步骤操作。
+#### 1.2.1 获取镜像下载命令
 
-**Step 1** — 访问 [CANN 镜像仓库](https://www.hiascend.com/developer/ascendhub/detail/17da20d1c2b6493cb38765adeba85884)，切换至 **"镜像版本"** 标签页，浏览可用版本列表：
+1. 访问 [CANN 镜像仓库](https://www.hiascend.com/developer/ascendhub/detail/17da20d1c2b6493cb38765adeba85884)，切换至 **"镜像下载"** 标签页，浏览可用版本列表（可通过右侧的搜索框过滤）：
 
-![image.png](https://raw.gitcode.com/user-images/assets/8763895/f2a0ae4f-4a7a-4c0e-ada9-ec4a0ab71403/image.png 'image.png')   
+    ![image.png](https://raw.gitcode.com/user-images/assets/9310220/32504999-0da1-4595-8865-acd9a01cfd3b/image.png 'image.png')
 
-**Step 2** — 根据以下建议选择镜像版本：
+2. 根据以下建议选择镜像版本：
 
-| 选项          | 建议                                               |
-| ----------- | ------------------------------------------------ |
-| **CANN 版本** | 若无特殊需求，建议选用最新稳定版本                                |
-| **芯片型号**    | 根据实际硬件选择（执行 `npu-smi info` 查看） |
-| **操作系统**    | openEuler 或 Ubuntu 均可，推荐 openEuler               |
+    | 选项          | 建议                                               |
+    | ----------- | ------------------------------------------------ |
+    | **CANN 版本** | 若无特殊需求，建议选用最新稳定版本                                |
+    | **芯片型号**    | 根据实际硬件选择（执行 `npu-smi info` 查看） |
+    | **操作系统**    | openEuler 或 Ubuntu 均可              |
+    | **开发专用**    | 应选择带有 `-devel` 后缀的版本，该版本包含算子开发所需的完整软件环境               |
 
-**Step 3** — 复制完整的镜像版本号（例如：8.5.1-910b-openeuler24.03-py3.11），按如下格式拼接拉取命令：
+    > [!CAUTION] 注意  
+    > 必须使用带 `-devel` 后缀的镜像（如 `...-py3.11-devel`），否则无法编译自定义算子。
+
+3. 点击“立即下载”，复制生成的 `docker pull` 命令。
+
+    ![image.png](https://raw.gitcode.com/user-images/assets/9310220/0b35b9a5-b9c4-4c42-a25d-31432c6611d2/image.png 'image.png')
+
+#### 1.2.2 在线拉取（服务器具备外网访问能力）
+
+请直接执行复制的命令。示例如下（耗时约 3～5 分钟，具体取决于网络带宽与延迟）：
 
 ```bash
-docker pull swr.cn-south-1.myhuaweicloud.com/ascendhub/cann:<镜像版本号>
+docker pull swr.cn-south-1.myhuaweicloud.com/ascendhub/cann:9.0.0-910b-openeuler24.03-py3.11-devel
 ```
 
-执行示例（耗时约 3~5 分钟，视网络状况而定）：
+镜像拉取完成后，请跳转至 [第 2 节：启动容器](#2-启动容器)。
 
-```bash
-docker pull swr.cn-south-1.myhuaweicloud.com/ascendhub/cann:8.5.1-910b-openeuler24.03-py3.11
-```
+#### 1.2.3 离线导入（服务器无外网访问权限）
 
-> [!NOTE] 说明
-> **为什么镜像名（swr.cn-south-1.myhuaweicloud.com/ascendhub/cann）这么长？**    
-> 因为全路径格式包含了完整的注册中心地址，可直接拉取而无需额外配置 Docker Registry，实现开箱即用。
+若服务器无法直接访问华为云容器镜像仓库（例如处于企业内网等隔离网络环境），请按以下步骤操作：
+
+1. 在具备外网访问能力的主机上拉取镜像（注意架构匹配 x86/ARM）：
+
+   ```bash
+   docker pull swr.cn-south-1.myhuaweicloud.com/ascendhub/cann:9.0.0-910b-openeuler24.03-py3.11-devel
+   ```
+ 
+2. 导出为 tar 文件：
+
+   ```bash
+   docker save -o cann.tar swr.cn-south-1.myhuaweicloud.com/ascendhub/cann:9.0.0-910b-openeuler24.03-py3.11-devel
+   ```
+   
+3. 通过 U 盘或中转网络等方式将 `cann.tar` 传至服务器，并加载：
+   
+   ```bash
+   docker load -i cann.tar
+   ```
+
+可通过执行 `docker images` 命令查看是否已成功加载，加载后的镜像与在线拉取结果完全一致。
 
 <br>
 
@@ -78,16 +102,16 @@ docker pull swr.cn-south-1.myhuaweicloud.com/ascendhub/cann:8.5.1-910b-openeuler
 
 ### 2.1 下载容器启动脚本
 
-执行如下命令下载：
+执行以下命令，将启动脚本下载至 HOME 目录：
 
-```shell
-cd ~
-curl -fLO --retry 10 --retry-all-errors --retry-delay 3 -A "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36" https://raw.gitcode.com/Ascend/msot/raw/master/example/quick_start/public/ctr_in.py && chmod +x ctr_in.py
+```bash
+cd ~ && curl -fLO --retry 10 --retry-all-errors --retry-delay 3 -A "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36" https://raw.gitcode.com/Ascend/msot/raw/master/example/quick_start/public/ctr_in.py && chmod +x ctr_in.py
 ```
 
 > [!NOTE] 说明
-> 1.若提示 `--retry-all-errors` 参数不存在，说明 curl 版本过低，可移除该参数后重试。
-> 2.若多次下载仍失败，可能是触发了防止自动化脚本恶意爬取代码的 CDN 防护机制，可手动从仓库下载 [ctr_in.py](../../../example/quick_start/public/ctr_in.py) 文件。
+> 1.若提示 `--retry-all-errors` 参数不存在，说明 curl 版本过低，可移除该参数后重试。  
+> 2.若多次下载仍失败，可能触发了 CDN 的反爬虫防护机制，可手动从仓库下载 [ctr_in.py](../../../example/quick_start/public/ctr_in.py) 文件。  
+> 3.若您的服务器处于企业内网等无法直连外网的环境，可先在当前访问此文档页面的设备上下载该文件，再通过 U 盘或中转网络等方式将其传至服务器。
 
 ### 2.2 执行启动命令
 
@@ -101,18 +125,18 @@ curl -fLO --retry 10 --retry-all-errors --retry-delay 3 -A "Mozilla/5.0 (Windows
 
 **命令格式：**
 
-```shell
+```bash
 python3 ~/ctr_in.py <CONTAINER_NAME> <USER_NAME> <IMAGE>
 ```
 
 **执行示例：**
 
-```shell
+```bash
 # 使用镜像 ID
 python3 ~/ctr_in.py op_dev_alice alice 6df0c5bbc16f
 
 # 使用镜像全名
-python3 ~/ctr_in.py op_dev_alice alice swr.cn-south-1.myhuaweicloud.com/ascendhub/cann:8.5.1-910b-openeuler24.03-py3.11
+python3 ~/ctr_in.py op_dev_alice alice swr.cn-south-1.myhuaweicloud.com/ascendhub/cann:9.0.0-910b-openeuler24.03-py3.11-devel
 ```
 
 **预期输出：**    
