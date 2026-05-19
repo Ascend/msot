@@ -2,81 +2,38 @@
 
 <br>
 
-> [!NOTE]
-> 
+> [!CAUTION]注意   
 > 本文档及相关脚本仅供学习使用，不承诺生产环境的稳定性和安全性，使用者需自行评估风险并承担相应责任。
 
-## 1. 算子工具学习环境安装
+您需要准备一台 Linux 服务器，配备至少 1 张昇腾 NPU 卡，且已安装好 NPU 驱动、固件和 Docker 服务。
 
-您需要准备一台 Linux 服务器，配备至少 1 张昇腾 NPU 卡，且已安装好 NPU 驱动和固件。
+## 1. 算子开发工具链安装
 
-### 1.1 算子工具安装
+👉 **【关键安装步骤】请严格遵照《[CANN 容器环境安装指南](./cann_container_setup.md)》完成安装。Docker 服务正常时，5 分钟内可完成。** 
 
-算子工具是集成到 CANN 中发布的，提供以下两种安装方式：
+> [!NOTE] 说明
+> 昇腾 AI 算子开发工具链随 CANN 统一发布，安装 CANN 即完成安装。由于算子编译环境依赖复杂，为避免环境问题影响学习体验，本教程要求使用 CANN 容器环境，不支持非容器化(裸机或虚拟机等)的环境。  
 
-1. **容器化运行环境**：推荐方式，Docker 服务正常时 5 分钟内即可完成，请参考《[CANN容器环境安装指南](./cann_container_setup.md)》进行安装；
-2. **裸机或虚机环境**：安装复杂，耗时较长，多用户共享易引发冲突，可能遇到难以解决的环境问题。如确需使用此类环境，请参考《[CANN 官方安装指南](https://www.hiascend.com/cann/download)》进行安装，版本使用较新的即可。
+## 2. 创建工作区并下载代码仓库
 
-### 1.2 工作区目录初始化
-
-**1. 创建工作区**   
-创建 `workspace` 目录，用于存放示例执行过程中生成的各类文件，路径为`~/ot_demo/workspace`（其中 “ot” 为 Operator Tool 算子工具的首字母缩写）：
+创建 `workspace` 目录，用于存放示例执行过程中生成的各类文件；并将代码仓库克隆至 `~/ot_demo` 目录，克隆完成后，示例路径为 `~/ot_demo/msot/example`：
 
 ```shell
 mkdir -p ~/ot_demo/workspace
-```
-
-**2. 下载仓库**   
-下载至目录 `~/ot_demo`，下载后示例路径为 `~/ot_demo/msot/example`：
-
-```shell
 git clone https://gitcode.com/Ascend/msot.git ~/ot_demo/msot
 ```
 
-> 提示：如果环境中 git 下载异常，可以直接从 gitcode.com 下载压缩包，手动传到服务器上，保持目录结构正确即可。
+若环境中 `git` 下载异常，可直接从 GitCode 网站下载仓库压缩包，手动上传至服务器，并确保目录结构与上述一致。
 
-### 1.3 芯片 SoC 型号获取
+## 3. 设置芯片 SoC 型号信息
 
-因芯片 SoC 型号在后续多条命令中频繁使用，且获取方式较复杂，此处统一获取并存入环境变量 `MY_STUDY_VAR_CHIP_SOC_TYPE`，便于后续引用。
+因芯片 SoC 型号信息在后续多条命令中频繁使用，此处统一获取并存入环境变量 `MY_STUDY_VAR_CHIP_SOC_TYPE`，便于后续引用。
 
-> [!NOTE]  
-> 注意：环境变量 `MY_STUDY_VAR_CHIP_SOC_TYPE` 仅用于本次快速入门学习，商用开发请勿使用此变量。
+> [!CAUTION]注意   
+> 环境变量 `MY_STUDY_VAR_CHIP_SOC_TYPE` 仅用于本次快速入门学习，商用开发请勿使用此变量。
 
-#### 1.3.1 自动获取芯片 SoC 型号
-
-如想快速体验工具，可运行以下命令自动获取并设置芯片 SoC 型号：
+请执行如下命令：
 
 ```shell
-python3 ~/ot_demo/msot/example/quick_start/public/get_ai_soc_version.py
-```
-
-若执行成功，按提示运行：
-
-```shell
-source set_chip_env_var.sh
-```
-
-该脚本将芯片 SoC 型号（去除“Ascend”前缀，如 910B4、910_9392）写入环境变量 `MY_STUDY_VAR_CHIP_SOC_TYPE`。
-
-#### 1.3.2 手动获取芯片 SoC 型号
-
-如想学习芯片 SoC 型号的概念及获取方法，请参考[《昇腾芯片 SoC 型号获取方法》](get_chip_soc_type.md)手动获取芯片 SoC 型号，并将去除 "Ascend" 前缀后的值（如 910B4）替换以下命令中的 `<YOUR_CHIP_NAME>` 后执行：
-
-```shell
-echo "export MY_STUDY_VAR_CHIP_SOC_TYPE=<YOUR_CHIP_NAME>" >> ~/.bashrc && source ~/.bashrc
-```
-
-> [!NOTE]
-> 
->`MY_STUDY_VAR_CHIP_SOC_TYPE` 的值为去掉 Ascend 前缀后的值：   
-> 正确值：910B4、910_9392；  
-> 错误值：Ascend910B4、Ascend910_9392。
-
-### 1.4 安装 Python 库
-
-算子工程构建依赖以下库，请执行如下命令安装：
-
-```shell
-pip3 install -r ~/ot_demo/msot/example/quick_start/public/requirements.txt -i https://repo.huaweicloud.com/repository/pypi/simple/
-ln -sf /usr/local/bin/python3 /usr/bin/python3
+export MY_STUDY_VAR_CHIP_SOC_TYPE=$(python3 -c "import acl; print(acl.get_soc_name().replace('Ascend', ''))")
 ```

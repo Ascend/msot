@@ -11,9 +11,9 @@ MindStudio 算子开发工具链包含多种工具。本文档以开发一个简
 **体验地图 (核心操作仅需 10 分钟)**     
 > **执行顺序建议**：步骤 1 为基础；完成 1 后可体验 2 或 3；步骤 4、5、6 均依赖步骤 3 生成的工程，但这三者之间相互独立，可按需选学。
  
- | 步骤 | 环节 | 核心工具 | 实测纯操作时间 | 建议原理学习 |
+ | 步骤 | 环节 | 核心工具 | 实测操作耗时 | 建议原理学习 |
 | :---: | :---: | :--- | :---: | :---: |
-| **1** | **环境准备** | `CANN` | 容器 ≤5分，裸机 ≥20分 | 5分钟 |
+| **1** | **环境准备** | `CANN容器镜像` | 3分钟 | 5分钟 |
 | **2** | **算子设计** | `msKPP` | 30 秒 | 5分钟 |
 | **3** | **工程开发** | `msOpGen` | 1 分钟 | 20分钟 |
 | **4** | **异常检测** | `msSanitizer` | 1 分钟 | 10分钟 |
@@ -22,38 +22,29 @@ MindStudio 算子开发工具链包含多种工具。本文档以开发一个简
 
 ### 1.2 环境准备
 
-请严格按 《[昇腾 AI 算子开发工具链学习环境安装指南](installation_guide.md)》完成环境与工作区配置。   
+👉 **【重要】请严格按 《[昇腾 AI 算子开发工具链学习环境安装指南](installation_guide.md)》完成环境安装和配置。**
 
->💡 <span style="color:#a10000;">**重要提示**</span>：后续体验环节全程支持 Copy/Paste 命令执行。为避免异常，即使已有类似环境，也请按如上指南核验依赖与环境变量。若遇异常请参阅 [3. FAQ](#3-faq)。
+> [!CAUTION]注意      
+> 本教程专为标准化容器环境设计。请务必依据上述安装指南完成容器部署；若当前环境不符（如裸机或虚拟机等非容器环境），请暂缓体验，以免因依赖缺失或配置差异引发难以诊断的问题，待环境满足要求后再操作。
 
 ## 2. 操作步骤
+
+> [!NOTE]说明  
+> 后续体验环节全程支持 Copy/Paste 快速执行，请按照每节中的步骤顺序操作，勿跳过或打乱操作步骤。
 
 ### 2.1【环境】运行环境预检
 
 #### 2.1.1 验证环境变量配置
 
-执行如下指令，确认系统输出正确的芯片 SoC 型号（如 910B4、910_9392）：
+执行如下指令，确认系统输出正确的芯片 SoC 型号信息（如 910B4、910_9392）：
 
 ```shell
 echo $MY_STUDY_VAR_CHIP_SOC_TYPE
 ```
 
- 若该变量为空，请参照[1.2 环境准备](#12-环境准备)进行正确设置。
+若该变量为空，参照 [1.2 环境准备](#12-环境准备) 正确设置。务必确保此环境变量已正确配置，否则后续步骤将频繁报错。
 
-> [!NOTE]    
-> 注意：请确保 MY_STUDY_VAR_CHIP_SOC_TYPE 环境变量已正确配置，否则后续步骤将频繁报错。此变量为学习环境专用，**正式商用版本中严禁使用**。
-
-#### 2.1.2 确认 Python 包已安装
-
-执行以下命令，若输出 "All is OK"，则表明所需 Python 包及其版本均满足规范：
-
-```shell
-python3 -c "import numpy, sympy, scipy, attrs, psutil, decorator; from packaging import version; assert version.parse(numpy.__version__) <= version.parse('1.26.4'); print('All is OK')"
-```
-
-若报错，请参照[1.2 环境准备](#12-环境准备)进行正确安装。
-
-#### 2.1.3 确认代码仓正常
+#### 2.1.2 确认代码仓正常
 
 执行以下命令，若能正常列出目录内容，则说明代码仓已正确就位：
 
@@ -61,13 +52,13 @@ python3 -c "import numpy, sympy, scipy, attrs, psutil, decorator; from packaging
 ls -al ~/ot_demo/msot/example/quick_start
 ```
 
-若报错，请参照[1.2 环境准备](#12-环境准备)完成正确的准备。
+若命令报错，请参照 [1.2 环境准备](#12-环境准备) 完成准备。
 
 ### 2.2【设计】算子建模设计（msKPP）
 
 首先，进行算子算法设计。借助 msKPP 工具，可在秒级时间内获得算子性能建模结果，在无硬件条件下预估性能，快速验证实现方案的可行性。先跟着操作体验效果，原理部分可稍后阅读：
 
-> [!NOTE]
+> [!NOTE]说明   
 > 
 > **知识点：msKPP 工具原理**   
 > msKPP 并非传统可执行程序，而是一套专用于昇腾的 Python 类库。用户需通过 import 相关模块、编写并执行 Python 脚本，生成性能分析结果文件以完成建模。内部原理是预先采集真实环境中各类指令操作的性能数据，基于用户定义的算子执行流程，对各种性能开销进行建模与估算。
@@ -82,7 +73,7 @@ ls -al ~/ot_demo/msot/example/quick_start
 
 2. 开发 Python 脚本
 
-    > [!NOTE]
+    > [!NOTE]说明  
     > 
     > **知识点（可选阅读）：msKPP 的 DSL 语言方案（Domain-Specific Language，领域特定语言）**   
     > 这套类库及接口是专为昇腾性能建模而设计的“方言”，需经过专门学习方可掌握，无法仅凭通用 Python 语法直接编写，但用法较简单，稍加学习即可应用。
@@ -106,7 +97,7 @@ python3 mskpp_demo.py
 
 #### 2.2.3 查看建模结果
 
-生成如下结果目录：
+以下为部分生成结果文件的示例：
 
 ```text
 MSKPP{timestamp}/
@@ -141,7 +132,7 @@ MSKPP{timestamp}/
 
 2. 开发算子定义配置文件
 
-    > [!NOTE]
+    > [!NOTE]说明   
     > 
     > **知识点（可选阅读）：msOpGen 输入配置文件**   
     > 自定义格式的 json 配置文件，可以简单类比理解为定义了一个 C 语言函数的声明，包括：函数名、入参及返回值的类型信息。
@@ -162,16 +153,19 @@ MSKPP{timestamp}/
     msopgen gen -i msopgen_demo.json -c ai_core-ascend${MY_STUDY_VAR_CHIP_SOC_TYPE} -lan cpp -out AddCustom
     ```
 
+    >[!CAUTION]注意          
+    > 上述命令生成的代码框架中，具体算子的实现为空，无法正常执行加法运算，需按照 [2.3.2节](#232-实现核心逻辑) 内容进行修改后方可正常运行。 
+
 4. 查看生成的结果
 
-    > [!NOTE]
+    > [!NOTE]说明   
     > 
     > **知识点（可选阅读）：关键概念**       
     > Host 侧：运行于 CPU 的代码，负责数据预处理、任务调度及算子调用。   
     > Kernel 侧：运行于 NPU 的代码，负责执行实际的大规模并行计算逻辑。   
     > Tiling：将大规模数据分块处理，以提高 Local Memory 利用率并优化内存访问效率。
 
-    生成的工程结构看起来庞大而复杂，但我们**仅需关注标记为【用户扩展点】的三个C++文件**，其余均为框架代码，无特殊需求无需查看修改：
+    以下为部分生成结果文件的示例，生成的工程结构看起来庞大而复杂，但我们**仅需关注标记为【用户扩展点】的三个C++文件**，其余均为框架代码，无特殊需求无需查看修改：
 
     ```text
     AddCustom
@@ -192,14 +186,14 @@ MSKPP{timestamp}/
 
 #### 2.3.2 实现核心逻辑
 
-> [!NOTE]
+> [!NOTE]说明   
 > 
 > **知识点（可选阅读）：算子核心代码文件实现原理**  
 > op_host/add_custom.cpp：实现 Host 侧的 Tiling 计算逻辑与算子原型注册。  
 > op_kernel/add_custom_tiling.h：定义 Tiling 分块策略的数据结构。  
 > op_kernel/add_custom.cpp：实现 Kernel 侧加法算子的具体计算逻辑（GM→UB 搬运→向量加法→UB→GM 写回）。   
 > 若需深入理解上述三个文件的功能与协作机制，除参考代码注释外，建议详细阅读<a href="https://www.hiascend.com/developer/blog/details/0239124507827469022" target="_blank">《昇腾Ascend C编程入门教程（纯干货）》</a>。    
-> 如下 `keep_soc_info.py` 用于处理 SoC 信息，由于该信息因环境而异，不可机械覆盖，必须使用当前系统中的实际配置。
+> 如下 `keep_soc_info.py` 原理说明：此脚本会自动获取当前环境的SoC信息，并自动刷新到cpp文件中。
 
 在上述三个【用户扩展点】文件中实现具体算法逻辑。因是快速入门，将准备好的 3 个 C++ 文件拷贝到此即视为开发完成（本教程聚焦工具链使用，实际开发需自行实现核心逻辑）：  
 
@@ -225,7 +219,7 @@ python3 ~/ot_demo/msot/example/quick_start/msopgen/keep_soc_info.py set ./op_hos
 
 2. 部署算子  
 
-    > [!NOTE]
+    >[!NOTE]说明   
     > 
     > **知识点：什么是部署算子**  
     > 部署算子是指将算子注册到 CANN 框架中，本质上是将算子的二进制文件拷贝至系统公共目录，使其他程序能够通过标准接口（如 CANN API 或 PyTorch 等）自动发现并调用该算子。*.run 的部署包格式可以简单理解为一种自解压的压缩包。
@@ -247,9 +241,9 @@ python3 ~/ot_demo/msot/example/quick_start/msopgen/keep_soc_info.py set ./op_hos
 
 #### 2.3.4 验证算子功能
 
-> [!NOTE]   
+> [!CAUTION]注意   
 > **关于 NPU 设备选择的说明**   
-> 执行以下 `run.sh` 脚本将实际运行算子。为便于学习，假设环境中所有 NPU 卡型号相同，系统将随机选择一张空闲卡执行任务。
+> 执行以下 `run.sh` 脚本将实际运行算子，会随机选择一张空闲卡执行任务。
 > 若因随机选定的卡存在故障等原因需指定 NPU 卡，请根据 `npu-smi info` 命令返回的 NPU 信息，使用其顺序号（取值范围为 [0, NPU 数量 - 1]）按如下方式调用：`bash ./run.sh 2`
 
 执行算子调用工程，验证算子功能（本例执行 1.0 + 2.0，预期结果为 3.0）：
@@ -305,12 +299,13 @@ printf '%s\n' "if(COMMAND add_ops_compile_options)" "  add_ops_compile_options(A
 \cp -f ~/ot_demo/msot/example/quick_start/mssanitizer/bug_code/add_custom.cpp op_kernel/add_custom.cpp
 ```
 
-关键修改如下（2 * this->tileLength 试图读取 2 倍长度，超出 GM 内存中 xGm 的分配范围，触发 “非法读取”）：
-
-```diff
-- AscendC::DataCopy(xLocal, xGm[progress * this->tileLength], this->tileLength);
-+ AscendC::DataCopy(xLocal, xGm[progress * this->tileLength], 2 * this->tileLength);
-```
+>[!NOTE]说明  
+>关键修改如下（2 * this->tileLength 试图读取 2 倍长度，超出 GM 内存中 xGm 的分配范围，触发 “非法读取”）：
+>
+>```diff
+>- AscendC::DataCopy(xLocal, xGm[progress * this->tileLength], this->tileLength);
+>+ AscendC::DataCopy(xLocal, xGm[progress * this->tileLength], 2 * this->tileLength);
+>```
 
 #### 2.4.3 重新编译部署
 
@@ -326,7 +321,7 @@ cd ~/ot_demo/workspace/src/caller
 mssanitizer --tool=memcheck -- bash run.sh
 ```
 
-工具输出如下错误报告，则表明已成功执行：  
+工具输出如下错误报告，则表明已成功执行（如下示例显示各版本可能会稍有不同，不影响学习工具使用）：  
 
 1. illegal read of size 224：表示非法读取了 224 字节。   
 2. op_kernel/add_custom.cpp:44:9：表明越界访问发生在 add_custom.cpp 第 44 行。   
@@ -345,6 +340,9 @@ mssanitizer --tool=memcheck -- bash run.sh
 ======    #6 /home/mgx/ot_demo/workspace/src/caller/AddCustom/build_out/op_kernel/AddCustom_ascend910b/kernel_0/kernel_meta_AddCustom_ab1b6750d7f510985325b603cb06dc8b/kernel_meta/AddCustom_ab1b6750d7f510985325b603cb06dc8b_2130445_kernel.cpp:37:5
 ```
 
+>[!NOTE]说明  
+>算子执行后仍能成功输出正确结果，这正体现了该工具的价值：内存问题通常具有偶发性，在多数情况下即使存在内存异常，程序仍可正常运行；仅当问题累积至临界点时才会突发崩溃，难以通过表象直接定位。
+
 #### 2.4.5 恢复手工修改
 
 为后续工具使用做准备，回退手工修改：
@@ -360,11 +358,16 @@ mssanitizer --tool=memcheck -- bash run.sh
 
 #### 2.5.1 开启内核调试开关
 
-> [!NOTE]
+>[!CAUTION]注意    
+> **msDebug 需以 root 权限启用内核调试开关 /proc/debug_switch**  
 > 
-> **msDebug 需要 root 权限**       
-> msDebug 需要内核调试开关 /proc/debug_switch 开启才能正常工作，但出于安全考虑默认关闭，且需要 root 权限才能打开。   
-> 这在很多环境（如共享开发机、容器）中可能无法满足，此时请联系系统管理员开启，或在拥有特权的容器中体验此部分。
+> 该开关默认关闭，仅 root 用户可修改。msDebug 必须在该开关开启后才能正常工作。  
+> 
+> **容器中操作通常无效：**  
+> 即使在容器内以 root 身份成功写入 `/proc/debug_switch`，由于宿主机普遍对 `/proc` 使用写时复制（CoW）、影子文件或 overlay 挂载等机制进行虚拟化，该设置**仅作用于容器视图**，并未真正生效于内核。因此，即便 `cat /proc/debug_switch` 显示为 `1`，msDebug 仍可能无法使用，并在调试时返回错误（如 `'A' packet returned an error: 8`）。  
+> 
+> **推荐做法：**  
+> 若您处于共享开发机、普通容器或无宿主机访问权限的环境中，请联系系统管理员协助开启，或切换至具备 root 权限的宿主机环境体验本功能。
 
 确认内核调试开关 debug_switch 是否打开：
 
@@ -372,7 +375,7 @@ mssanitizer --tool=memcheck -- bash run.sh
 cat /proc/debug_switch
 ```
 
-若输出值不为 1，请使用 root 权限执行以下命令 **（有条件最好在宿主机中执行，某些场景容器内设置成功实际并不能生效）**：
+若输出值不为 1，请使用 root 权限在宿主机执行以下命令： 
 
 ```shell
 echo 1 > /proc/debug_switch
@@ -423,19 +426,8 @@ source ~/ot_demo/msot/example/quick_start/msdebug/set_kernel_obj_env.sh
     b add_custom.cpp:34
     ```
 
-    > [!NOTE]
-    > 
-    > **若在云平台直接申请的托管容器环境中操作，需特别留意 `/proc/debug_switch = 1` 可能为虚假状态。**     
-    > 即使在容器内成功将 `/proc/debug_switch` 设置并查询为 `1`，该值仍可能未真实生效。出于安全隔离考虑，底层宿主机通常通过写时复制（Copy-on-Write, CoW）、
-    > 影子文件或覆盖挂载（overlay mount）等机制对 `/proc` 目录进行虚拟化或拦截，导致写入操作仅作用于容器视图，而未反映至内核实际状态。    
-    > 在此情况下，执行上一节所述的断点设置将触发警告；而按照后续章节运行 `run` 命令时，则会报出如下错误：
-    > 
-    > ```text
-    > error: 'A' packet returned an error: 8
-    > ```
-    > 
-    > 请登录**宿主机**，以root权限执行 `echo 1 > /proc/debug_switch`, 然后执行 `cat /proc/debug_switch` 确认是否成功设置为 1。    
-    > 若无法登录宿主机，或在宿主机没有成功设置，或不具备切换至其它合适环境的条件，则只能跳过本节关于 msDebug 的实操体验。
+    >[!CAUTION]注意  
+    >若此前未在宿主机正确启用 /proc/debug_switch，执行上一节所述的断点设置将触发警告，而按照后续章节运行 `run` 命令时将触发调试器错误（例如 'A' packet returned an error: 8），表明 msDebug 无法正常工作。
 
 3. 运行算子
       
@@ -445,7 +437,7 @@ source ~/ot_demo/msot/example/quick_start/msdebug/set_kernel_obj_env.sh
     run
     ```
 
-    显示如下信息，则成功命中断点：
+    显示如下信息，则成功命中断点（如下示例显示各版本可能会稍有不同，不影响学习工具使用）：
 
     ```text
     Process 163027 launched: '/root/ot_demo/workspace/src/caller/build/execute_add_op' (aarch64)
@@ -499,7 +491,7 @@ source ~/ot_demo/msot/example/quick_start/msdebug/set_kernel_obj_env.sh
     printf '%s\n' "if(COMMAND add_ops_compile_options)" "  add_ops_compile_options(ALL OPTIONS -g)" "elseif(COMMAND npu_op_kernel_options)" "  npu_op_kernel_options(ascendc_kernels ALL OPTIONS -g)" "endif()" | cat - op_kernel/CMakeLists.txt > tmp && mv -f tmp op_kernel/CMakeLists.txt;
     ```
 
-    > [!NOTE]
+    > [!NOTE]说明   
     > 
     > **知识点（可选阅读）：为何 -O 优化等级在各工具间切来切去**   
     > 调试阶段为支持断点与变量查看，必须使用 -O0 关闭优化，以保留准确的符号映射；但 -O0 与 -O2 的性能差距可达数倍，因此性能分析必须基于 -O2（或默认优化级别）编译的代码，否则采集的数据将严重偏离真实场景，失去参考价值。
@@ -513,8 +505,7 @@ source ~/ot_demo/msot/example/quick_start/msdebug/set_kernel_obj_env.sh
 
 #### 2.6.2 启动真机与仿真采集
 
-> [!NOTE]
-> 
+> [!NOTE]说明   
 > **知识点：上板和仿真采集信息的区别**   
 > 上板：可精确捕获算子运行耗时、各 Pipe 使用情况、内存带宽、Cache 行为等真实硬件特性，而这些往往是仿真器难以高保真复现的关键指标。  
 > 仿真：在指令流追踪、代码热点定位等方面提供更完整、稳定的分析能力，但对内存访问延迟、带宽瓶颈等硬件相关行为的模拟精度有限。  
@@ -532,10 +523,6 @@ source ~/ot_demo/msot/example/quick_start/msdebug/set_kernel_obj_env.sh
     ```shell
     msopprof simulator --soc-version=Ascend${MY_STUDY_VAR_CHIP_SOC_TYPE} --output=./msopprof_output_sim ./execute_add_op
     ```
-
-> [!NOTE]
-> 
-> 如果执行时报`msopprof: command not found`，说明环境版本较旧，尝试将命令`msopprof`替换为`msprof op`，例如：`msprof op --output=./msprof_output_npu ./execute_add_op`
 
 #### 2.6.3 查看性能数据结果
 
@@ -559,7 +546,7 @@ source ~/ot_demo/msot/example/quick_start/msdebug/set_kernel_obj_env.sh
 - bin 文件   
 可使用 `MindStudio Insight` 工具打开，以图形化方式直观展示各类性能视图，例如：计算内存热力图、Cache 热力图以及算子代码热点图等。
 
-  > [!NOTE]
+  > [!NOTE]说明  
   > 
   > 若想体验可视化的图表查看，请参考<a href="https://gitcode.com/Ascend/msinsight/blob/26.0.0/docs/zh/user_guide/mindstudio_insight_install_guide.md" target="_blank">《MindStudio Insight工具文档》</a>安装 Insight 工具。
 
@@ -609,7 +596,7 @@ source ~/ot_demo/msot/example/quick_start/msdebug/set_kernel_obj_env.sh
 
 ## 3. FAQ
 
-### 执行 mskpp_demo.py 报错：Exception: Parameter chip_name in Chip is unsupported
+### 3.1 执行 mskpp_demo.py 报错：Exception: Parameter chip_name in Chip is unsupported
 
 **问题现象**
 
@@ -634,7 +621,7 @@ Exception: Parameter chip_name in Chip is unsupported
 
 参考《[算子开发工具链学习环境安装指南](https://gitcode.com/luyq11/MindStudio-Operator-Tools_ky/blob/26.0.0/docs/zh/quick_start/installation_guide.md)》的第1.3节重新设置。
 
-### 编译调用算子程序时报错：fatal error: aclnn_add_custom.h: No such file or directory
+### 3.2 编译调用算子程序时报错：fatal error: aclnn_add_custom.h: No such file or directory
 
 **问题现象**
 
@@ -657,7 +644,7 @@ gmake[1]: *** [CMakeFiles/Makefile2:83: CMakeFiles/execute_add_op.dir/all] Error
 
 删除该环境变量（执行 `unset ASCEND_CUSTOM_OPP_PATH`），然后重新部署算子。
 
-### 执行 execute_add_op 时异常报错：undefined symbol: aclnnAddCustomGetWorkspaceSize
+### 3.3 执行 execute_add_op 时异常报错：undefined symbol: aclnnAddCustomGetWorkspaceSize
 
 **问题现象**
 
@@ -673,7 +660,7 @@ execute_add_op: symbol lookup error: ./build/execute_add_op: undefined symbol: a
 
 按[2.3.3 编译与部署算子](#233-编译与部署算子)第 3 步，重新设置 LD_LIBRARY_PATH 环境变量。
 
-### 执行 msDebug 设置断点时报错：WARNING:  Unable to resolve breakpoint to any actual locations
+### 3.4 执行 msDebug 设置断点时报错：WARNING:  Unable to resolve breakpoint to any actual locations
 
 **问题现象**
 
@@ -691,7 +678,7 @@ WARNING:  Unable to resolve breakpoint to any actual locations.
 
 查看代码源文件，确认代码的真实行号；按 [2.5.1 开启内核调试开关](#251-开启内核调试开关) 以 root 权限在宿主机上（注意不是容器内）设置 `/proc/debug_switch` = 1。
 
-### 执行 msDebug 的 run 时报错：error: 'A' packet returned an error: 8
+### 3.5 执行 msDebug 的 run 时报错：error: 'A' packet returned an error: 8
 
 **问题现象**
 
