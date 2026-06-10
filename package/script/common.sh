@@ -458,6 +458,8 @@ function installWhlPackage() {
     local _pylocal=$1
     local _package_path=$2
     local _pythonlocalpath=$3
+    local _python_bin_path="${_pythonlocalpath}/bin"
+    local _python_bin_backup_path="${_pythonlocalpath}/bin.bak"
  
     log_and_print ${LEVEL_INFO} "start to install whl package."
     # 一次性安装路径下的所有whl包，避免whl包安装中出现路径冲突的问题
@@ -469,6 +471,14 @@ function installWhlPackage() {
         fi
         whl_files+=" $_package_path/${whl}*.whl"
     done
+
+    # 备份 bin 目录原始的文件，防止在更新过程中被删除
+    cp -r ${_python_bin_path} ${_python_bin_backup_path}
+    if [ $? -ne 0 ]; then
+        log_and_print ${LEVEL_ERROR} "Backup before install whl package failed."
+        return 1
+    fi
+
     if [ "-${_pylocal}" = "-y" ]; then
         pip3 install --upgrade --no-index --no-deps --force-reinstall ${whl_files} -t ${_pythonlocalpath}
     else
@@ -482,6 +492,15 @@ function installWhlPackage() {
         log_and_print ${LEVEL_ERROR} "Install whl package failed."
         return 1
     fi
+
+    # 还原被删除的文件
+    cp -r ${_python_bin_path}/* ${_python_bin_backup_path}/
+    rm -rf ${_python_bin_path} && mv ${_python_bin_backup_path} ${_python_bin_path}
+    if [ $? -ne 0 ]; then
+        log_and_print ${LEVEL_ERROR} "Restore after install whl package failed."
+        return 1
+    fi
+
     # 安装完成后删除whl包
     rm -rf $whl_files || return 1
     remove_empty_dir ${_package_path}
