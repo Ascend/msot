@@ -378,9 +378,12 @@ def start_container(container_name: str, user_name: str, image_name: str,
                     nonroot: bool = False) -> None:
     uid, gid = os.getuid(), os.getgid()
     run_as = f"{uid}:{gid}" if nonroot else "root"
+    is_build = "mindstudio-build" in image_name
     print(f"Begin to start container: {container_name}")
     print(f"User: {user_name}  (run as: {run_as})")
     print(f"Image: {image_name}")
+    if is_build:
+        print("Mode: build (NPU devices skipped)")
     print("-" * 40)
 
     cmd = [
@@ -389,18 +392,22 @@ def start_container(container_name: str, user_name: str, image_name: str,
         f"--hostname={container_name.rsplit('_', 1)[0].replace('.', '_')}",
         "--net=host",
         "--privileged=true",
-        "--device=/dev/davinci_manager",
-        "--device=/dev/hisi_hdc",
-        "--device=/dev/devmm_svm",
         "--entrypoint=bash",
         "-w", f"/home/{user_name}",
         "-v", f"/home/{user_name}:/home/{user_name}",
-        "-v", "/usr/local/Ascend/driver:/usr/local/Ascend/driver:ro",
-        "-v", "/usr/local/dcmi:/usr/local/dcmi:ro",
-        "-v", "/usr/local/bin/npu-smi:/usr/local/bin/npu-smi:ro",
-        "-v", "/etc/ascend_install.info:/etc/ascend_install.info:ro",
         "-v", "/usr/local/sbin:/usr/local/sbin:ro",
     ]
+
+    if not is_build:
+        cmd.extend([
+            "--device=/dev/davinci_manager",
+            "--device=/dev/hisi_hdc",
+            "--device=/dev/devmm_svm",
+            "-v", "/usr/local/Ascend/driver:/usr/local/Ascend/driver:ro",
+            "-v", "/usr/local/dcmi:/usr/local/dcmi:ro",
+            "-v", "/usr/local/bin/npu-smi:/usr/local/bin/npu-smi:ro",
+            "-v", "/etc/ascend_install.info:/etc/ascend_install.info:ro",
+        ])
 
     if nonroot:
         cmd.extend([
