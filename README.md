@@ -45,7 +45,7 @@ MindStudio Operator Tools（msOT）算子开发工具链，聚焦算子开发中
 
 ## 📘 使用指南
 
-各工具的详细使用说明请参阅其源码仓库中的 README 文件，也可通过上方功能介绍表格中的链接直接跳转。
+请查阅《[msOT 使用指南](./docs/zh/user_guide/msot_user_guide.md)》，根据具体应用场景选用相应工具，详细使用说明请参见其源码仓库中的 README 文件。
 
 ## 🛠️ 贡献指南
 
