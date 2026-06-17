@@ -213,7 +213,6 @@ python3 ~/ot_demo/msot/example/quick_start/msopgen/keep_soc_info.py set ./op_hos
     执行构建脚本，成功后将在 build_out 目录下生成 .run 格式的算子部署包（sed 命令用于规避某些环境下的并发 pipe 问题，将打包改为串行）：
 
     ```shell
-    sed -i 's/--target $target -j$(nproc)/--target $target -j1/g' build.sh
     bash ./build.sh
     ```
 
@@ -262,8 +261,12 @@ result is:
 test pass
 ```
 
-若超过 30 秒未返回结果，可能是 NPU 卡繁忙，可按 Ctrl+C 终止后切换至其他空闲卡重试；若出现类似如下错误，可能原因包括：NPU卡异常（硬件故障、驱动问题等），/dev/hisi_hdc 设备异常（如容器内未成功挂载、缺乏访问权限、因线程数过多导致设备无法打开等），以及内存等系统资源不足等。    
-错误码说明请参见：[《ACL错误码表》](https://www.hiascend.com/document/detail/zh/CANNCommunityEdition/850/API/appdevgapi/aclcppdevg_03_1345.html)，请先解决 NPU 卡故障或更换为其他正常卡后再继续体验（指定 NPU 卡运行的方法详见上文“关于 NPU 设备选择的说明”）：
+若未能看到上述输出，请参照下表排查：
+
+| 现象 | 可能原因 | 处理方式 |
+|------|----------|----------|
+| 超过 30 秒无返回 | NPU 卡繁忙 | 按 Ctrl+C 终止，切换至其他空闲卡重试（指定方法见上文”关于 NPU 设备选择的说明”） |
+| 出现如下 ACL 报错 | NPU 卡异常（硬件故障、驱动问题等）；<br>`/dev/hisi_hdc` 设备异常，比如未挂载、无权限等；<br>内存等系统资源不足； | 解决 NPU 卡故障或更换为正常卡后重试；错误码含义参见[《ACL 错误码表》](https://www.hiascend.com/document/detail/zh/CANNCommunityEdition/850/API/appdevgapi/aclcppdevg_03_1345.html) |
 
 ```text
 aclrtSetDevice failed. ERROR: xxxxxx
@@ -300,12 +303,7 @@ printf '%s\n' "if(COMMAND add_ops_compile_options)" "  add_ops_compile_options(A
 ```
 
 >[!NOTE]说明  
->关键修改如下（2 * this->tileLength 试图读取 2 倍长度，超出 GM 内存中 xGm 的分配范围，触发 “非法读取”）：
->
->```diff
->- AscendC::DataCopy(xLocal, xGm[progress * this->tileLength], this->tileLength);
->+ AscendC::DataCopy(xLocal, xGm[progress * this->tileLength], 2 * this->tileLength);
->```
+>关键修改如下，将 `AscendC::DataCopy` 函数调用中将读取长度修改为 2 倍（`2 * this->tileLength`），导致访问超出 GM 内存中 `xGm` 的分配范围，从而触发“非法读取”错误。
 
 #### 2.4.3 重新编译部署
 
@@ -433,25 +431,27 @@ source ~/ot_demo/msot/example/quick_start/msdebug/set_kernel_obj_env.sh
       
     输入 run 启动程序，等待命中断点：
 
-    ```shell
+    ```text
     run
     ```
 
     显示如下信息，则成功命中断点（如下示例显示各版本可能会稍有不同，不影响学习工具使用）：
 
     ```text
-    Process 163027 launched: '/root/ot_demo/workspace/src/caller/build/execute_add_op' (aarch64)
+    Process 2799 launched: '/root/ot_demo/workspace/src/caller/build/execute_add_op' (aarch64)
+    Running on NPU [0]. If this is the first run on this card, scheduling may take a few seconds; please wait...
     [Launch of Kernel AddCustom_ab1b6750d7f510985325b603cb06dc8b_0 on Device 0]
-    Process 163027 stopped
-    [Switching to focus on Kernel AddCustom_ab1b6750d7f510985325b603cb06dc8b_0, CoreId 1, Type aiv]
-    * thread #1, name = 'execute_add_op', stop reason = breakpoint 1.1
-        frame #0: 0x00000000000007e0 AddCustom_ab1b6750d7f510985325b603cb06dc8b.o`KernelAdd::Init(this=0x00000000001d78a8, x=0x12c0c0013000, y=0x12c0c001c000, z=0x12c0c0025000, totalLength=16384, tileNum=8) (.vector) at add_custom.cpp:34:9
-      31           this->tileLength = this->blockLength / tileNum / BUFFER_NUM;
-      32  
-      33           // 设置全局内存缓冲区，为当前AI Core分配其负责的全局共享内存区域
+    1 location added to breakpoint 1
+    Process 2799 stopped
+    [Switching to focus on Kernel AddCustom_ab1b6750d7f510985325b603cb06dc8b_0, CoreId 35, Type aiv]
+    * thread #1, name = 'execute_add_op', stop reason = breakpoint 1.2
+        frame #0: 0x000012c0412008b4 device_debugdata_0`KernelAdd::Init(this=0x00000000002e7860, x=0x12c0c0015000, y=0x12c0c001e000, z=0x12c0c0027000, totalLength=16384, tileNum=8) (.vector) at add_custom.cpp:34:9
+       31           this->tileLength = this->blockLength / this->tileNum / BUFFER_NUM;
+       32  
+       33           // 设置全局内存缓冲区，为当前AI Core分配其负责的全局共享内存区域
     -> 34           xGm.SetGlobalBuffer((__gm__ DTYPE_X *)x + this->blockLength * AscendC::GetBlockIdx(), this->blockLength);
-      35           yGm.SetGlobalBuffer((__gm__ DTYPE_Y *)y + this->blockLength * AscendC::GetBlockIdx(), this->blockLength);
-      36           zGm.SetGlobalBuffer((__gm__ DTYPE_Z *)z + this->blockLength * AscendC::GetBlockIdx(), this->blockLength);
+       35           yGm.SetGlobalBuffer((__gm__ DTYPE_Y *)y + this->blockLength * AscendC::GetBlockIdx(), this->blockLength);
+       36           zGm.SetGlobalBuffer((__gm__ DTYPE_Z *)z + this->blockLength * AscendC::GetBlockIdx(), this->blockLength);
     ```
 
 4. 查看变量的值
@@ -548,7 +548,7 @@ source ~/ot_demo/msot/example/quick_start/msdebug/set_kernel_obj_env.sh
 
   > [!NOTE]说明  
   > 
-  > 若想体验可视化的图表查看，请参考<a href="https://gitcode.com/Ascend/msinsight/blob/master/docs/zh/user_guide/mindstudio_insight_install_guide.md" target="_blank">《MindStudio Insight工具文档》</a>安装 Insight 工具。
+  > 若想体验可视化的图表查看，请参考<a href="https://gitcode.com/Ascend/msinsight/blob/master/docs/zh/install_guide/mindstudio_insight_install_guide.md" target="_blank">《MindStudio Insight工具文档》</a>安装 Insight 工具。
 
 #### 2.6.4 恢复手工修改
 
@@ -588,7 +588,7 @@ source ~/ot_demo/msot/example/quick_start/msdebug/set_kernel_obj_env.sh
 | [msOpGen](https://gitcode.com/Ascend/msopgen/blob/master/docs/zh/user_guide/msopgen_user_guide.md) | 复杂算子模板定制、多输入多输出算子的工程生成等。 |
 | [msSanitizer](https://gitcode.com/Ascend/mssanitizer/blob/master/docs/zh/user_guide/mssanitizer_user_guide.md) | 竞争条件检测、同步异常诊断、未初始化变量检查等更多检测模式。 |
 | [msDebug](https://gitcode.com/Ascend/msdebug/blob/master/docs/zh/user_guide/msdebug_user_guide.md) | 内存查看、核切换、解析Core dump文件等高级调试技巧。 |
-| [msOpProf](https://gitcode.com/Ascend/msopprof/blob/master/docs/zh/user_guide/msopprof_user_guide.md) | 结合 [MindStudio Insight](https://gitcode.com/Ascend/msinsight/blob/master/docs/zh/user_guide/mindstudio_insight_install_guide.md) 进行可视化性能分析，包括计算内存热力图、Cache 热力图及代码热点图。 |
+| [msOpProf](https://gitcode.com/Ascend/msopprof/blob/master/docs/zh/user_guide/msopprof_user_guide.md) | 结合 [MindStudio Insight](https://gitcode.com/Ascend/msinsight/blob/master/docs/zh/install_guide/mindstudio_insight_install_guide.md) 进行可视化性能分析，包括计算内存热力图、Cache 热力图及代码热点图。 |
 
 **第三步：落地真实业务 —— 从教学走向生产**  
 
@@ -619,7 +619,7 @@ Exception: Parameter chip_name in Chip is unsupported
 
 **解决方法** 
 
-参考《[算子开发工具链学习环境安装指南](https://gitcode.com/luyq11/MindStudio-Operator-Tools_ky/blob/master/docs/zh/quick_start/installation_guide.md)》的第1.3节重新设置。
+参考《[算子开发工具链学习环境安装指南](./installation_guide.md)》的第 3 节重新设置。
 
 ### 3.2 编译调用算子程序时报错：fatal error: aclnn_add_custom.h: No such file or directory
 
