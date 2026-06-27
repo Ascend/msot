@@ -6,7 +6,7 @@ It is recommended that users enable ASLR (Level 2), also known as **full random 
 
 ```sh
 echo 2 > /proc/sys/kernel/randomize_va_space
- ```
+```
 
 ## Running User Recommendations
 
@@ -22,7 +22,7 @@ echo 2 > /proc/sys/kernel/randomize_va_space
 
 2. Users need to properly control permissions during installation and usage. It is recommended to refer to the file permission reference for configuration.
 
-## File Permission Control
+**File Permission Control**
 
 | Type                               | Maximum Linux Permission Reference |
 | ---------------------------------- | ------------------- |

@@ -1,6 +1,6 @@
 # MindStudio Operator Tools Release Notes
 
-## Version Compatibility
+## Version Pairing Guide
 
 ### Product Version Information
 
@@ -11,12 +11,12 @@
 
 ### Related Product Version Compatibility
 
-| msOT Version | CANN Version | Python Version
-|----------|-----------------|----------
-| 26.0.0 | 9.0.0 and above recommended | Python 3.11 and above recommended
-| 8.3.0 | 8.2.RC1 and above | Python 3.11 and above recommended 
+| msOT Version | CANN Version | Python Version|
+|----------|-----------------|----------|
+| 26.0.0 | 9.0.0 and above recommended | Python 3.11 and above recommended |
+| 8.3.0 | 8.2.RC1 and above | Python 3.11 and above recommended |
 
-## Version Compatibility
+## Version Compatibility Statement
 
 ### 26.0.0
 
@@ -130,11 +130,11 @@ Feature Category:
 
 1. Adapted to the new AscendC operator project.
 
-#### II. Deletion Description
+#### 2. Deletion Description
 
 No relevant deletion description
 
-#### III. Bugfix
+#### 3. Bugfix
 
 ##### msDebug
 
@@ -231,10 +231,10 @@ Initial Release, with the following new features:
 3. Uninitialized Detection: Detects memory read exceptions caused by using uninitialized variables.
 4. Synchronization Detection: Detects unpaired SetFlag/WaitFlag instructions in Ascend C operators.
 
-#### II. Deletion Description
+#### 2. Deletion Description
 
 No related deletion changes
 
-#### III. Bugfix
+#### 3. Bugfix
 
 No related bugfix changes

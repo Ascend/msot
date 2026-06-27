@@ -597,7 +597,7 @@ This tutorial only covers the introductory usage of each tool. Each tool offers 
 
 **Step 3: Landing Real Business: From Teaching to Production**  
 
-Deeply study the [*Ascend C Programming Guide (Official Tutorial)*](https://www.hiascend.com/en/ascend-c?utm_source=cann&utm_medium=article&utm_campaign=alll) to systematically master core concepts such as multi-level pipelining, data layout, and memory management. On this basis, try to apply the toolchain to the development and tuning of actual business operators, gradually building complete capabilities from prototype verification to production-level delivery.
+Deeply study the [*Ascend C Programming Guide (Official Tutorial)*](https://www.hiascend.com/document/detail/en/canncommercial/850/opdevg/Ascendcopdevg/atlas_ascendc_map_10_0002.html) to systematically master core concepts such as multi-level pipelining, data layout, and memory management. On this basis, try to apply the toolchain to the development and tuning of actual business operators, gradually building complete capabilities from prototype verification to production-level delivery.
 
 ## 3. FAQ
 
