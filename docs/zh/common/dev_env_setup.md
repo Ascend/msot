@@ -1,4 +1,4 @@
-# 算子工具开发环境安装指导
+# MindStudio 工具开发环境安装指导
 
 <br>
 
@@ -13,44 +13,46 @@
 
 ---
 
-## 1. 拉取编译专用镜像
+## 1. 获取开发专用镜像
 
-从华为云官方容器镜像仓库拉取定制的开发镜像：
+从华为云 SWR 镜像仓库拉取定制好的 MindStudio 编译专用镜像：
 
-```shell
-docker pull swr.cn-north-4.myhuaweicloud.com/mindstudio-image/mindstudio-build:26.1.0-20260610
+```bash
+docker pull swr.cn-north-4.myhuaweicloud.com/mindstudio-image/mindstudio-build:26.1.0-0701
 ```
 
-> [!NOTE] 编译镜像说明   
+> [!NOTE] 如何自行构建该镜像？   
 > 
-> * **操作系统**：openEuler 22.03 LTS。
-> * **C++ 工具链**：GCC 11.2，兼容 glibc ≥ 2.17。
-> * **Python 环境**：原生支持 3.8–3.13（符合 manylinux2014 标准）。
-> * **CANN 运行环境**：预装 CANN 9.1.0-beta.1，已深度裁剪非编译组件以优化体积。
+> 该开发镜像内部组件较为复杂。如需了解其分层架构或需要从头构建此镜像，请参考文档：《[MindStudio 统一构建镜像制作指南](./docker_image_build_guide.md)》
 
-## 2. 启动开发容器
+## 2. 部署并启动开发容器
 
-### 2.1 获取启动脚本
+### 2.1 下载并配置启动脚本
 
-```shell
+获取用于自动化创建和配置容器的辅助脚本，并赋予执行权限：
+
+```bash
 cd ~ && curl -O https://inst.obs.cn-north-4.myhuaweicloud.com/env/ctr_in.py && chmod +x ctr_in.py
 ```
 
-### 2.2 启动容器
+### 2.2 初始化并进入容器
 
-```shell
-~/ctr_in.py swr.cn-north-4.myhuaweicloud.com/mindstudio-image/mindstudio-build:26.1.0-20260610
+运行脚本并指定刚刚拉取的镜像名称。脚本会自动处理目录挂载、用户映射及环境变量初始化：
+
+```bash
+~/ctr_in.py swr.cn-north-4.myhuaweicloud.com/mindstudio-image/mindstudio-build:26.1.0-0701
 ```
 
-**预期输出：**  
-终端显示类似如下提示，进入交互式 shell 即表示环境启动成功：
+#### 预期输出
+
+命令执行后，终端将自动切换至容器内的交互式 Shell，并显示如下 MindStudio 欢迎界面，即表示环境搭建成功：
 
 ```text
 =================================================================
            >>>>>   MindStudio Build Environment   <<<<<
     THE END-TO-END TOOLCHAIN TO UNLEASH HUAWEI ASCEND COMPUTE
 =================================================================
-  OS/Arch   : openEuler 22.03 (LTS-SP4) | x86_64
+  OS/Arch   : openEuler 24.03 (LTS-SP3) | x86_64
   Toolchain : GCC 11.2.0 | glibc <= 2.17 | CANN 9.1.0
               ccache   : /home/alice/.cache/ccache (persistent)
               uv cache : /home/alice/.cache/uv (persistent)
@@ -62,8 +64,24 @@ cd ~ && curl -O https://inst.obs.cn-north-4.myhuaweicloud.com/env/ctr_in.py && c
 mindstudio@alice-build-env:/home/alice$
 ```
 
-> [!NOTE] 说明
-> **退出容器后如何重新进入？**
->
-> 1. 快捷方式：`~/ctr_in.py`，交互式选择进入当前用户创建的容器，结果唯一则直接进入。
-> 2. 原生命令：`docker exec -it alice_YYMMD_HHMMSS bash`（替换为实际容器名）。
+## 3. 日常运维：重新进入容器
+
+当您退出容器或重启宿主机后，可以通过以下两种方式重新进入已创建的开发环境：
+
+### 方法一：通过脚本快捷进入（推荐）
+
+再次执行启动脚本，脚本会智能识别当前用户创建的容器：
+
+```bash
+~/ctr_in.py
+```
+
+若存在多个容器，请根据终端的交互式提示输入对应编号；若结果唯一，则会自动直接进入。
+
+### 方法二：使用原生 Docker 命令
+
+如果您希望跳过脚本，可以直接使用 Docker 原生命令进入（请将 `<CONTAINER_NAME>` 替换为实际的容器名，如 `alice_20260606_120000`）：
+
+```bash
+docker exec -it <CONTAINER_NAME> bash
+```

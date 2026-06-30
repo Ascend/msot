@@ -6,9 +6,7 @@
 
 MindStudio 算子开发工具链包含多种工具。本文档以开发一个简单加法算子为例，带您贯穿算子开发全流程，直观体验工具链带来的高效与便捷。
 
-### 1.1 前言
- 
-**体验地图 (核心操作仅需 10 分钟)**     
+**体验地图 (核心操作仅需 10 分钟，容器环境安装好后可全程 Copy/Paste 快速执行)**     
 > **执行顺序建议**：步骤 1 为基础；完成 1 后可体验 2 或 3；步骤 4、5、6 均依赖步骤 3 生成的工程，但这三者之间相互独立，可按需选学。
  
  | 步骤 | 环节 | 核心工具 | 实测操作耗时 | 建议原理学习 |
@@ -20,41 +18,40 @@ MindStudio 算子开发工具链包含多种工具。本文档以开发一个简
 | **5** | **原生调试** | `msDebug` | 1 分钟 | 10分钟 |
 | **6** | **性能调优** | `msOpProf` | 1 分钟 | 10分钟 |
 
-### 1.2 环境准备
-
-👉 **【重要】请严格按 《[昇腾 AI 算子开发工具链学习环境安装指南](installation_guide.md)》完成环境安装和配置。**
-
-> [!CAUTION]注意      
-> 本教程专为标准化容器环境设计。请务必依据上述安装指南完成容器部署；若当前环境不符（如裸机或虚拟机等非容器环境），请暂缓体验，以免因依赖缺失或配置差异引发难以诊断的问题，待环境满足要求后再操作。
-
 ## 2. 操作步骤
 
-> [!NOTE]说明  
-> 后续体验环节全程支持 Copy/Paste 快速执行，请按照每节中的步骤顺序操作，勿跳过或打乱操作步骤。
+### 2.1【环境】必备环境准备（强制前置 ⚠️）
 
-### 2.1【环境】运行环境预检
+🛑 **本节为强制前置步骤！跳过将导致后续操作大量出现失败。**  
+本教程**仅支持**标准化 CANN 容器环境，不兼容裸机、虚拟机或其他非标准容器部署。
 
-#### 2.1.1 验证环境变量配置
+#### 2.1.1 安装 CANN 容器环境
 
-执行如下指令，确认系统输出正确的芯片 SoC 型号信息（如 910B4、910_9392）：
+✅ **请严格按以下指南完成环境安装：**  
+👉 **[《昇腾 AI 算子开发工具链学习环境安装指南》](installation_guide.md)**
 
-```shell
-echo $MY_STUDY_VAR_CHIP_SOC_TYPE
+> ⏱️ **外网可达环境下预计耗时：约 3 分钟**  
+> 安装完成后，您将获得一个预装所有算子工具、示例代码和依赖库的标准化容器环境。
+
+#### 2.1.2 执行环境自检脚本（必须通过！）
+
+在如下正式体验前，请**全文复制下方整段脚本**，粘贴到终端执行，只有输出全部显示为 [PASS] 才能继续：
+
+```bash
+# 1. 容器环境检查
+[ -f /.dockerenv ] && [ -n "$ASCEND_HOME_PATH" ] && [ -n "$ATB_HOME_PATH" ] && echo -e "\033[32m[PASS] CANN 容器环境 OK \033[0m" || echo -e "\033[31m[FAIL] 非标容器或未进入容器！\033[0m"
+# 2. 芯片型号变量检查
+[ -n "$MY_STUDY_VAR_CHIP_SOC_TYPE" ] && echo -e "\033[32m[PASS] 芯片型号: $MY_STUDY_VAR_CHIP_SOC_TYPE\033[0m" || echo -e "\033[31m[FAIL] 缺失环境变量 \$MY_STUDY_VAR_CHIP_SOC_TYPE\033[0m"
+# 3. 示例代码仓检查
+[ -d ~/ot_demo/msot/example/quick_start ] && echo -e "\033[32m[PASS] 示例代码仓 OK\033[0m" || echo -e "\033[31m[FAIL] 代码仓缺失\033[0m"
 ```
 
-若该变量为空，参照 [1.2 环境准备](#12-环境准备) 正确设置。务必确保此环境变量已正确配置，否则后续步骤将频繁报错。
-
-#### 2.1.2 确认代码仓正常
-
-执行以下命令，若能正常列出目录内容，则说明代码仓已正确就位：
-
-```shell
-ls -al ~/ot_demo/msot/example/quick_start
-```
-
-若命令报错，请参照 [1.2 环境准备](#12-环境准备) 完成准备。
+🚀 **后续体验环节全程支持 Copy/Paste 快速执行，请按照每节中的步骤顺序操作，勿跳过或打乱操作步骤。**
 
 ### 2.2【设计】算子建模设计（msKPP）
+
+> [!CAUTION]注意
+> 本工具仅支持昇腾 910B 系列芯片。如需体验，请切换至搭载昇腾 910B 芯片的环境；否则，请跳过本节内容。
 
 首先，进行算子算法设计。借助 msKPP 工具，可在秒级时间内获得算子性能建模结果，在无硬件条件下预估性能，快速验证实现方案的可行性。先跟着操作体验效果，原理部分可稍后阅读：
 
@@ -67,7 +64,7 @@ ls -al ~/ot_demo/msot/example/quick_start
 
 1. 创建子工作区目录
 
-    ```shell
+    ```bash
     mkdir -p ~/ot_demo/workspace/mskpp && cd ~/ot_demo/workspace/mskpp
     ```
 
@@ -81,7 +78,7 @@ ls -al ~/ot_demo/msot/example/quick_start
 
     因是快速入门，将准备好的 msKPP 的 DSL 脚本复制到此即视为开发完成（本教程聚焦工具链使用，实际开发需自行实现）：
 
-    ```shell
+    ```bash
     \cp -f ~/ot_demo/msot/example/quick_start/mskpp/mskpp_demo.py ./
     ```
 
@@ -89,11 +86,11 @@ ls -al ~/ot_demo/msot/example/quick_start
 
 执行 Python 脚本开始性能建模，如果成功，将自动在当前目录下生成 "MSKPP{timestamp}" 结果目录：
 
-```shell
+```bash
 python3 mskpp_demo.py
 ```
 
-如果脚本报错，提示 Chip is unsupported，请确认环境变量 `MY_STUDY_VAR_CHIP_SOC_TYPE` 是否正确设置，如变量为空，请参考[1.2 环境准备](#12-环境准备)正确设置。
+如果脚本报错，提示 Chip is unsupported，请确认环境变量 `MY_STUDY_VAR_CHIP_SOC_TYPE` 是否正确设置，如变量为空，请参考《[算子开发工具链学习环境安装指南](./installation_guide.md)》的第 3 节重新设置。
 
 #### 2.2.3 查看建模结果
 
@@ -126,7 +123,7 @@ MSKPP{timestamp}/
 
     创建名为 `src` 的子目录，作为算子源码根目录，后续所有源码操作均基于此路径开展：
 
-    ```shell
+    ```bash
     mkdir -p ~/ot_demo/workspace/src && cd ~/ot_demo/workspace/src/
     ```
 
@@ -141,7 +138,7 @@ MSKPP{timestamp}/
 
     因是快速入门，将准备好的配置文件拷贝到此即视为开发完成（本教程聚焦工具链使用，实际开发需自行实现）：
 
-    ```shell
+    ```bash
     \cp -f ~/ot_demo/msot/example/quick_start/msopgen/msopgen_demo.json ./
     ```
 
@@ -149,12 +146,14 @@ MSKPP{timestamp}/
 
     执行以下命令生成 Ascend C 算子工程，参数说明：-lan cpp 表明要生成 Ascend C 代码；-c 为芯片 SoC 型号（不同芯片处理上可能有区别）：
 
-    ```shell
+    ```bash
     msopgen gen -i msopgen_demo.json -c ai_core-ascend${MY_STUDY_VAR_CHIP_SOC_TYPE} -lan cpp -out AddCustom
     ```
 
     >[!CAUTION]注意          
     > 上述命令生成的代码框架中，具体算子的实现为空，无法正常执行加法运算，需按照 [2.3.2节](#232-实现核心逻辑) 内容进行修改后方可正常运行。 
+
+    如需了解上述命令各参数的详细含义，请参阅 [msOpGen 代码仓库](https://gitcode.com/Ascend/msopgen) 的 《使用指南》。
 
 4. 查看生成的结果
 
@@ -197,22 +196,22 @@ MSKPP{timestamp}/
 
 在上述三个【用户扩展点】文件中实现具体算法逻辑。因是快速入门，将准备好的 3 个 C++ 文件拷贝到此即视为开发完成（本教程聚焦工具链使用，实际开发需自行实现核心逻辑）：  
 
-```shell
+```bash
 cd ~/ot_demo/workspace/src/AddCustom/
-python3 ~/ot_demo/msot/example/quick_start/msopgen/keep_soc_info.py get ./op_host/add_custom.cpp
+python3 ~/ot_demo/msot/example/quick_start/msopgen/keep_soc_info.py get ./op_host/add_custom.cpp # 获取当前环境SoC信息
 \cp -f ~/ot_demo/msot/example/quick_start/msopgen/code/op_host/add_custom.cpp ./op_host/
 \cp -f ~/ot_demo/msot/example/quick_start/msopgen/code/op_kernel/add_custom_tiling.h ./op_kernel/
 \cp -f ~/ot_demo/msot/example/quick_start/msopgen/code/op_kernel/add_custom.cpp ./op_kernel/
-python3 ~/ot_demo/msot/example/quick_start/msopgen/keep_soc_info.py set ./op_host/add_custom.cpp
+python3 ~/ot_demo/msot/example/quick_start/msopgen/keep_soc_info.py set ./op_host/add_custom.cpp # 刷新代码中SoC信息为当前环境SoC信息
 ```
 
 #### 2.3.3 编译与部署算子
 
 1. 编译算子
 
-    执行构建脚本，成功后将在 build_out 目录下生成 .run 格式的算子部署包（sed 命令用于规避某些环境下的并发 pipe 问题，将打包改为串行）：
+    执行构建脚本，成功后将在 build_out 目录下生成 .run 格式的算子部署包：
 
-    ```shell
+    ```bash
     bash ./build.sh
     ```
 
@@ -225,7 +224,7 @@ python3 ~/ot_demo/msot/example/quick_start/msopgen/keep_soc_info.py set ./op_hos
 
     因各平台生成的算子部署包名称略有差异，执行以下脚本以自动定位并运行部署包（在固定环境中，实际等效于执行类似 ./build_out/custom_opp_ubuntu_aarch64.run 的命令）：
 
-    ```shell
+    ```bash
     MY_OP_PKG=$(find ./build_out -maxdepth 1 -name "custom_opp_*.run" | head -1) && bash $MY_OP_PKG
     ```
 
@@ -233,7 +232,7 @@ python3 ~/ot_demo/msot/example/quick_start/msopgen/keep_soc_info.py set ./op_hos
       
     部署成功后，按终端提示追加算子依赖的动态库路径：
 
-    ```shell
+    ```bash
     export LD_LIBRARY_PATH=${ASCEND_OPP_PATH}/vendors/customize/op_api/lib:$LD_LIBRARY_PATH
     echo "export LD_LIBRARY_PATH=${ASCEND_OPP_PATH}/vendors/customize/op_api/lib:$LD_LIBRARY_PATH" >> ~/.bashrc
     ```
@@ -247,7 +246,7 @@ python3 ~/ot_demo/msot/example/quick_start/msopgen/keep_soc_info.py set ./op_hos
 
 执行算子调用工程，验证算子功能（本例执行 1.0 + 2.0，预期结果为 3.0）：
 
-```shell
+```bash
 \cp -rf ~/ot_demo/msot/example/quick_start/msopgen/caller ~/ot_demo/workspace/src/
 cd ~/ot_demo/workspace/src/caller
 bash ./run.sh
@@ -277,7 +276,7 @@ Init acl failed. ERROR: 1
 
 后续 3 个工具的执行都需要修改此 CMakeLists.txt，保留此备份，用于恢复环境：
 
-```shell
+```bash
 \cp ~/ot_demo/workspace/src/AddCustom/op_kernel/CMakeLists.txt ~/ot_demo/workspace/src/AddCustom/op_kernel/CMakeLists.txt.bak
 ```
 
@@ -289,16 +288,16 @@ Init acl failed. ERROR: 1
 
 为启用检测能力，需在 Kernel 侧的 CMakeLists.txt 首行插入 sanitizer 编译选项，注入检测桩代码：
 
-```shell
+```bash
 cd ~/ot_demo/workspace/src/AddCustom
 printf '%s\n' "if(COMMAND add_ops_compile_options)" "  add_ops_compile_options(ALL OPTIONS -sanitizer)" "elseif(COMMAND npu_op_kernel_options)" "  npu_op_kernel_options(ascendc_kernels ALL OPTIONS -sanitizer)" "endif()" | cat - op_kernel/CMakeLists.txt > tmp && mv -f tmp op_kernel/CMakeLists.txt;
 ```
 
 #### 2.4.2 构造内存越界错误
 
-将准备好的含缺陷代码的源文件覆盖原始实现，人为引入越界访问：
+将准备好的含缺陷代码的源文件覆盖原始实现，**人为引入越界访问**：
 
-```shell
+```bash
 \cp -f ~/ot_demo/msot/example/quick_start/mssanitizer/bug_code/add_custom.cpp op_kernel/add_custom.cpp
 ```
 
@@ -307,19 +306,19 @@ printf '%s\n' "if(COMMAND add_ops_compile_options)" "  add_ops_compile_options(A
 
 #### 2.4.3 重新编译部署
 
-```shell
+```bash
 bash ./build.sh
 MY_OP_PKG=$(find ./build_out -maxdepth 1 -name "custom_opp_*.run" | head -1) && bash $MY_OP_PKG
 ```
 
 #### 2.4.4 执行内存检测
 
-```shell
+```bash
 cd ~/ot_demo/workspace/src/caller
 mssanitizer --tool=memcheck -- bash run.sh
 ```
 
-工具输出如下错误报告，则表明已成功执行（如下示例显示各版本可能会稍有不同，不影响学习工具使用）：  
+工具输出如下错误报告，则表明已成功执行，识别到构造的越界访问（如下示例显示各版本可能会稍有不同，不影响学习工具使用）：  
 
 1. illegal read of size 224：表示非法读取了 224 字节。   
 2. op_kernel/add_custom.cpp:44:9：表明越界访问发生在 add_custom.cpp 第 44 行。   
@@ -332,20 +331,20 @@ mssanitizer --tool=memcheck -- bash run.sh
 ======    #0 /usr/local/Ascend/ascend-toolkit/8.3.RC2/aarch64-linux/tikcpp/tikcfw/impl/dav_c220/kernel_operator_data_copy_impl.h:77:9
 ======    #1 /usr/local/Ascend/ascend-toolkit/8.3.RC2/aarch64-linux/tikcpp/tikcfw/impl/kernel_operator_data_copy_intf_impl.h:53:9
 ======    #2 /usr/local/Ascend/ascend-toolkit/8.3.RC2/aarch64-linux/tikcpp/tikcfw/impl/kernel_operator_data_copy_intf_impl.h:502:5
-======    #3 /home/mgx/ot_demo/workspace/src/caller/AddCustom/op_kernel/add_custom.cpp:44:9
-======    #4 /home/mgx/ot_demo/workspace/src/caller/AddCustom/op_kernel/add_custom.cpp:33:13
-======    #5 /home/mgx/ot_demo/workspace/src/caller/AddCustom/op_kernel/add_custom.cpp:83:8
-======    #6 /home/mgx/ot_demo/workspace/src/caller/AddCustom/build_out/op_kernel/AddCustom_ascend910b/kernel_0/kernel_meta_AddCustom_ab1b6750d7f510985325b603cb06dc8b/kernel_meta/AddCustom_ab1b6750d7f510985325b603cb06dc8b_2130445_kernel.cpp:37:5
+======    #3 /root/ot_demo/workspace/src/caller/AddCustom/op_kernel/add_custom.cpp:44:9
+======    #4 /root/ot_demo/workspace/src/caller/AddCustom/op_kernel/add_custom.cpp:33:13
+======    #5 /root/ot_demo/workspace/src/caller/AddCustom/op_kernel/add_custom.cpp:83:8
+======    #6 /root/ot_demo/workspace/src/caller/AddCustom/build_out/op_kernel/AddCustom_ascend910b/kernel_0/kernel_meta_AddCustom_ab1b6750d7f510985325b603cb06dc8b/kernel_meta/AddCustom_ab1b6750d7f510985325b603cb06dc8b_2130445_kernel.cpp:37:5
 ```
 
->[!NOTE]说明  
->算子执行后仍能成功输出正确结果，这正体现了该工具的价值：内存问题通常具有偶发性，在多数情况下即使存在内存异常，程序仍可正常运行；仅当问题累积至临界点时才会突发崩溃，难以通过表象直接定位。
+> [!NOTE]说明  
+> 算子执行后仍能成功输出正确结果，这正体现了该工具的价值：内存问题通常具有偶发性，在多数情况下即使存在内存异常，程序仍可正常运行；仅当问题累积至临界点时才会突发崩溃，难以通过表象直接定位。
 
 #### 2.4.5 恢复手工修改
 
 为后续工具使用做准备，回退手工修改：
 
-```shell
+```bash
 \cp -f ~/ot_demo/msot/example/quick_start/msopgen/code/op_kernel/add_custom.cpp ~/ot_demo/workspace/src/AddCustom/op_kernel/
 \cp -f ~/ot_demo/workspace/src/AddCustom/op_kernel/CMakeLists.txt.bak ~/ot_demo/workspace/src/AddCustom/op_kernel/CMakeLists.txt
 ```
@@ -369,13 +368,13 @@ mssanitizer --tool=memcheck -- bash run.sh
 
 确认内核调试开关 debug_switch 是否打开：
 
-```shell
+```bash
 cat /proc/debug_switch
 ```
 
 若输出值不为 1，请使用 root 权限在宿主机执行以下命令： 
 
-```shell
+```bash
 echo 1 > /proc/debug_switch
 ```
 
@@ -387,14 +386,14 @@ echo 1 > /proc/debug_switch
 
     在 Kernel 侧 CMakeLists.txt 首行插入配置，用于启用调试信息、禁用编译优化：
 
-    ```shell
+    ```bash
     cd ~/ot_demo/workspace/src/AddCustom
     printf '%s\n' "if(COMMAND add_ops_compile_options)" "  add_ops_compile_options(ALL OPTIONS -g -O0)" "elseif(COMMAND npu_op_kernel_options)" "  npu_op_kernel_options(ascendc_kernels ALL OPTIONS -g -O0)" "endif()" | cat - op_kernel/CMakeLists.txt > tmp && mv -f tmp op_kernel/CMakeLists.txt;
     ```
 
 2. 重新编译部署算子
 
-    ```shell
+    ```bash
     bash ./build.sh
     MY_OP_PKG=$(find ./build_out -maxdepth 1 -name "custom_opp_*.run" | head -1) && bash $MY_OP_PKG
     ```
@@ -403,7 +402,7 @@ echo 1 > /proc/debug_switch
 
 通过脚本设置 LAUNCH_KERNEL_PATH，指定算子obj加载路径并导入调试符号信息：
 
-```shell
+```bash
 source ~/ot_demo/msot/example/quick_start/msdebug/set_kernel_obj_env.sh
 ```
 
@@ -411,7 +410,7 @@ source ~/ot_demo/msot/example/quick_start/msdebug/set_kernel_obj_env.sh
 
 1. 启动调试器
 
-    ```shell
+    ```bash
     cd ~/ot_demo/workspace/src/caller/build
     msdebug execute_add_op
     ```
@@ -425,7 +424,7 @@ source ~/ot_demo/msot/example/quick_start/msdebug/set_kernel_obj_env.sh
     ```
 
     >[!CAUTION]注意  
-    >若此前未在宿主机正确启用 /proc/debug_switch，执行上一节所述的断点设置将触发警告，而按照后续章节运行 `run` 命令时将触发调试器错误（例如 'A' packet returned an error: 8），表明 msDebug 无法正常工作。
+    >若此前未在宿主机正确启用 /proc/debug_switch，执行上述断点设置将触发警告，而在后续步骤运行 `run` 命令时将触发调试器错误（例如 'A' packet returned an error: 8），表明 msDebug 无法正常工作。
 
 3. 运行算子
       
@@ -472,7 +471,7 @@ source ~/ot_demo/msot/example/quick_start/msdebug/set_kernel_obj_env.sh
 
 为后续工具使用做准备，回退手工修改：
 
-```shell
+```bash
 \cp -f ~/ot_demo/workspace/src/AddCustom/op_kernel/CMakeLists.txt.bak ~/ot_demo/workspace/src/AddCustom/op_kernel/CMakeLists.txt
 ```
 
@@ -486,7 +485,7 @@ source ~/ot_demo/msot/example/quick_start/msdebug/set_kernel_obj_env.sh
     
     在 Kernel 侧 CMakeLists.txt 首行插入一行配置，开启调试信息：
 
-    ```shell
+    ```bash
     cd ~/ot_demo/workspace/src/AddCustom
     printf '%s\n' "if(COMMAND add_ops_compile_options)" "  add_ops_compile_options(ALL OPTIONS -g)" "elseif(COMMAND npu_op_kernel_options)" "  npu_op_kernel_options(ascendc_kernels ALL OPTIONS -g)" "endif()" | cat - op_kernel/CMakeLists.txt > tmp && mv -f tmp op_kernel/CMakeLists.txt;
     ```
@@ -498,7 +497,7 @@ source ~/ot_demo/msot/example/quick_start/msdebug/set_kernel_obj_env.sh
 
 2. 重新编译部署算子
 
-    ```shell
+    ```bash
     bash ./build.sh
     MY_OP_PKG=$(find ./build_out -maxdepth 1 -name "custom_opp_*.run" | head -1) && bash $MY_OP_PKG
     ```
@@ -513,14 +512,14 @@ source ~/ot_demo/msot/example/quick_start/msdebug/set_kernel_obj_env.sh
 
 1. 上板性能采集 
 
-    ```shell
+    ```bash
     cd ~/ot_demo/workspace/src/caller/build
     msopprof --output=./msopprof_output_npu ./execute_add_op
     ```
 
 2. 仿真器性能采集
 
-    ```shell
+    ```bash
     msopprof simulator --soc-version=Ascend${MY_STUDY_VAR_CHIP_SOC_TYPE} --output=./msopprof_output_sim ./execute_add_op
     ```
 
@@ -554,7 +553,7 @@ source ~/ot_demo/msot/example/quick_start/msdebug/set_kernel_obj_env.sh
 
 为后续工具使用做准备，回退手工修改：
 
-```shell
+```bash
 \cp -f ~/ot_demo/workspace/src/AddCustom/op_kernel/CMakeLists.txt.bak ~/ot_demo/workspace/src/AddCustom/op_kernel/CMakeLists.txt
 ```
 
@@ -694,3 +693,14 @@ error: 'A' packet returned an error: 8
 **解决方法** 
 
 以 root 权限登录到宿主机上（注意不是容器内），按 [2.5.1 开启内核调试开关](#251-开启内核调试开关) 设置 `/proc/debug_switch` = 1，如果不能设置成功只能跳过此工具体验。
+
+### 3.6 进入容器后发现 Python 版本异常或缺少大量依赖库
+
+**问题现象**  
+容器内 Python 版本异常，或存在大量依赖库缺失。
+
+**问题原因**  
+可能因使用公共账户，比如 `root` 账户进行操作所致。`root` 为多人共享账户，其配置文件（如 `~/.bashrc`）可能已被他人修改（例如配置了 Conda 环境）。容器启动时若挂载或继承了宿主机的 `~/.bashrc`，将导致 Python 环境被意外覆盖或干扰。
+
+**解决方法**  
+建议使用个人普通账户登录并进行体验，避免使用公共账户，以防止受共享配置影响而导致环境异常。
