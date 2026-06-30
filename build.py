@@ -75,7 +75,6 @@ class BuildManager:
 
         if self.parsed_arguments.build_version is not None:
             logging.info("--build-version: %s", self.parsed_arguments.build_version)
-            self._execute_command(["sed", "-i", f"s/^Version=.*/Version={self.parsed_arguments.build_version}/", "./package/conf/version.info"])
 
     def _execute_command(self, command_sequence, timeout_seconds=36000, cwd=None, env=None):
         logging.info("Running: %s", " ".join(command_sequence))
@@ -114,6 +113,14 @@ class BuildManager:
         if 'local' not in self.parsed_arguments.command:
             from download_dependencies import DependencyManager
             DependencyManager(self.parsed_arguments).run()
+
+        # 依赖下载完成后统一更新所有 version.info（放在下载后避免被 git submodule update 覆盖）
+        if self.parsed_arguments.build_version is not None:
+            for vf in ["./package/conf/version.info",
+                       "./msdebug/package/conf/version.info",
+                       "./msopprof/package/conf/version.info",
+                       "./mssanitizer/package/conf/version.info"]:
+                self._execute_command(["sed", "-i", f"s/^Version=.*/Version={self.parsed_arguments.build_version}/", vf])
 
         if 'test' in self.parsed_arguments.command:
             # -------------------- 单元测试 --------------------
