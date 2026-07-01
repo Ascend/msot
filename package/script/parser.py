@@ -112,6 +112,18 @@ class Xmlparser(object):
                 dir_info = self.pre_parse(dir_info)
                 self.add_dir_info(dir_info)
 
+    def _validate_path_component(self, value, attr_name):
+        """验证路径组件不包含遍历序列"""
+        if not value:
+            return value
+        # 拒绝绝对路径
+        if os.path.isabs(value):
+            raise Exception("Absolute path not allowed in %s: %s" % (attr_name, value))
+        # 拒绝路径遍历序列
+        if '..' in value.split(os.sep):
+            raise Exception("Path traversal not allowed in %s: %s" % (attr_name, value))
+        return value
+
     def _parse_file_infos(self, file_infos):
         for item in file_infos:
             file_config = self.default_config.copy()
@@ -120,8 +132,10 @@ class Xmlparser(object):
             for sub_item in list(item.iter())[1:]:
                 file_info = file_config.copy()
                 file_info.update(sub_item.attrib)
+                # 添加路径验证
+                self._validate_path_component(file_info.get('src_path'), 'src_path')
+                self._validate_path_component(file_info.get('value'), 'value')
                 file_info = self.pre_parse(file_info)
-
                 configurable = file_info.get('configurable', 'FALSE').upper()
                 file_info['configurable'] = configurable
 
@@ -146,16 +160,24 @@ class Xmlparser(object):
         """
         copy_type = file_info.get('copy_type', None)
         if copy_type == 'delivery':
+            base_dir = os.path.realpath(self.delivery_dir)
             src_target = os.path.join(
-                self.delivery_dir, file_info.get(
-                    'src_path'), file_info.get('value')
+                base_dir, file_info.get('src_path', ''), file_info.get('value', '')
             )
         elif copy_type == 'source':
+            base_dir = os.path.realpath(TOP_DIR)
             src_target = os.path.join(
-                TOP_DIR, file_info.get('src_path'), file_info.get('value')
+                base_dir, file_info.get('src_path', ''), file_info.get('value', '')
             )
         else:
             raise Exception("error copy_type=%s" % (copy_type))
+         # 规范化路径并验证是否在允许的基目录内
+        src_target = os.path.realpath(src_target)
+        if not src_target.startswith(base_dir + os.sep) and src_target != base_dir:
+            raise Exception(
+                "Path traversal detected: %s escapes base directory %s"
+                % (src_target, base_dir)
+            )
         return src_target
 
     def expand_dir(self, file_info):
@@ -286,6 +308,16 @@ class Xmlparser(object):
         if item_attr.get("src_path", None):
             item_attr["src_path"] = item_attr["src_path"].replace(
                 OUTPUT, self.delivery_dir)
+        path_fields = ['dst_path', 'src_path', 'install_path']
+        for field in path_fields:
+            value = item_attr.get(field, '')
+            if value:
+                # 检测路径遍历序列
+                normalized = os.path.normpath(value)
+                if normalized.startswith('..') or '/../' in normalized or normalized == '..':
+                    raise ValueError(
+                        f"安全校验失败: 字段 '{field}' 包含路径遍历序列: '{value}'"
+                    )
         return item_attr
 
 def copy_file_by_pattern(src_path: str, dst_path:str, mode: int) -> None:
@@ -312,6 +344,61 @@ def copy_file_by_pattern(src_path: str, dst_path:str, mode: int) -> None:
             return False
     return True
 
+def validate_path(path: str, base_dir: str, param_name: str) -> str:
+    """
+    验证路径是否在允许的基础目录内
+    """
+    # 规范化路径，解析 ../ 和符号链接
+    normalized = os.path.realpath(os.path.join(base_dir, path))
+    base_real = os.path.realpath(base_dir)
+    
+    # 确保规范化后的路径仍在基础目录内
+    if not normalized.startswith(base_real + os.sep) and normalized != base_real:
+        raise ValueError(
+            f"Path traversal detected in {param_name}: '{path}' "
+            f"resolves to '{normalized}' which is outside '{base_real}'"
+        )
+    return normalized
+
+def validate_mode(pkg_mod_str: str) -> int:
+    """
+    验证文件权限值，禁止 setuid/setgid/sticky 位
+    """
+    if pkg_mod_str.startswith(('0o', '0O')):
+        pkg_mod_str = pkg_mod_str[2:]
+    
+    mode = int(pkg_mod_str, 8)
+    
+    # 禁止 setuid (0o4000), setgid (0o2000), sticky (0o1000)
+    SPECIAL_BITS = 0o7000
+    if mode & SPECIAL_BITS:
+        raise ValueError(
+            f"Special permission bits (setuid/setgid/sticky) are not allowed: "
+            f"got {oct(mode)}"
+        )
+    # 限制最大权限为 0o755
+    if mode > 0o755:
+        raise ValueError(
+            f"Permission mode too permissive: got {oct(mode)}, max allowed is 0o755"
+        )
+    return mode
+
+def safe_join(base_dir, user_path):
+    """
+    安全地拼接路径，防止路径遍历攻击。
+    确保最终路径在 base_dir 之内。
+    """
+    # 规范化基础路径
+    real_base = os.path.realpath(base_dir)
+    # 拼接并规范化目标路径
+    joined = os.path.realpath(os.path.join(real_base, user_path))
+    # 校验目标路径是否在基础路径之内
+    if not joined.startswith(real_base + os.sep) and joined != real_base:
+        raise ValueError(
+            f"路径遍历检测: '{user_path}' 试图逃逸 '{base_dir}' "
+            f"(解析为 '{joined}', 基础路径为 '{real_base}')"
+        )
+    return joined
 
 def do_copy(target_conf={}, delivery_dir='', release_dir=''):
     '''
@@ -320,35 +407,34 @@ def do_copy(target_conf={}, delivery_dir='', release_dir=''):
         target_conf:{'value': ,'copy_type': ,'src_path': ,'dst_path': }
     返回值: SUCC/FAIL
     '''
+    raw_src = os.path.join(target_conf.get('src_path', ''), target_conf.get('value', ''))
     copy_type = target_conf.get('copy_type')
     if copy_type == 'delivery':
-        src_target = os.path.join(delivery_dir, target_conf.get(
-            'src_path'), target_conf.get('value'))
+        src_target = validate_path(raw_src, delivery_dir, 'src_path')
     elif copy_type == 'source':
-        src_target = os.path.join(TOP_DIR, target_conf.get(
-            'src_path'), target_conf.get('value'))
+        src_target = validate_path(raw_src, TOP_DIR, 'src_path')
     else:
-        log_msg(LOG_E, "copy_type %s is not support for src_target %s!", copy_type, src_target)
+        log_msg(LOG_E, "copy_type %s is not supported!", copy_type)
         return FAIL
     value_list = target_conf.get('value').split('/')
     target_name = value_list[-1] if value_list[-1] else value_list[-2]
-    dst_path = os.path.join(release_dir, target_conf.get('dst_path', ''))
+
+    # [修复] 使用安全路径拼接
+    dst_path = safe_join(release_dir, target_conf.get('dst_path', ''))
     pkg_mod = target_conf.get('pkg_mod', '0o750')
     rename = target_conf.get('rename')
     cmd = ''
     if not os.path.exists(dst_path):
         os.makedirs(dst_path, mode=0o750)
     if rename:
-        dst_path = os.path.join(dst_path, rename)
-    if (pkg_mod.startswith(('0o','0o'))) :
-        pkg_mod = pkg_mod[2:]
-    mode = int(pkg_mod, 8)
+        dst_path = safe_join(os.path.dirname(dst_path), rename)
+    mode = validate_mode(pkg_mod)
     if not copy_file_by_pattern(src_target, dst_path, mode) :
         return FAIL
     pkg_softlink = target_conf.get('pkg_softlink')
     if pkg_softlink:
         source = os.path.join(dst_path, target_conf.get('value'))
-        link_target = os.path.join(release_dir, pkg_softlink)
+        link_target = safe_join(release_dir, pkg_softlink)
         return creat_softlink(source, link_target)
     return SUCC
 
@@ -370,10 +456,13 @@ def creat_softlink(source, target):
         except Exception as e:
             log_msg(LOG_E, "Faile to delete file %s!. error is %s", target, str(e))
     if os.path.isfile(target):
-        cmd = 'rm -f {}'.format(target)
-        status, output = subprocess.getstatusoutput(cmd)
-        if status != SUCC:
-            log_msg(LOG_E, "rm -f %s failed, %s" , target, output)
+        result = subprocess.run(
+            ['rm', '-f', target],
+            capture_output=True,
+            text=True
+        )
+        if result.returncode != SUCC:
+            log_msg(LOG_E, "rm -f %s failed, %s", target, result.stderr)
             return FAIL
     if os.path.isdir(target):
         log_msg(LOG_E, "%s is directory, can't add softlink", target)

@@ -472,11 +472,13 @@ function installWhlPackage() {
         whl_files+=" $_package_path/${whl}*.whl"
     done
 
-    # 备份 bin 目录原始的文件，防止在更新过程中被删除
-    cp -r ${_python_bin_path} ${_python_bin_backup_path}
-    if [ $? -ne 0 ]; then
-        log_and_print ${LEVEL_ERROR} "Backup before install whl package failed."
-        return 1
+    if [ -d "${_python_bin_path}" ]; then
+        # 备份 bin 目录原始的文件，防止在更新过程中被删除
+        cp -r ${_python_bin_path} ${_python_bin_backup_path}
+        if [ $? -ne 0 ]; then
+            log_and_print ${LEVEL_ERROR} "Backup before install whl package failed."
+            return 1
+        fi
     fi
 
     if [ "-${_pylocal}" = "-y" ]; then
@@ -493,12 +495,14 @@ function installWhlPackage() {
         return 1
     fi
 
-    # 还原被删除的文件
-    cp -r ${_python_bin_path}/* ${_python_bin_backup_path}/
-    rm -rf ${_python_bin_path} && mv ${_python_bin_backup_path} ${_python_bin_path}
-    if [ $? -ne 0 ]; then
-        log_and_print ${LEVEL_ERROR} "Restore after install whl package failed."
-        return 1
+    if [ -d "${_python_bin_backup_path}" ]; then
+        # 还原被删除的文件
+        cp -r ${_python_bin_path}/* ${_python_bin_backup_path}/
+        rm -rf ${_python_bin_path} && mv ${_python_bin_backup_path} ${_python_bin_path}
+        if [ $? -ne 0 ]; then
+            log_and_print ${LEVEL_ERROR} "Restore after install whl package failed."
+            return 1
+        fi
     fi
 
     # 安装完成后删除whl包

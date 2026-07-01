@@ -22,6 +22,7 @@ import os
 import shutil
 import subprocess
 import sys
+import re
 import traceback
 from pathlib import Path
 
@@ -120,7 +121,16 @@ class BuildManager:
                        "./msdebug/package/conf/version.info",
                        "./msopprof/package/conf/version.info",
                        "./mssanitizer/package/conf/version.info"]:
-                self._execute_command(["sed", "-i", f"s/^Version=.*/Version={self.parsed_arguments.build_version}/", vf])
+                version_file = self.project_root / "package" / "conf" / "version.info"
+                content = version_file.read_text()
+                # 使用 re.sub 替换版本号，仅允许合法版本字符
+                sanitized = re.sub(
+                    r"^Version=.*$",
+                    f"Version={self.parsed_arguments.build_version}",
+                    content,
+                    flags=re.MULTILINE
+                )
+                version_file.write_text(sanitized)
 
         if 'test' in self.parsed_arguments.command:
             # -------------------- 单元测试 --------------------
