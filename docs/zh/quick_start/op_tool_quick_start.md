@@ -30,7 +30,7 @@ MindStudio 算子开发工具链包含多种工具。本文档以开发一个简
 ✅ **请严格按以下指南完成环境安装：**  
 👉 **[《昇腾 AI 算子开发工具链学习环境安装指南》](installation_guide.md)**
 
-> ⏱️ **外网可达环境下预计耗时：约 3 分钟**  
+> ⏱️ **外网可达环境下预计耗时：约 3 分钟（具体时间受网络状况影响）**  
 > 安装完成后，您将获得一个预装所有算子工具、示例代码和依赖库的标准化容器环境。
 
 #### 2.1.2 执行环境自检脚本（必须通过！）
@@ -39,19 +39,16 @@ MindStudio 算子开发工具链包含多种工具。本文档以开发一个简
 
 ```bash
 # 1. 容器环境检查
-[ -f /.dockerenv ] && [ -n "$ASCEND_HOME_PATH" ] && [ -n "$ATB_HOME_PATH" ] && echo -e "\033[32m[PASS] CANN 容器环境 OK \033[0m" || echo -e "\033[31m[FAIL] 非标容器或未进入容器！\033[0m"
+[ -f /.dockerenv ] && [ -n "$ASCEND_HOME_PATH" ] && [ -n "$ATB_HOME_PATH" ] && echo -e "\033[32m[PASS] CANN container environment OK \033[0m" || echo -e '\033[31m[FAIL] Non-standard container or not inside the container!\033[0m'
 # 2. 芯片型号变量检查
-[ -n "$MY_STUDY_VAR_CHIP_SOC_TYPE" ] && echo -e "\033[32m[PASS] 芯片型号: $MY_STUDY_VAR_CHIP_SOC_TYPE\033[0m" || echo -e "\033[31m[FAIL] 缺失环境变量 \$MY_STUDY_VAR_CHIP_SOC_TYPE\033[0m"
+[ -n "$MY_STUDY_VAR_CHIP_SOC_TYPE" ] && echo -e "\033[32m[PASS] Chip Soc type: $MY_STUDY_VAR_CHIP_SOC_TYPE\033[0m" || echo -e "\033[31m[FAIL] Missing environment variable \$MY_STUDY_VAR_CHIP_SOC_TYPE\033[0m"
 # 3. 示例代码仓检查
-[ -d ~/ot_demo/msot/example/quick_start ] && echo -e "\033[32m[PASS] 示例代码仓 OK\033[0m" || echo -e "\033[31m[FAIL] 代码仓缺失\033[0m"
+[ -d ~/ot_demo/msot/example/quick_start ] && echo -e "\033[32m[PASS] Example code repository OK\033[0m" || echo -e "\033[31m[FAIL] Code repository missing\033[0m"
 ```
 
 🚀 **后续体验环节全程支持 Copy/Paste 快速执行，请按照每节中的步骤顺序操作，勿跳过或打乱操作步骤。**
 
 ### 2.2【设计】算子建模设计（msKPP）
-
-> [!CAUTION]注意
-> 本工具仅支持昇腾 910B 系列芯片。如需体验，请切换至搭载昇腾 910B 芯片的环境；否则，请跳过本节内容。
 
 首先，进行算子算法设计。借助 msKPP 工具，可在秒级时间内获得算子性能建模结果，在无硬件条件下预估性能，快速验证实现方案的可行性。先跟着操作体验效果，原理部分可稍后阅读：
 
@@ -60,7 +57,17 @@ MindStudio 算子开发工具链包含多种工具。本文档以开发一个简
 > **知识点：msKPP 工具原理**   
 > msKPP 并非传统可执行程序，而是一套专用于昇腾的 Python 类库。用户需通过 import 相关模块、编写并执行 Python 脚本，生成性能分析结果文件以完成建模。内部原理是预先采集真实环境中各类指令操作的性能数据，基于用户定义的算子执行流程，对各种性能开销进行建模与估算。
 
-#### 2.2.1 编写 Python 建模脚本
+#### 2.2.1 环境检查
+
+本工具**仅支持昇腾 910B** 系列芯片。请执行以下命令：
+
+```bash
+chip=$(npu-smi info -m 2>/dev/null | grep -oP 'Ascend\s*\S+' | head -1); case "$chip" in 'Ascend 910B'* ) echo -e "\n\e[32m[PASS] Chip SoC type [$chip] check passed. Please continue with the experience.\e[0m";; * ) echo -e "\n\033[31m[FAIL] Get chip: ${chip:-None}. The current environment does not support this tool. Please skip this experience.\033[0m" >&2;; esac
+```
+
+若输出为 `[PASS]`，请继续进行体验；若输出为 `[FAIL]`，请切换至搭载昇腾 910B 芯片的环境后再进行体验；否则，请跳过本节内容。
+
+#### 2.2.2 编写 Python 建模脚本
 
 1. 创建子工作区目录
 
@@ -82,7 +89,7 @@ MindStudio 算子开发工具链包含多种工具。本文档以开发一个简
     \cp -f ~/ot_demo/msot/example/quick_start/mskpp/mskpp_demo.py ./
     ```
 
-#### 2.2.2 执行性能建模
+#### 2.2.3 执行性能建模
 
 执行 Python 脚本开始性能建模，如果成功，将自动在当前目录下生成 "MSKPP{timestamp}" 结果目录：
 
@@ -90,9 +97,9 @@ MindStudio 算子开发工具链包含多种工具。本文档以开发一个简
 python3 mskpp_demo.py
 ```
 
-如果脚本报错，提示 Chip is unsupported，请确认环境变量 `MY_STUDY_VAR_CHIP_SOC_TYPE` 是否正确设置，如变量为空，请参考《[算子开发工具链学习环境安装指南](./installation_guide.md)》的第 3 节重新设置。
+如果脚本报错，提示 Chip is unsupported，请确认环境变量 `MY_STUDY_VAR_CHIP_SOC_TYPE` 是否正确设置，如变量为空，请参考《[算子开发工具链学习环境安装指南](./installation_guide.md)》的第 3 节重新设置；若变量非空，请核实当前芯片型号是否为 910B 系列——本工具仅支持 910B 系列芯片，请切换至 910B 系列芯片环境后再进行体验。
 
-#### 2.2.3 查看建模结果
+#### 2.2.4 查看建模结果
 
 以下为部分生成结果文件的示例：
 
@@ -290,7 +297,7 @@ Init acl failed. ERROR: 1
 
 ```bash
 cd ~/ot_demo/workspace/src/AddCustom
-printf '%s\n' "if(COMMAND add_ops_compile_options)" "  add_ops_compile_options(ALL OPTIONS -sanitizer)" "elseif(COMMAND npu_op_kernel_options)" "  npu_op_kernel_options(ascendc_kernels ALL OPTIONS -sanitizer)" "endif()" | cat - op_kernel/CMakeLists.txt > tmp && mv -f tmp op_kernel/CMakeLists.txt;
+sed -i '1i npu_op_kernel_options(ascendc_kernels ALL OPTIONS -sanitizer)' op_kernel/CMakeLists.txt
 ```
 
 #### 2.4.2 构造内存越界错误
@@ -388,7 +395,7 @@ echo 1 > /proc/debug_switch
 
     ```bash
     cd ~/ot_demo/workspace/src/AddCustom
-    printf '%s\n' "if(COMMAND add_ops_compile_options)" "  add_ops_compile_options(ALL OPTIONS -g -O0)" "elseif(COMMAND npu_op_kernel_options)" "  npu_op_kernel_options(ascendc_kernels ALL OPTIONS -g -O0)" "endif()" | cat - op_kernel/CMakeLists.txt > tmp && mv -f tmp op_kernel/CMakeLists.txt;
+    sed -i '1i npu_op_kernel_options(ascendc_kernels ALL OPTIONS -g -O0)' op_kernel/CMakeLists.txt
     ```
 
 2. 重新编译部署算子
@@ -487,7 +494,7 @@ source ~/ot_demo/msot/example/quick_start/msdebug/set_kernel_obj_env.sh
 
     ```bash
     cd ~/ot_demo/workspace/src/AddCustom
-    printf '%s\n' "if(COMMAND add_ops_compile_options)" "  add_ops_compile_options(ALL OPTIONS -g)" "elseif(COMMAND npu_op_kernel_options)" "  npu_op_kernel_options(ascendc_kernels ALL OPTIONS -g)" "endif()" | cat - op_kernel/CMakeLists.txt > tmp && mv -f tmp op_kernel/CMakeLists.txt;
+    sed -i '1i npu_op_kernel_options(ascendc_kernels ALL OPTIONS -g)' op_kernel/CMakeLists.txt
     ```
 
     > [!NOTE]说明   
