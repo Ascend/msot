@@ -51,7 +51,7 @@ msOT工具的安装方式包括：
 
 ```shell
 cd ~
-git clone https://gitcode.com/Ascend/msot.git
+git clone https://gitcode.com/Ascend/msot.git -b 26.0.0
 ```
 
 ### 2.3 执行编译打包

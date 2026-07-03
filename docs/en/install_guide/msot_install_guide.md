@@ -34,7 +34,7 @@ Configure the environment by referring to the following document: *[Operator Too
 
 ```shell
 cd ~
-git clone https://gitcode.com/Ascend/msot.git
+git clone https://gitcode.com/Ascend/msot.git -b 26.0.0
 ```
 
 ### 2.3 Compilation and Packaging

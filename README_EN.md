@@ -22,7 +22,7 @@
 
 MindStudio Operator Tools (msOT) is an operator development toolchain that focuses on key challenges in operator development. By providing capabilities such as operator design, development framework generation, functional debugging, anomaly detection, and multi-dimensional performance tuning, it reduces the complexity of operator development and improves the delivery efficiency of high-performance operators.
 
-<img src="./docs/en/figures/readme/fullview.svg?v=2026033001" width="1200"/>
+<img src="./docs/en/figures/readme/fullview.svg" width="1200"/>
 
 ## ⚙️ Feature Overview
 

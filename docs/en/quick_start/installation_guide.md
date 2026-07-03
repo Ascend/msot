@@ -1,84 +1,37 @@
-# Ascend AI Operator Development Toolchain Learning Environment Installation Guide
+# Ascend AI Operator Development Toolchain Learning Environment Setup Guide
 
-<br>
+> [!CAUTION]  
+> This document and related scripts are for learning purposes only. Stability and security in production environments are not guaranteed. Users should assess risks and assume corresponding responsibilities on their own.
 
->[!CAUTION]Note  
->**Disclaimer**  
->This document and related scripts are for learning purposes only. No guarantee is made regarding stability and security in production environments. Users must assess risks and assume corresponding responsibilities on their own.
+You need to prepare a Linux server equipped with at least one Ascend NPU card, with the NPU driver, firmware, and Docker service already installed.
 
-## 1. Operator Tool Learning Environment Installation
+## 1. Operator Development Toolchain Installation
 
-You need to prepare a Linux server equipped with at least one Ascend NPU card, with the NPU driver and firmware already installed.
+👉 **[Key Installation Step] Strictly follow the [CANN Container Environment Setup Guide](./cann_container_setup.md) to complete the installation. It can be completed within 5 minutes when the Docker service is running normally.**
 
-### 1.1 Operator Tool Installation
+> [!NOTE]
+> The Ascend AI operator development toolchain is released together with CANN, so installing CANN completes the installation. Due to the complex dependencies of the operator compilation environment, and to prevent environmental issues from affecting the learning experience, this tutorial requires the use of the CANN container environment and does not support non-containerized environments (such as bare metal or virtual machines).  
 
-The operator tool is integrated and released with CANN, and the following two installation methods are provided:
+## 2. Workspace Creation and Code Repository Download
 
-1. **Containerized Runtime Environment**: Recommended method. It can be completed within 5 minutes when the Docker service is running normally. Please refer to the *[CANN Container Environment Setup Guide](./cann_container_setup.md)* for installation.
-2. **Bare Metal or Virtual Machine Environment**: Installation is complex and time-consuming. Multi-user sharing can easily lead to conflicts and potentially difficult-to-resolve environmental issues. If you must use this type of environment, please refer to the *[CANN Official Installation Guide](https://www.hiascend.com/cann/download)* for installation. Using a relatively newer version is sufficient.
-
-### 1.2 Workspace Directory Initialization
-
-**1. Creating Workspace**  
-Create the `workspace` directory to store various files generated during example execution. The path is `~/ot_demo/workspace` (where "ot" is the acronym for Operator Tool):
+Create a `workspace` directory to store various files generated during the example execution process; clone the code repository to the `~/ot_demo` directory. After cloning, the example path will be `~/ot_demo/msot/example`:
 
 ```shell
 mkdir -p ~/ot_demo/workspace
-```
-
-**2. Downloading Repository**  
-Download to the `~/ot_demo` directory. After downloading, the example path is `~/ot_demo/msot/example`:
-
-```shell
 git clone https://gitcode.com/Ascend/msot.git ~/ot_demo/msot
 ```
 
-> Tip: If the git download fails in your environment, you can directly download the compressed package from gitcode.com and manually transfer it to the server, ensuring the directory structure remains correct.
+If `git` download is abnormal in the environment, you can directly download the repository archive from the GitCode website, manually upload it to the server, and ensure that the directory structure is consistent with the above.
 
-### 1.3 Obtaining the Chip SoC Model
+## 3. Chip SoC Model Information Configuration
 
-Since the chip SoC model is frequently used in many subsequent commands and the method to obtain it is relatively complex, it is obtained uniformly here and stored in the environment variable `MY_STUDY_VAR_CHIP_SOC_TYPE` for easy reference later.
+Since the chip SoC model information is frequently used in multiple subsequent commands, it is obtained and stored in the environment variable `MY_STUDY_VAR_CHIP_SOC_TYPE` here for easy reference later.
 
->[!CAUTION] Note  
-> The environment variable `MY_STUDY_VAR_CHIP_SOC_TYPE` is only used for this quick start tutorial. Do not use this variable in commercial development.
+> [!CAUTION]
+> The environment variable `MY_STUDY_VAR_CHIP_SOC_TYPE` is only used for this quick start learning. Do not use this variable for commercial development.
 
-#### 1.3.1 Automatically Obtaining the Chip SoC Model
-
-If you want to quickly experience the tool, run the following command to automatically obtain and set the chip SoC model:
+Run the following command:
 
 ```shell
-python3 ~/ot_demo/msot/example/quick_start/public/get_ai_soc_version.py
+export MY_STUDY_VAR_CHIP_SOC_TYPE=$(python3 -c "import acl; print(acl.get_soc_name().replace('Ascend', ''))")
 ```
-
-If the execution is successful, run the following as prompted:
-
-```shell
-source set_chip_env_var.sh
-```
-
-This script writes the chip SoC model (with the "Ascend" prefix removed, e.g., 910B4, 910_9392) into the environment variable `MY_STUDY_VAR_CHIP_SOC_TYPE`.
-
-#### 1.3.2 Manually Obtaining the Chip SoC Model
-
-If you want to learn about the concept and acquisition method of the chip SoC model, please refer to [*Ascend Chip SoC Model Acquisition Method*](get_chip_soc_type.md) to manually obtain the chip SoC model, and replace `<YOUR_CHIP_NAME>` in the following command with the value after removing the "Ascend" prefix (e.g., 910B4), then execute:
-
-```shell
-echo "export MY_STUDY_VAR_CHIP_SOC_TYPE=<YOUR_CHIP_NAME>" >> ~/.bashrc && source ~/.bashrc
-```
-
->[!CAUTION]Note    
->The value of `MY_STUDY_VAR_CHIP_SOC_TYPE` is the value after removing the Ascend prefix:   
->Correct values: 910B4, 910_9392;  
->Incorrect values: Ascend910B4, Ascend910_9392.
-
-### 1.4 Installing Python Libraries
-
-The operator project build depends on the following libraries. Please execute the following command to install them:
-
-```shell
-pip3 install -r ~/ot_demo/msot/example/quick_start/public/requirements.txt -i https://mirrors.aliyun.com/pypi/simple/
-ln -sf /usr/local/bin/python3 /usr/bin/python3
-```
-
->[!NOTE] Note  
->Due to the slow download speed from the official website, the above command uses the Alibaba source for installation. If your environment cannot access the Alibaba source, or if you do not trust this source for security reasons, you can remove the `-i xxx` parameter to restore the default source.

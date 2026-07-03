@@ -41,7 +41,7 @@
     <polygon points="3,-9 -5,1 1,1 -3,9 5,-1 -1,-1" fill="#ffffff" stroke="#ffffff" stroke-width="1" stroke-linejoin="round"/>
   </g>
 
-  <text x="366" y="34" text-anchor="start" fill="white" font-size="18" font-weight="bold">昇腾 AI 算子开发工具链全景图</text>
+  <text x="366" y="34" text-anchor="start" fill="white" font-size="18" font-weight="bold">Ascend AI Op Dev Toolchain Overview</text>
 
   <line x1="192" y1="72" x2="192" y2="210" stroke="#cbd5e1" stroke-width="1" stroke-opacity="0.5"/>
   <line x1="384" y1="72" x2="384" y2="210" stroke="#cbd5e1" stroke-width="1" stroke-opacity="0.5"/>
@@ -49,45 +49,45 @@
   <line x1="768" y1="72" x2="768" y2="210" stroke="#cbd5e1" stroke-width="1" stroke-opacity="0.5"/>
 
   <rect x="24" y="72" width="144" height="36" rx="8" fill="url(#stage)" filter="url(#shadow)"/>
-  <text x="96" y="96" text-anchor="middle" fill="white" font-size="14" font-weight="bold">性能预测</text>
+  <text x="96" y="95" text-anchor="middle" fill="white" font-size="12" font-weight="bold">Performance Prediction</text>
   <rect x="28" y="120" width="136" height="70" rx="8" fill="white" filter="url(#shadowSm)" stroke="#e2e8f0" stroke-width="1"/>
-  <text x="96" y="142" text-anchor="middle" fill="#1e40af" font-size="13" font-weight="bold">msKPP</text>
-  <text x="96" y="162" text-anchor="middle" fill="#64748b" font-size="11">预测特定算法实现下</text>
-  <text x="96" y="177" text-anchor="middle" fill="#64748b" font-size="11">的性能上限</text>
+  <text x="96" y="141" text-anchor="middle" fill="#1e40af" font-size="13" font-weight="bold">msKPP</text>
+  <text x="96" y="160" text-anchor="middle" fill="#64748b" font-size="10">Performance ceiling</text>
+  <text x="96" y="175" text-anchor="middle" fill="#64748b" font-size="10">prediction</text>
 
   <rect x="216" y="72" width="144" height="36" rx="8" fill="url(#stage)" filter="url(#shadow)"/>
-  <text x="288" y="96" text-anchor="middle" fill="white" font-size="14" font-weight="bold">工程生成</text>
+  <text x="288" y="95" text-anchor="middle" fill="white" font-size="12" font-weight="bold">Project Generation</text>
   <rect x="220" y="120" width="136" height="70" rx="8" fill="white" filter="url(#shadowSm)" stroke="#e2e8f0" stroke-width="1"/>
-  <text x="288" y="142" text-anchor="middle" fill="#1e40af" font-size="13" font-weight="bold">msOpGen</text>
-  <text x="288" y="162" text-anchor="middle" fill="#64748b" font-size="11">提供模板工程生成能力</text>
-  <text x="288" y="177" text-anchor="middle" fill="#64748b" font-size="11">简化工程搭建</text>
+  <text x="288" y="141" text-anchor="middle" fill="#1e40af" font-size="13" font-weight="bold">msOpGen</text>
+  <text x="288" y="160" text-anchor="middle" fill="#64748b" font-size="10">Template project</text>
+  <text x="288" y="175" text-anchor="middle" fill="#64748b" font-size="10">generation</text>
 
   <rect x="408" y="72" width="144" height="36" rx="8" fill="url(#stage)" filter="url(#shadow)"/>
-  <text x="480" y="96" text-anchor="middle" fill="white" font-size="14" font-weight="bold">异常检测</text>
+  <text x="480" y="95" text-anchor="middle" fill="white" font-size="12" font-weight="bold">Anomaly Detection</text>
   <rect x="412" y="120" width="136" height="70" rx="8" fill="white" filter="url(#shadowSm)" stroke="#e2e8f0" stroke-width="1"/>
-  <text x="480" y="142" text-anchor="middle" fill="#1e40af" font-size="13" font-weight="bold">msSanitizer</text>
-  <text x="480" y="162" text-anchor="middle" fill="#64748b" font-size="11">内存、竞争、未初始化</text>
-  <text x="480" y="177" text-anchor="middle" fill="#64748b" font-size="11">及同步检测</text>
+  <text x="480" y="141" text-anchor="middle" fill="#1e40af" font-size="13" font-weight="bold">msSanitizer</text>
+  <text x="480" y="160" text-anchor="middle" fill="#64748b" font-size="10">Memory, race, uninit</text>
+  <text x="480" y="175" text-anchor="middle" fill="#64748b" font-size="10">&amp; sync detection</text>
 
   <rect x="600" y="72" width="144" height="36" rx="8" fill="url(#stage)" filter="url(#shadow)"/>
-  <text x="672" y="96" text-anchor="middle" fill="white" font-size="14" font-weight="bold">原生调试</text>
+  <text x="672" y="95" text-anchor="middle" fill="white" font-size="12" font-weight="bold">Native Debugging</text>
   <rect x="604" y="120" width="136" height="70" rx="8" fill="white" filter="url(#shadowSm)" stroke="#e2e8f0" stroke-width="1"/>
-  <text x="672" y="142" text-anchor="middle" fill="#1e40af" font-size="13" font-weight="bold">msDebug</text>
-  <text x="672" y="162" text-anchor="middle" fill="#64748b" font-size="11">原生环境调试</text>
-  <text x="672" y="177" text-anchor="middle" fill="#64748b" font-size="11">变量查看、单步执行</text>
+  <text x="672" y="141" text-anchor="middle" fill="#1e40af" font-size="13" font-weight="bold">msDebug</text>
+  <text x="672" y="160" text-anchor="middle" fill="#64748b" font-size="10">Native environment</text>
+  <text x="672" y="175" text-anchor="middle" fill="#64748b" font-size="10">debugging &amp; stepping</text>
 
   <rect x="792" y="72" width="144" height="36" rx="8" fill="url(#stage)" filter="url(#shadow)"/>
-  <text x="864" y="96" text-anchor="middle" fill="white" font-size="14" font-weight="bold">性能分析</text>
+  <text x="864" y="95" text-anchor="middle" fill="white" font-size="12" font-weight="bold">Performance Analysis</text>
   <rect x="796" y="120" width="136" height="70" rx="8" fill="white" filter="url(#shadowSm)" stroke="#e2e8f0" stroke-width="1"/>
-  <text x="864" y="142" text-anchor="middle" fill="#1e40af" font-size="13" font-weight="bold">msOpProf</text>
-  <text x="864" y="162" text-anchor="middle" fill="#64748b" font-size="11">支持上板与仿真</text>
-  <text x="864" y="177" text-anchor="middle" fill="#64748b" font-size="11">数据采集</text>
+  <text x="864" y="141" text-anchor="middle" fill="#1e40af" font-size="13" font-weight="bold">msOpProf</text>
+  <text x="864" y="160" text-anchor="middle" fill="#64748b" font-size="10">On-device &amp; simulation</text>
+  <text x="864" y="175" text-anchor="middle" fill="#64748b" font-size="10">data collection</text>
 
   <rect x="16" y="200" width="928" height="36" rx="10" fill="url(#footerBg)" filter="url(#shadow)" stroke="#e2e8f0" stroke-width="1"/>
 
-  <text x="305" y="223" text-anchor="end" fill="#1e40af" font-size="14" font-weight="bold">面向昇腾 NPU</text>
+  <text x="305" y="222" text-anchor="end" fill="#1e40af" font-size="13" font-weight="bold">For Ascend NPU</text>
   <circle cx="325" cy="218" r="2.5" fill="#94a3b8"/>
-  <text x="429" y="223" text-anchor="middle" fill="#1e40af" font-size="14" font-weight="bold">聚焦高效的高性能算子开发</text>
+  <text x="429" y="222" text-anchor="middle" fill="#1e40af" font-size="13" font-weight="bold">High-perf operator development</text>
   <circle cx="530" cy="218" r="2.5" fill="#94a3b8"/>
-  <text x="547" y="223" text-anchor="start" fill="#1e40af" font-size="14" font-weight="bold">工具链覆盖算子开发全生命周期</text>
+  <text x="547" y="222" text-anchor="start" fill="#1e40af" font-size="13" font-weight="bold">Full lifecycle toolchain coverage</text>
 </svg>
