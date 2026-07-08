@@ -41,6 +41,9 @@ FAIL = -1
 LOG_E = "ERROR"
 LOG_W = "WARNING"
 LOG_I = "INFO"
+# 与顶层 CMake 的 MSOT_VALID_TOOLS 保持一致；parser 只负责“总包内容过滤”，
+# 构建阶段是否跳过由 CMake 控制。
+SUPPORTED_TOOLS = ("msdebug", "mskl", "mskpp", "msopgen", "msopprof", "mssanitizer")
 
 def log_print_element(log_element):
     print("[" + log_element + "]", end=' ')
@@ -62,11 +65,14 @@ class Xmlparser(object):
     """
     功能描述: 解析xml配置文件。
     """
-    def __init__(self, xml_file, delivery_dir, os_arch):
+    def __init__(self, xml_file, delivery_dir, os_arch, excluded_tools=None):
         self.xml_file = xml_file
         self.delivery_dir = delivery_dir
         self.default_config = {}
         self.target_env="{0}-{1}".format(os_arch, "linux")
+        # excluded_tools 只过滤带 tool 属性的文件项；公共安装脚本和基础信息不设置 tool，
+        # 因此始终会进入总包。
+        self.excluded_tools = set(excluded_tools or [])
 
         self._cache_dir_info = {}
         self._dir_install_list = []
@@ -132,6 +138,10 @@ class Xmlparser(object):
             for sub_item in list(item.iter())[1:]:
                 file_info = file_config.copy()
                 file_info.update(sub_item.attrib)
+                # filelist.xml 中的 tool 属性表示该文件属于哪个子工具。
+                # 命中排除列表时，既不生成 filelist.csv 记录，也不执行后续复制。
+                if self.is_tool_excluded(file_info.get('tool')):
+                    continue
                 # 添加路径验证
                 self._validate_path_component(file_info.get('src_path'), 'src_path')
                 self._validate_path_component(file_info.get('value'), 'value')
@@ -151,6 +161,12 @@ class Xmlparser(object):
                         hash_value = self.make_hash(file_info)
                         file_info['hash'] = hash_value
                 self._package_content_list.append(file_info)
+
+    def is_tool_excluded(self, tool_name):
+        """判断 XML 文件项是否属于被排除的子工具。"""
+        if not tool_name:
+            return False
+        return tool_name.strip().lower() in self.excluded_tools
 
     def get_src_target(self, file_info):
         """
@@ -400,6 +416,26 @@ def safe_join(base_dir, user_path):
         )
     return joined
 
+def normalize_excluded_tools(exclude_tools):
+    """归一化 parser 入参，保证直接调用 parser.py 时也有白名单校验。"""
+    if not exclude_tools:
+        return []
+
+    normalized_tools = []
+    for tool in exclude_tools.split(','):
+        # 兼容 CMake/build.py 传入的逗号分隔字符串；忽略空片段，保留首次出现顺序。
+        tool_name = tool.strip().lower()
+        if not tool_name:
+            continue
+        if tool_name not in SUPPORTED_TOOLS:
+            raise ValueError(
+                "Unsupported tool '%s'. Supported tools: %s"
+                % (tool_name, ", ".join(SUPPORTED_TOOLS))
+            )
+        if tool_name not in normalized_tools:
+            normalized_tools.append(tool_name)
+    return normalized_tools
+
 def do_copy(target_conf={}, delivery_dir='', release_dir=''):
     '''
     功能描述: 根据拷贝类型来执行文件或目录拷贝
@@ -560,7 +596,9 @@ def main(args=None):
         log_msg(LOG_E, "Input xml_file is None, please check paramters!")
         return FAIL
 
-    xmlparser = Xmlparser(pkg_xml_file, delivery_dir, args.os_arch)
+    # args 可能来自命令行，也可能来自单测/其他脚本构造；getattr 保持旧调用兼容。
+    excluded_tools = normalize_excluded_tools(getattr(args, 'exclude_tools', ''))
+    xmlparser = Xmlparser(pkg_xml_file, delivery_dir, args.os_arch, excluded_tools=excluded_tools)
     if xmlparser.parse():
         sys.exit(FAIL)
 
@@ -600,6 +638,9 @@ def args_prase():
                         help="This parameter define the delivery path for all module." )
     parser.add_argument('-o', '--os_arch', metavar='os_arch', required=False, dest='os_arch', nargs='?', const='',
                         default=None, help="This parameter define the package's os_arch")
+    # 由顶层 CMake 传入，用于过滤 filelist.xml 中带 tool 属性的子工具产物。
+    parser.add_argument('--exclude_tools', metavar='tools', required=False, dest='exclude_tools', nargs='?', const='',
+                        default='', help="Comma-separated tools excluded from package.")
     return parser.parse_args()
 
 

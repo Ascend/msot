@@ -29,13 +29,15 @@
     </file_info>
 
     <file_info value="package" copy_type="source" src_path="${OUTPUT}" dst_path="mindstudio-operator-tools" install_path="mindstudio-operator-tools" install_mod="550">
-        <file value="mskpp/mindstudio_kpp-*.whl" />
-        <file value="mskl/mindstudio_kl-*.whl" />
-        <file value="msopgen/mindstudio_opgen-*.whl" />
-        <file value="msopgen/mindstudio_opst-*.whl" />
-        <file value="msdebug/mindstudio-debugger_*.run" />
-        <file value="mssanitizer/mindstudio-sanitizer_*.run" />
-        <file value="msopprof/mindstudio-opprof_*.run" />
+        <!-- tool 属性用于排除工具参数过滤；未设置 tool 的公共文件始终打入总包。 -->
+        <!-- msopgen 同时产出 mindstudio_opgen 与 mindstudio_opst，因此两个 whl 使用同一个 tool 标记。 -->
+        <file value="mskpp/mindstudio_kpp-*.whl" tool="mskpp" />
+        <file value="mskl/mindstudio_kl-*.whl" tool="mskl" />
+        <file value="msopgen/mindstudio_opgen-*.whl" tool="msopgen" />
+        <file value="msopgen/mindstudio_opst-*.whl" tool="msopgen" />
+        <file value="msdebug/mindstudio-debugger_*.run" tool="msdebug" />
+        <file value="mssanitizer/mindstudio-sanitizer_*.run" tool="mssanitizer" />
+        <file value="msopprof/mindstudio-opprof_*.run" tool="msopprof" />
     </file_info>
 
 </config>

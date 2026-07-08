@@ -34,12 +34,52 @@ if(BUILD_TESTS)
     set(BUILD_ARG test)
 endif()
 
-include(cmake/module/msdebug.cmake)
-include(cmake/module/mskl.cmake)
-include(cmake/module/mskpp.cmake)
-include(cmake/module/msopgen.cmake)
-include(cmake/module/msopprof.cmake)
-include(cmake/module/mssanitizer.cmake)
+# 顶层总包支持的子工具列表。排除能力按这些 CMake 模块粒度生效，
+# 其中 msopgen 模块会同时产出 msopgen 与 msopst 两个 whl。
+set(MSOT_VALID_TOOLS msdebug mskl mskpp msopgen msopprof mssanitizer)
+
+# CMake 直接调用时也可以使用该变量；build.py 的 --exclude-tools 会透传到这里。
+set(MSOT_EXCLUDE_TOOLS "" CACHE STRING "Comma-separated msOT sub-tools excluded from build/package")
+
+# 将用户传入的逗号分隔字符串归一化为列表：去空、转小写、去重，并做白名单校验。
+set(MSOT_EXCLUDED_TOOL_LIST "")
+if(MSOT_EXCLUDE_TOOLS)
+    string(REPLACE "," ";" MSOT_EXCLUDE_TOOL_RAW_LIST "${MSOT_EXCLUDE_TOOLS}")
+    foreach(TOOL_NAME IN LISTS MSOT_EXCLUDE_TOOL_RAW_LIST)
+        string(STRIP "${TOOL_NAME}" TOOL_NAME)
+        string(TOLOWER "${TOOL_NAME}" TOOL_NAME)
+        if(TOOL_NAME STREQUAL "")
+            continue()
+        endif()
+        list(FIND MSOT_VALID_TOOLS "${TOOL_NAME}" TOOL_INDEX)
+        if(TOOL_INDEX EQUAL -1)
+            message(FATAL_ERROR "Unsupported MSOT_EXCLUDE_TOOLS item: ${TOOL_NAME}. Supported tools: ${MSOT_VALID_TOOLS}")
+        endif()
+        list(FIND MSOT_EXCLUDED_TOOL_LIST "${TOOL_NAME}" EXISTING_TOOL_INDEX)
+        if(EXISTING_TOOL_INDEX EQUAL -1)
+            list(APPEND MSOT_EXCLUDED_TOOL_LIST "${TOOL_NAME}")
+        endif()
+    endforeach()
+endif()
+
+# 归一化后的字符串用于传给 parser，也写入配置依赖文件，保证排除项变化会重新触发打包。
+string(JOIN "," MSOT_EXCLUDE_TOOLS_NORMALIZED ${MSOT_EXCLUDED_TOOL_LIST})
+if(MSOT_EXCLUDE_TOOLS_NORMALIZED)
+    message(STATUS "Exclude msOT sub-tools: ${MSOT_EXCLUDE_TOOLS_NORMALIZED}")
+endif()
+
+# 只 include 未排除的子工具模块。被排除模块不会创建对应 package_* target，
+# 因而既不会构建，也不会作为 package_msot 的前置依赖。
+set(MSOT_PACKAGE_TARGETS "")
+foreach(TOOL_NAME IN LISTS MSOT_VALID_TOOLS)
+    list(FIND MSOT_EXCLUDED_TOOL_LIST "${TOOL_NAME}" TOOL_INDEX)
+    if(TOOL_INDEX EQUAL -1)
+        include(cmake/module/${TOOL_NAME}.cmake)
+        list(APPEND MSOT_PACKAGE_TARGETS package_${TOOL_NAME})
+    else()
+        message(STATUS "Skip msOT sub-tool target: ${TOOL_NAME}")
+    endif()
+endforeach()
 
 # 根据构建环境信息生成scene.info
 string(TOLOWER "${CMAKE_SYSTEM_NAME}" SYSTEM)
@@ -73,6 +113,18 @@ set(installShell share/info/${NAME}/script/install.sh)
 set(comments "ASCEND MINDSTUDIO SANITIZER RUN PACKAGE")
 file(GLOB_RECURSE PACAKGE_SCRIPT_FILES ${ROOT_DIR}/package/**/*)
 
+# 自定义命令的 DEPENDS 需要一个可跟踪文件；排除列表变化时更新该文件，
+# 避免 CMake 认为 package.flag 已经是最新而复用上一次的总包内容。
+set(MSOT_PACKAGE_CONFIG_FILE ${CMAKE_CURRENT_BINARY_DIR}/msot_package_config.txt)
+file(WRITE "${MSOT_PACKAGE_CONFIG_FILE}" "MSOT_EXCLUDE_TOOLS=${MSOT_EXCLUDE_TOOLS_NORMALIZED}\n")
+
+# parser 负责生成 filelist.csv 并复制总包内容；这里把同一份排除列表传进去，
+# 让最终 run 包目录也跳过对应 whl/run 文件。
+set(MSOT_PARSER_EXCLUDE_ARGS "")
+if(MSOT_EXCLUDE_TOOLS_NORMALIZED)
+    list(APPEND MSOT_PARSER_EXCLUDE_ARGS --exclude_tools ${MSOT_EXCLUDE_TOOLS_NORMALIZED})
+endif()
+
 file(GLOB_RECURSE MAKESELF_TAR_FILE_GLOB ${ROOT_DIR}/thirdparty/makeself/makeself-*.tar.gz)
 file(GLOB_RECURSE MAKESELF_PATCH_FILE_GLOB ${ROOT_DIR}/thirdparty/makeself/makeself-*.patch)
 list(GET MAKESELF_TAR_FILE_GLOB 0 MAKESELF_TAR_FILE)
@@ -96,20 +148,18 @@ add_custom_command(
 # 解析打包配置文件filelist.xml，并完成打包
 add_custom_command(OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/package.flag
     COMMAND ${CMAKE_COMMAND} -E copy "${ROOT_DIR}/package/conf/version.info" ${CMAKE_INSTALL_PREFIX}
+    # 清理总包 staging 目录，防止前一次构建留下的已排除子包被 makeself 再次打入 run 包。
+    COMMAND ${CMAKE_COMMAND} -E remove_directory ${CMAKE_INSTALL_PREFIX}/${NAME}
     COMMAND cd ${ROOT_DIR}/package/script/ && ${PYTHON} parser.py -x ${ROOT_DIR}/package/conf/filelist.xml
-            --delivery_path ${CMAKE_INSTALL_PREFIX} -o ${CMAKE_SYSTEM_PROCESSOR}
+            --delivery_path ${CMAKE_INSTALL_PREFIX} -o ${CMAKE_SYSTEM_PROCESSOR} ${MSOT_PARSER_EXCLUDE_ARGS}
     COMMAND cd ${CMAKE_INSTALL_PREFIX} && ${makeselfTool} --header ${makeselfHeader} --help-header ${helpInfo} --pigz
             --complevel 4 --nocrc --nomd5 --sha256 --chown --tar-quietly ${NAME} ${packageName} ${comments} ${installShell}
     COMMAND touch ${CMAKE_CURRENT_BINARY_DIR}/package.flag
     COMMAND chmod 750 ${CMAKE_INSTALL_PREFIX}/*.run
-    DEPENDS ${PACAKGE_SCRIPT_FILES} ${ROOT_DIR}/package/conf/version.info ${makeselfTool} ${makeselfHeader}
+    # package.flag 依赖未排除子工具 target，确保保留的子包产物先生成，再执行总包打包。
+    DEPENDS ${MSOT_PACKAGE_TARGETS} ${PACAKGE_SCRIPT_FILES} ${ROOT_DIR}/package/conf/version.info
+            ${MSOT_PACKAGE_CONFIG_FILE} ${makeselfTool} ${makeselfHeader}
     WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
 )
-add_custom_target(package_msot ALL DEPENDS 
-                                    package_msdebug
-                                    package_mskl
-                                    package_mskpp
-                                    package_msopgen
-                                    package_msopprof
-                                    package_mssanitizer
-                                    ${CMAKE_CURRENT_BINARY_DIR}/package.flag)
+# ALL 目标也只挂未排除子工具，避免 excluded 子工具在默认 make 中被构建。
+add_custom_target(package_msot ALL DEPENDS ${MSOT_PACKAGE_TARGETS} ${CMAKE_CURRENT_BINARY_DIR}/package.flag)

@@ -28,6 +28,31 @@ from pathlib import Path
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
+# 子工具排除粒度与顶层 CMake 模块保持一致；这里做第一层白名单校验，
+# 避免非法名字继续传到 CMake 后才失败。
+SUPPORTED_TOOLS = ("msdebug", "mskl", "mskpp", "msopgen", "msopprof", "mssanitizer")
+
+
+def normalize_excluded_tools(exclude_tools):
+    """归一化 --exclude-tools 输入，输出稳定的 CMake 逗号分隔参数来源。"""
+    if not exclude_tools:
+        return []
+
+    normalized_tools = []
+    for tool in exclude_tools.split(','):
+        # 支持用户输入空格和大小写混用；空片段来自尾逗号或连续逗号，直接忽略。
+        tool_name = tool.strip().lower()
+        if not tool_name:
+            continue
+        if tool_name not in SUPPORTED_TOOLS:
+            raise argparse.ArgumentTypeError(
+                "Unsupported tool '%s'. Supported tools: %s"
+                % (tool_name, ", ".join(SUPPORTED_TOOLS))
+            )
+        if tool_name not in normalized_tools:
+            normalized_tools.append(tool_name)
+    return normalized_tools
+
 
 class BuildManager:
     """
@@ -41,6 +66,7 @@ class BuildManager:
         python build.py -r <revision>    指定依赖的内部源码仓(例如msopcom)的 Git 分支/标签/commit
         python build.py -v <version>     指定构建版本号，同时覆盖 --build-version 和 --whl-version
         python build.py -e KEY=VALUE     指定额外构建选项，可多次使用
+        python build.py --exclude-tools msdebug,msopprof  排除指定子工具
 
     参数说明:
         - 参数: command : 构建动作: 为空时为全构建, local 为跳过依赖下载, test 为运行单元测试。
@@ -48,6 +74,7 @@ class BuildManager:
         - 参数: -v, --version : 指定构建版本号；若设置，则同时覆盖 --build-version 和 --whl-version 的值。
         - 参数: --build-version, --whl-version : 历史参数，保留用于兼容；设置了 --version 时以 --version 为准。
         - 参数: -e, --extra : 额外构建选项，格式为 KEY=VALUE，可多次指定。
+        - 参数: --exclude-tools : 不构建且不打包指定子工具，逗号分隔。
 
     产物归档:
         产品构建完成后，归档到 artifacts/ 目录中。
@@ -68,6 +95,11 @@ class BuildManager:
                                      help='Build version, overrides --build-version and --whl-version if set')
         argument_parser.add_argument('-e', '--extra', metavar='KEY=VALUE', action='append', default=[],
                                      help='Extra build options in KEY=VALUE format, can be specified multiple times')
+        # build.py 是用户入口，CMake 是实际构建入口；这里先完成校验和归一化，
+        # run 阶段只需要把稳定列表透传给 MSOT_EXCLUDE_TOOLS。
+        argument_parser.add_argument('--exclude-tools', metavar='TOOLS', type=normalize_excluded_tools, default=[],
+                                     help='Comma-separated tools excluded from build/package. Supported tools: %s'
+                                          % ', '.join(SUPPORTED_TOOLS))
         self.parsed_arguments = argument_parser.parse_args()
 
         if self.parsed_arguments.version is not None:
@@ -76,6 +108,9 @@ class BuildManager:
 
         if self.parsed_arguments.build_version is not None:
             logging.info("--build-version: %s", self.parsed_arguments.build_version)
+
+        if self.parsed_arguments.exclude_tools:
+            logging.info("--exclude-tools: %s", ",".join(self.parsed_arguments.exclude_tools))
 
     def _execute_command(self, command_sequence, timeout_seconds=36000, cwd=None, env=None):
         logging.info("Running: %s", " ".join(command_sequence))
@@ -146,7 +181,14 @@ class BuildManager:
             product_build_dir.mkdir(exist_ok=True)
             os.chdir(product_build_dir)
 
-            self._execute_command(["cmake", ".."])
+            # 始终显式传递 MSOT_EXCLUDE_TOOLS，包括空值；否则 CMake 会复用
+            # build/CMakeCache.txt 中上一次的排除列表，导致后续默认构建仍跳过旧工具。
+            cmake_command = [
+                "cmake",
+                "..",
+                "-DMSOT_EXCLUDE_TOOLS=%s" % ",".join(self.parsed_arguments.exclude_tools),
+            ]
+            self._execute_command(cmake_command)
             self._execute_command(["make", "-j", str(self.build_jobs)])
 
             self._archive_artifacts()
