@@ -463,14 +463,23 @@ function installWhlPackage() {
  
     log_and_print ${LEVEL_INFO} "start to install whl package."
     # 一次性安装路径下的所有whl包，避免whl包安装中出现路径冲突的问题
-    whl_files=()
+    local whl_files=()
+    local whl_file
     for whl in "${SUBWHL[@]}"; do
         # 如果目标安装路径是一个软连接，需要先删除再安装，否则会导致无法更新
         if [ -L "${_pythonlocalpath}/${whl}" ]; then
             delete_softlink ${_pythonlocalpath}/${whl}
         fi
-        whl_files+=" $_package_path/${whl}*.whl"
+        for whl_file in "${_package_path}"/${whl}*.whl; do
+            [ -e "${whl_file}" ] || continue
+            whl_files+=("${whl_file}")
+        done
     done
+
+    if [ ${#whl_files[@]} -eq 0 ]; then
+        log ${LEVEL_INFO} "no whl package need to install."
+        return 0
+    fi
 
     if [ -d "${_python_bin_path}" ]; then
         # 备份 bin 目录原始的文件，防止在更新过程中被删除
@@ -482,12 +491,12 @@ function installWhlPackage() {
     fi
 
     if [ "-${_pylocal}" = "-y" ]; then
-        pip3 install --upgrade --no-index --no-deps --force-reinstall ${whl_files} -t ${_pythonlocalpath}
+        pip3 install --upgrade --no-index --no-deps --force-reinstall "${whl_files[@]}" -t ${_pythonlocalpath}
     else
         if [ "$(id -u)" -ne 0 ]; then
-            pip3 install --upgrade --no-index --no-deps --force-reinstall ${whl_files} --user
+            pip3 install --upgrade --no-index --no-deps --force-reinstall "${whl_files[@]}" --user
         else
-            pip3 install --upgrade --no-index --no-deps --force-reinstall ${whl_files}
+            pip3 install --upgrade --no-index --no-deps --force-reinstall "${whl_files[@]}"
         fi
     fi
     if [ $? -ne 0 ]; then
@@ -506,7 +515,7 @@ function installWhlPackage() {
     fi
 
     # 安装完成后删除whl包
-    rm -rf $whl_files || return 1
+    rm -rf "${whl_files[@]}" || return 1
     remove_empty_dir ${_package_path}
     log ${LEVEL_INFO} "install whl package succeed."
     return 0
