@@ -156,7 +156,7 @@ class BuildManager:
                        "./msdebug/package/conf/version.info",
                        "./msopprof/package/conf/version.info",
                        "./mssanitizer/package/conf/version.info"]:
-                version_file = self.project_root / "package" / "conf" / "version.info"
+                version_file = self.project_root / vf
                 content = version_file.read_text()
                 # 使用 re.sub 替换版本号，仅允许合法版本字符
                 sanitized = re.sub(
