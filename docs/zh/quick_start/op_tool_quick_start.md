@@ -352,7 +352,7 @@ mssanitizer --tool=memcheck -- bash run.sh
 ```
 
 > [!NOTE]说明  
-> 算子执行后仍能成功输出正确结果，这正体现了该工具的价值：内存问题通常具有偶发性，在多数情况下即使存在内存异常，程序仍可正常运行；仅当问题累积至临界点时才会突发崩溃，难以通过表象直接定位。
+> 算子出现内存问题后仍可能执行成功，这正体现了该工具的价值：内存问题通常具有偶发性，在多数情况下即使存在内存异常，程序仍可正常运行；仅当问题累积至临界点时才会突发崩溃，难以通过表象直接定位。
 
 #### 2.4.5 恢复手工修改
 
@@ -610,18 +610,7 @@ source ~/ot_demo/msot/example/quick_start/msdebug/set_kernel_obj_env.sh
 
 ## 3. FAQ
 
-### 3.1 进入容器后发现 Python 版本异常或缺少大量依赖库
-
-**问题现象**  
-容器内 Python 版本异常，或存在大量依赖库缺失。
-
-**问题原因**  
-容器启动时会将宿主机的 HOME 目录挂载为数据目录，而容器内的实际 HOME 目录为 `/root`。若以 `root` 用户启动容器，则容器内的 `/root` 会直接挂载宿主机的 `/root` 目录，从而复用宿主机的 `~/.bashrc` 等配置文件。若宿主机在该配置中添加了 Conda 环境路径等自定义设置，将污染容器内的 Python 环境，导致版本异常或依赖错误。
-
-**解决方法**  
-使用个人普通账户启动容器并进行体验，不要使用`root`用户，以防止受共享配置影响而导致环境异常。
-
-### 3.2 编译调用算子程序时报错：fatal error: aclnn_add_custom.h: No such file or directory
+### 3.1 编译调用算子程序时报错：fatal error: aclnn_add_custom.h: No such file or directory
 
 **问题现象**
 
@@ -644,7 +633,7 @@ gmake[1]: *** [CMakeFiles/Makefile2:83: CMakeFiles/execute_add_op.dir/all] Error
 
 删除该环境变量（执行 `unset ASCEND_CUSTOM_OPP_PATH`），然后重新部署算子。
 
-### 3.3 执行 execute_add_op 时异常报错：undefined symbol: aclnnAddCustomGetWorkspaceSize
+### 3.2 执行 execute_add_op 时异常报错：undefined symbol: aclnnAddCustomGetWorkspaceSize
 
 **问题现象**
 
@@ -660,7 +649,7 @@ execute_add_op: symbol lookup error: ./build/execute_add_op: undefined symbol: a
 
 按 [2.3.3 编译与部署算子](#233-编译与部署算子) 第 3 步，重新设置 `LD_LIBRARY_PATH` 环境变量。
 
-### 3.4 执行 msDebug 设置断点时报错：WARNING:  Unable to resolve breakpoint to any actual locations
+### 3.3 执行 msDebug 设置断点时报错：WARNING:  Unable to resolve breakpoint to any actual locations
 
 **问题现象**
 
@@ -678,7 +667,7 @@ WARNING:  Unable to resolve breakpoint to any actual locations.
 
 查看代码源文件，确认代码的真实行号；按 [2.5.1 开启内核调试开关](#251-开启内核调试开关) 以 root 权限在宿主机上（注意不是容器内）设置 `/proc/debug_switch` = 1。如果不能设置成功，只能跳过此工具体验。
 
-### 3.5 执行 msDebug 的 run 时报错：error: 'A' packet returned an error: 8
+### 3.4 执行 msDebug 的 run 时报错：error: 'A' packet returned an error: 8
 
 **问题现象**
 

@@ -153,7 +153,7 @@ add_custom_command(OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/package.flag
     COMMAND cd ${ROOT_DIR}/package/script/ && ${PYTHON} parser.py -x ${ROOT_DIR}/package/conf/filelist.xml
             --delivery_path ${CMAKE_INSTALL_PREFIX} -o ${CMAKE_SYSTEM_PROCESSOR} ${MSOT_PARSER_EXCLUDE_ARGS}
     COMMAND cd ${CMAKE_INSTALL_PREFIX} && ${makeselfTool} --header ${makeselfHeader} --help-header ${helpInfo} --pigz
-            --complevel 4 --nocrc --nomd5 --sha256 --chown --tar-quietly ${NAME} ${packageName} ${comments} ${installShell}
+            --complevel 4 --nocrc --nomd5 --sha256 --chown --tar-quietly --tar-format posix ${NAME} ${packageName} ${comments} ${installShell}
     COMMAND touch ${CMAKE_CURRENT_BINARY_DIR}/package.flag
     COMMAND chmod 750 ${CMAKE_INSTALL_PREFIX}/*.run
     # package.flag 依赖未排除子工具 target，确保保留的子包产物先生成，再执行总包打包。
