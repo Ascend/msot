@@ -42,7 +42,7 @@ If a suitable version already exists, you can skip directly to [Section 2: Start
 
 1. Visit the [CANN Image Repository](https://www.hiascend.com/developer/ascendhub/detail/17da20d1c2b6493cb38765adeba85884), switch to the **"Image Download"** tab, and browse the list of available versions (you can filter using the search box on the right):
 
-    ![image.png](https://raw.gitcode.com/user-images/assets/9310220/32504999-0da1-4595-8865-acd9a01cfd3b/image.png 'image.png')
+    ![msot-1.png](../figures/msot-1.png)
 
 2. Select an image version based on the following suggestions:
 
@@ -58,7 +58,7 @@ If a suitable version already exists, you can skip directly to [Section 2: Start
 
 3. Click "Download Now" and copy the generated `docker pull` command.
 
-    ![image.png](https://raw.gitcode.com/user-images/assets/9310220/0b35b9a5-b9c4-4c42-a25d-31432c6611d2/image.png 'image.png')
+    ![msot-2.png](../figures/msot-2.png)
 
 #### 1.2.2 Online Pull (Server with Internet Access)
 

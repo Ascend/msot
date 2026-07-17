@@ -93,7 +93,7 @@ Feature Category:
 
 1. Supports out-of-bounds detection for LocalTensor in AscendC unary, binary computation, and data movement APIs.
 2. Supports memory corruption detection between SIMT and Main-Scalar pipelines.
-3. Supports competition detection among threads within a SIMTR VF.
+3. Supports competition detection among threads within a SIMT VF.
 4. Supports redundant SET_FLAG instruction detection.
 5. Added extensive instrumentation and processing for intra-core and inter-core synchronization instructions, enhancing competition detection capabilities. The newly added instructions are as follows: SET_FLAG/WAIT_FLAG/SET_FLAGI/WAIT_FLAGI/HSET/HWAIT/GET_BUF/RLS_BUF.
 
