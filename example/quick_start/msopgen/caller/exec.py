@@ -85,7 +85,7 @@ class OpRunner:
         npu_ids = OpRunner._extract_npu_ids(result.stdout)
         print("[INFO] Detected NPU IDs: " + str(npu_ids))
 
-        idle = list(re.findall(r"No running processes found in NPU (\d+)", result.stdout))
+        idle = list(re.findall(r"No running processes found in NPU\s+(\d+)", result.stdout))
         idle = [int(x) for x in idle]
         print("[INFO] Available (idle) NPU IDs:" + str(idle))
         if len(idle) == 0:

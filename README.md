@@ -3,8 +3,12 @@
 <div align="center">
 <h2>昇腾 AI 算子开发工具链</h2>
 
- [![Ascend](https://img.shields.io/badge/Community-MindStudio-blue.svg)](https://www.hiascend.com/developer/software/mindstudio) 
- [![License](https://badgen.net/badge/License/MulanPSL-2.0/blue)](./LICENSE)
+ [![快速入门](https://badgen.net/badge/快速入门/QuickStart/blue)](docs/zh/quick_start/op_tool_quick_start.md)
+ [![AI问答(DeepWiki)](https://badgen.net/badge/AI问答/DeepWiki/blue)](https://deepwiki.com/mindstudio-docs/26.1.0) 
+ [![AI问答(ZRead)](https://badgen.net/badge/AI问答/ZRead/blue)](https://zread.ai/mindstudio-docs/26.1.0) 
+ [![精确搜索](https://badgen.net/badge/精确搜索/ReadTheDocs/blue)](https://mindstudio-docs-2610.readthedocs.io) 
+ [![昇腾社区](https://badgen.net/badge/昇腾社区/Community/blue)](https://www.hiascend.com/cn/developer/software/mindstudio) 
+ [![报告问题](https://badgen.net/badge/报告问题/Issues/blue)](https://gitcode.com/Ascend/msot/issues) 
 
 </div>
 
@@ -46,6 +50,13 @@ MindStudio Operator Tools（msOT）算子开发工具链，聚焦算子开发中
 ## 📘 使用指南
 
 请查阅《[msOT 使用指南](./docs/zh/user_guide/msot_user_guide.md)》，根据具体应用场景选用相应工具，详细使用说明请参见其源码仓库中的 README 文件。
+
+## 🌌 智能检索
+
+为提升文档查阅效率，我们提供多种高效检索方式：  
+🔹 [AI 问答（DeepWiki）](https://deepwiki.com/mindstudio-docs/26.1.0)：自然语言问答，快速把握项目架构与模块关系。   
+🔹 [AI 问答（ZRead）](https://zread.ai/mindstudio-docs/26.1.0)：中文问答体验更优，精准定位功能用法与细节。   
+🔹 [精确搜索（ReadTheDocs）](https://mindstudio-docs-2610.readthedocs.io)：关键词全文检索，直达接口、参数与报错等信息。 
 
 ## 🛠️ 贡献指南
 

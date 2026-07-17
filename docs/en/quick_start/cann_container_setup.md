@@ -81,14 +81,8 @@ docker pull swr.cn-south-1.myhuaweicloud.com/ascendhub/cann:8.5.1-910b-openeuler
 Run the following command to download:
 
 ```shell
-cd ~
-curl -fLO --retry 10 --retry-all-errors --retry-delay 3 -A "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36" https://raw.gitcode.com/Ascend/msot/raw/master/example/quick_start/public/ctr_in.py && chmod +x ctr_in.py
+cd ~ && curl -fLO --retry 3 https://inst.obs.cn-north-4.myhuaweicloud.com/env/ctr_in.py && chmod +x ctr_in.py
 ```
-
-> [!NOTE] Note
-> 
-> 1. If the prompt says the `--retry-all-errors` parameter does not exist, it means the curl version is too low. You can remove this parameter and try again; 
-> 2. If the download still fails after multiple attempts, it may be because a CDN protection mechanism against automated script crawling has been triggered. You can manually download the [ctr_in.py](../../../example/quick_start/public/ctr_in.py) file from the repository;
 
 ### 2.2 Running the Start Command
 
