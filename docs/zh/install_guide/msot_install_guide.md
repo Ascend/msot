@@ -32,7 +32,7 @@
 
 ```bash
 cd ~
-git clone https://gitcode.com/Ascend/msot.git
+git clone https://gitcode.com/Ascend/msot.git -b 26.1.0
 ```
 
 #### 2.3.3 执行编译打包
