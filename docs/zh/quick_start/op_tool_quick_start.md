@@ -86,7 +86,7 @@ chip=$(npu-smi info -m 2>/dev/null | grep -oP 'Ascend\s*\S+' | head -1); case "$
     > 
     > **知识点（可选阅读）：msKPP 的 DSL 语言方案（Domain-Specific Language，领域特定语言）**   
     > 这套类库及接口是专为昇腾性能建模而设计的“方言”，需经过专门学习方可掌握，无法仅凭通用 Python 语法直接编写，但用法较简单，稍加学习即可应用。
-    > 常规开发流程：需先导入 Tensor、Chip 以及算子实现所必需的指令（例如 vadd），通过 `with` 语句进入算子实现代码的上下文，再创建 Tensor 以执行具体操作。样例脚本中已做了详细注释，其他指令接口说明请参考《[msKPP 工具接口说明](https://gitcode.com/Ascend/mskpp/blob/master/docs/zh/api_reference/mskpp_api_reference.md)》。
+    > 常规开发流程：需先导入 Tensor、Chip 以及算子实现所必需的指令（例如 vadd），通过 `with` 语句进入算子实现代码的上下文，再创建 Tensor 以执行具体操作。样例脚本中已做了详细注释，其他指令接口说明请参考《[msKPP 工具接口说明](https://gitcode.com/Ascend/mskpp/blob/26.1.0/docs/zh/api_reference/mskpp_api_reference.md)》。
 
     由于这是快速入门，将准备好的 msKPP DSL 脚本复制到此即视为开发完成（本教程聚焦工具链使用，实际开发需自行实现）：
 
@@ -562,7 +562,7 @@ source ~/ot_demo/msot/example/quick_start/msdebug/set_kernel_obj_env.sh
 
   > [!NOTE]说明  
   > 
-  > 若想体验可视化的图表查看，请参考 <a href="https://gitcode.com/Ascend/msinsight/blob/master/docs/zh/install_guide/mindstudio_insight_install_guide.md" target="_blank">《MindStudio Insight 工具文档》</a>安装 Insight 工具。
+  > 若想体验可视化的图表查看，请参考 <a href="https://gitcode.com/Ascend/msinsight/blob/26.1.0/docs/zh/install_guide/mindstudio_insight_install_guide.md" target="_blank">《MindStudio Insight 工具文档》</a>安装 Insight 工具。
 
 #### 2.6.4 恢复手工修改
 
@@ -598,11 +598,11 @@ source ~/ot_demo/msot/example/quick_start/msdebug/set_kernel_obj_env.sh
 
 | 工具 | 高级能力说明 |
 |------|--------------|
-| [msKPP](https://gitcode.com/Ascend/mskpp/blob/master/docs/zh/user_guide/mskpp_user_guide.md) | 使用 Cache 命中率、随路转换等建模、多种 Tiling 方案的性能对比分析等。 |
-| [msOpGen](https://gitcode.com/Ascend/msopgen/blob/master/docs/zh/user_guide/msopgen_user_guide.md) | 复杂算子模板定制、多输入多输出算子的工程生成等。 |
-| [msSanitizer](https://gitcode.com/Ascend/mssanitizer/blob/master/docs/zh/user_guide/mssanitizer_user_guide.md) | 竞争条件检测、同步异常诊断、未初始化变量检查等更多检测模式。 |
-| [msDebug](https://gitcode.com/Ascend/msdebug/blob/master/docs/zh/user_guide/msdebug_user_guide.md) | 内存查看、核切换、解析 Core dump 文件等高级调试技巧。 |
-| [msOpProf](https://gitcode.com/Ascend/msopprof/blob/master/docs/zh/user_guide/msopprof_user_guide.md) | 结合 [MindStudio Insight](https://gitcode.com/Ascend/msinsight/blob/master/docs/zh/install_guide/mindstudio_insight_install_guide.md) 进行可视化性能分析，包括计算内存热力图、Cache 热力图及代码热点图。 |
+| [msKPP](https://gitcode.com/Ascend/mskpp/blob/26.1.0/docs/zh/user_guide/mskpp_user_guide.md) | 使用 Cache 命中率、随路转换等建模、多种 Tiling 方案的性能对比分析等。 |
+| [msOpGen](https://gitcode.com/Ascend/msopgen/blob/26.1.0/docs/zh/user_guide/msopgen_user_guide.md) | 复杂算子模板定制、多输入多输出算子的工程生成等。 |
+| [msSanitizer](https://gitcode.com/Ascend/mssanitizer/blob/26.1.0/docs/zh/user_guide/mssanitizer_user_guide.md) | 竞争条件检测、同步异常诊断、未初始化变量检查等更多检测模式。 |
+| [msDebug](https://gitcode.com/Ascend/msdebug/blob/26.1.0/docs/zh/user_guide/msdebug_user_guide.md) | 内存查看、核切换、解析 Core dump 文件等高级调试技巧。 |
+| [msOpProf](https://gitcode.com/Ascend/msopprof/blob/26.1.0/docs/zh/user_guide/msopprof_user_guide.md) | 结合 [MindStudio Insight](https://gitcode.com/Ascend/msinsight/blob/26.1.0/docs/zh/install_guide/mindstudio_insight_install_guide.md) 进行可视化性能分析，包括计算内存热力图、Cache 热力图及代码热点图。 |
 
 **第三步：落地真实业务 —— 从教学走向生产**  
 
