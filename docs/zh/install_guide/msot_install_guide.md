@@ -26,39 +26,52 @@
 
 #### 2.3.1 编译环境准备
 
-请按照以下文档进行环境配置：《[算子工具开发环境安装指导](../common/dev_env_setup.md)》。
+源码编译统一使用 MindStudio 标准构建环境。
 
-#### 2.3.2 克隆本仓库
+- 日常开发或使用已发布镜像，请参考《[MindStudio 工具开发环境安装指导](../common/dev_env_setup.md)》。
+- 需要从基础操作系统复现环境、执行源码构建验证或单元测试验证时，必须参考《[MindStudio 统一构建镜像制作指南](../common/docker_image_build_guide.md)》，从 openEuler 基础镜像现场构建环境镜像。
+
+本文档后续的源码编译和单元测试命令，均在上述指定镜像容器或现场构建的环境镜像的容器中执行，CANN 软件包版本、GCC 版本和 Python 版本以统一镜像制作指南为准。
+
+镜像构建完成后，必须使用统一镜像制作指南第 7 章给出的 `ctr_in.py` 命令，在交互式终端中启动并进入容器。不得使用普通 `docker run` 创建容器，也不得使用 `docker exec <容器名> bash -c '<命令>'` 替代交互式环境；否则可能跳过 Python、GCC 和 CANN 环境初始化。
+
+进入 `ctr_in.py` 打开的容器的交互式 Shell 后，执行如下命令克隆本仓库：
 
 ```bash
 cd ~
 git clone https://gitcode.com/Ascend/msot.git
 ```
 
-#### 2.3.3 执行编译打包
+#### 2.3.2 执行编译
 
-通过一键式脚本自动完成依赖仓库的下载与构建流程（首次耗时约 20 分钟）：
+保持在 `ctr_in.py` 打开的同一个交互式容器的 Shell 中，执行以下命令，自动完成依赖下载与构建：
 
 ```bash
-cd msot
+cd ~/msot
 python3 build.py
 ```
 
-提示类似如下信息则表示构建成功：
+构建成功后，run 包将生成在 `artifacts/` 目录下。
 
-```text
-Self-extractable archive "ascend-mindstudio-operator-tools_1.0.0_aarch64.run" successfully created.
-[100%] Built target package_msot
+#### 2.3.3 执行单元测试（可选）
+
+此步骤非安装必需。如需验证代码基本功能，可执行单元测试：
+
+```bash
+cd ~/msot
+python3 build.py test
 ```
+
+命令返回码为 0，且测试用例均无失败，表示单元测试通过。
 
 #### 2.3.4 安装
 
 ##### 2.3.4.1 准备 run 包
 
-run 包将生成在 `output` 目录下，执行以下命令为其添加可执行权限：
+run 包将生成在 `artifacts` 目录下，执行以下命令为其添加可执行权限：
 
 ```bash
-cd output
+cd artifacts
 chmod +x ascend-mindstudio-operator-tools_*.run
 ```
 

@@ -79,6 +79,15 @@ tar zxvf dockerfile.tar.gz
 cd docker
 ```
 
+> [!CAUTION]注意
+>
+> 解压命令 `tar zxvf` 的 `-v` 参数会将文件列表输出到 stdout。**严禁**将解压命令与 `| head`、`| tail` 等截断管道组合使用（如 `tar zxvf xxx.tar.gz | head -20`）。`head` 读满行数后关闭管道，tar 进程收到 SIGPIPE 信号被终止，导致仅部分文件被解压且无任何错误提示。
+>
+> 正确做法：
+> 
+> - 解压用 `tar zxf`（不带 `-v`，无 stdout 输出，不受管道影响）
+> - 查看文件列表用 `tar ztf xxx.tar.gz | head -20`（`-t` 只列出不解压，截断无副作用）
+
 ## 5. 宿主机：设置镜像标签
 
 运行以下命令，系统会根据当前机器的硬件架构（ARM64 / AMD64）自动追加后缀并设置环境变量：
@@ -108,7 +117,9 @@ python3 build_image.py -t ${IMG_TAG} --force \
 
 > [!CAUTION]注意
 >
-> 上述命令中的 CANN run 包地址仅为示例。如需构建其他 CANN 版本的镜像，请替换为对应版本的 run 包地址，并确保多个 CANN 包版本一致。
+> 上述命令是当前MindStudio工具源码编译和单元测试使用的默认环境构建基线。当业务仓文档未明确指定其他版本时，必须原样使用上述toolkit和ops软件包地址，并确保多个CANN软件包版本一致。
+>
+> 如需升级统一构建环境，仅修改本指南中的默认命令和配套软件版本，各业务仓无需重复维护版本信息。
 
 ## 7. 宿主机：验证并启动镜像
 
@@ -124,11 +135,19 @@ docker images | grep "${IMG_TAG}"
 cd ~ && curl -fLO --retry 3 https://inst.obs.cn-north-4.myhuaweicloud.com/env/ctr_in.py && chmod +x ctr_in.py
 ```
 
-启动容器（由于最新构建的镜像在 `docker images` 输出中位于最上方，脚本将自动选取匹配标签的第一个结果作为启动镜像）：
+执行如下命令在具备交互式终端（TTY）的会话中启动并进入容器。由于最新构建的镜像在 `docker images` 输出中位于最上方，脚本将自动选取匹配标签的第一个结果作为启动镜像：
 
 ```bash
 ~/ctr_in.py "$(docker images --format '{{.Repository}}:{{.Tag}}' | grep "${IMG_TAG}" | head -n1)"
 ```
+
+> [!CAUTION]注意
+>
+> 必须使用上述 `ctr_in.py` 命令创建并进入容器，不得替换为普通 `docker run`。`ctr_in.py` 会保留镜像入口脚本，完成用户映射、目录挂载和环境初始化，并进入交互式 Shell。
+>
+> 后续业务仓的源码编译和单元测试命令必须在 `ctr_in.py` 打开的同一个交互式 Shell 中执行，不得退出后改用 `docker exec <容器名> bash -c '<命令>'`。非交互式 Shell 不会完整执行 `/etc/profile.d/` 中的初始化脚本，可能导致Python版本、GCC或CANN环境未正确激活。
+>
+> 自动化工具执行本节时必须分配TTY，并持续复用该交互式会话。会话意外中断时，使用 `~/ctr_in.py <容器名>` 重新交互式进入容器后再继续。
 
 ## 8. FAQ
 
