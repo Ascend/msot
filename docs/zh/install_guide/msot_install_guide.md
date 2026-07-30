@@ -1,4 +1,4 @@
-# 算子开发工具链安装指南
+# msOT 安装指南
 
 <br>
 
@@ -24,7 +24,7 @@
 
 如需使用最新代码的功能，可下载本仓库代码，自行编译、打包并完成算子工具链安装。
 
-#### 2.3.1 编译环境准备
+#### 2.3.1 环境准备
 
 源码编译统一使用 MindStudio 标准构建环境。
 
@@ -71,7 +71,7 @@ python3 build.py test
 run 包将生成在 `artifacts` 目录下，执行以下命令为其添加可执行权限：
 
 ```bash
-cd artifacts
+cd ~/msot/artifacts
 chmod +x ascend-mindstudio-operator-tools_*.run
 ```
 

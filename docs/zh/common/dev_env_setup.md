@@ -22,14 +22,22 @@
 从华为云 SWR 镜像仓库拉取定制好的 MindStudio 编译专用镜像：
 
 ```bash
-docker pull swr.cn-north-4.myhuaweicloud.com/mindstudio-image/mindstudio-build:26.1.0-0701
+docker pull swr.cn-north-4.myhuaweicloud.com/mindstudio-image/mindstudio-build:26.1.0
 ```
 
-若镜像拉取失败，请优先检查网络代理或 Docker 数据目录空间。
-
-> [!NOTE] 如何自行构建该镜像？
+> [!CAUTION]注意
 >
-> 普通开发者通常无需自行构建镜像。仅当需要定制镜像内容、排查镜像分层或复现构建过程时，请参考文档：《[MindStudio 统一构建镜像制作指南](./docker_image_build_guide.md)》。
+> 为保持镜像轻量，该镜像**仅用于编译构建**，未包含 NPU 运行态所需的全部依赖，不可用于实际运行 NPU 程序。
+> 
+> 普通用户启动容器后，会共享宿主机 HOME 目录，在此目录编译的产物会落盘到宿主机。编译完成后请在宿主机或启动 [CANN 运行态容器](https://www.hiascend.com/developer/ascendhub/detail/17da20d1c2b6493cb38765adeba85884) 运行程序。
+
+> [!NOTE]说明
+>
+> **如何自行构建该镜像？**
+>
+> 普通开发者通常无需关注此步骤。仅当需要定制镜像内容、排查镜像分层或复现构建过程时，请参考《[MindStudio 统一构建镜像制作指南](./docker_image_build_guide.md)》。
+
+若镜像拉取失败，请参考 [FAQ 2](#62-拉取镜像失败如何处理) 。
 
 ## 3. 宿主机：下载容器启动脚本
 
@@ -45,11 +53,13 @@ cd ~ && curl -fLO --retry 3 https://inst.obs.cn-north-4.myhuaweicloud.com/env/ct
 
 ## 4. 宿主机：启动并进入开发容器
 
-运行脚本并指定刚刚拉取的镜像名称。脚本会自动处理目录挂载、用户映射及环境变量初始化：
+以普通用户身份执行脚本，并指定已拉取的镜像名称。脚本将自动完成目录挂载、用户映射及环境变量初始化：
 
 ```bash
-~/ctr_in.py swr.cn-north-4.myhuaweicloud.com/mindstudio-image/mindstudio-build:26.1.0-0701
+~/ctr_in.py swr.cn-north-4.myhuaweicloud.com/mindstudio-image/mindstudio-build:26.1.0
 ```
+
+> **注意**：不建议以 root 用户执行此脚本。root 模式下既不符合最小权限安全原则，也不会挂载宿主机 HOME 目录，影响日常使用效率。
 
 ### 预期输出
 
@@ -71,6 +81,8 @@ cd ~ && curl -fLO --retry 3 https://inst.obs.cn-north-4.myhuaweicloud.com/env/ct
 
 mindstudio@alice-build-env:/home/alice$
 ```
+
+进入容器后，即可参照相应指南执行编译、单元测试等开发工作。
 
 ## 5. 宿主机：重新进入容器
 
