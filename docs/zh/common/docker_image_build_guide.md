@@ -4,18 +4,18 @@
 
 本文档介绍如何基于 openEuler 操作系统，构建集成了 GCC、Python 及昇腾 CANN 软件包的 MindStudio 编译镜像。
 
-本文档仅面向需要**自定义镜像内容或复现镜像构建过程**的开发者。若只是搭建日常开发环境，请优先参考《[MindStudio 工具开发环境安装指导](./dev_env_setup.md)》直接拉取已发布镜像。
+本文档仅面向需要**自定义镜像内容或复现镜像构建过程**的开发者。若只是搭建日常开发环境，请优先参考《[MindStudio 工具开发环境安装指导](./dev_env_setup.md)》。
 
 ## 1. 适用场景与镜像组成
 
 为了提高日常更新和分发的效率，镜像采用分层构建模式。自底向上依次叠加，以便在软件更新时充分复用底层缓存，加速构建过程：
 
-| 镜像层级 | 核心组件 | 说明 |
-| :--- | :--- | :--- |
-| **顶层（Layer 4）** | 昇腾 CANN 软件包 | 业务最常更新的部分，包含 CANN 运行与开发环境 |
-| **第三层（Layer 3）** | Python 环境 | 基于 PyPA 标准安装的 Python 环境，与 GCC 共同构成基础构建镜像 |
-| **第二层（Layer 2）** | GCC 11 | 核心编译工具链 |
-| **底层（Layer 1）** | openEuler 基础系统 | 操作系统底座，提供基础系统库 |
+| 镜像层级 | 核心组件            | 说明 |
+| :--- |:----------------| :--- |
+| **顶层（Layer 4）** | 昇腾 CANN 软件包     | 业务最常更新的部分，包含 CANN 运行与开发环境 |
+| **第三层（Layer 3）** | Python 环境及相关工具链 | 基于 PyPA 标准安装的 Python 环境，与 GCC 共同构成基础构建镜像 |
+| **第二层（Layer 2）** | GCC 11 及相关工具链   | 核心编译工具链 |
+| **底层（Layer 1）** | openEuler 基础系统  | 操作系统底座，提供基础系统库 |
 
 > [!NOTE]说明
 >
@@ -32,11 +32,11 @@
 
 | 依赖项 | 要求                                 | 验证命令                                                                           |
 | --- |------------------------------------|--------------------------------------------------------------------------------|
-| **Docker Engine** | 建议 23 及以上版本；本示例使用 26.1.3           | `docker info` 正常返回信息无报错                                                        |
+| **Docker Engine** | 版本不低于 23.0，且 Docker 服务正常运行        | `docker info` 正常返回信息无报错                                                        |
 | **Docker Buildx** | 已安装并可执行                            | `docker buildx version` 有版本信息输出                                                |
-| **Python 3** | 已安装任意 3.x 版本                       | `python3 -V` 有版本信息输出                                                            |
-| **curl** | 用于下载构建脚本                           | `curl -V` 有版本信息输出                                                              |
-| **磁盘空间** | Docker 数据目录需有足够空间保存构建上下文、基础镜像和构建缓存 | `df -h $(docker info -f '{{.DockerRootDir}}')` 中 Avail 大于 20 GB |
+| **Python 3** | 已安装（任意 3.x 版本）                     | `python3 -V` 有版本信息输出                                                            |
+| **curl** | 已安装（任意版本）                          | `curl -V` 有版本信息输出                                                              |
+| **磁盘空间** | Docker 数据目录需有足够空间保存构建上下文、基础镜像和构建缓存 | `df -h $(docker info -f '{{.DockerRootDir}}')` 中 Avail 不低于 20 GB |
 | **网络访问** | 直连互联网，可访问脚本下载地址、CANN run 包地址等      | `curl -I https://inst.obs.cn-north-4.myhuaweicloud.com/env/ctr_in.py` 返回 200 OK |
 
 若 `docker info` 出现 permission denied 类错误，请先参考 [8.1 节](#81-执行-docker-命令遇到-permission-denied-类错误提示) 处理 Docker 权限。
@@ -99,12 +99,12 @@ echo "IMG_TAG=${IMG_TAG}"
 
 ## 6. 宿主机：执行镜像构建
 
-执行 Python 脚本开始构建，整个构建过程通常需要 30 分钟左右，实际耗时取决于网络速度、磁盘性能和 Docker 缓存命中情况：
+执行 Python 脚本开始构建，整个构建过程通常需要 20 分钟左右，实际耗时取决于网络速度、磁盘性能和 Docker 缓存命中情况：
 
 ```bash
 python3 build_image.py -t ${IMG_TAG} --force \
--c https://ascend-cann-open.obs.cn-north-4.myhuaweicloud.com/CANN/CANN%209.1.0-beta.3/Ascend-cann_9.1.0-beta.3_linux-$(arch).run \
--c https://ascend-repo.obs.cn-east-2.myhuaweicloud.com/CANN/CANN%209.1.T6/Ascend-cann-910b-ops_9.1.0-beta.3_linux-$(arch).run
+-c https://ascend-cann-open.obs.cn-north-4.myhuaweicloud.com/CANN/CANN%209.1.0/Ascend-cann_9.1.0_linux-$(arch).run  \
+-c https://ascend-cann-open.obs.cn-north-4.myhuaweicloud.com/CANN/CANN%209.1.0/Ascend-cann-910b-ops_9.1.0_linux-$(arch).run
 ```
 
 参数说明如下：
@@ -117,7 +117,7 @@ python3 build_image.py -t ${IMG_TAG} --force \
 
 > [!CAUTION]注意
 >
-> 上述命令是当前MindStudio工具源码编译和单元测试使用的默认环境构建基线。当业务仓文档未明确指定其他版本时，必须原样使用上述toolkit和ops软件包地址，并确保多个CANN软件包版本一致。
+> 上述命令是当前 MindStudio 工具源码编译和单元测试使用的默认环境构建基线。当业务仓文档未明确指定其他版本时，必须原样使用上述 toolkit 和 ops 软件包地址，并确保多个 CANN 软件包版本一致。
 >
 > 如需升级统一构建环境，仅修改本指南中的默认命令和配套软件版本，各业务仓无需重复维护版本信息。
 
@@ -145,9 +145,9 @@ cd ~ && curl -fLO --retry 3 https://inst.obs.cn-north-4.myhuaweicloud.com/env/ct
 >
 > 必须使用上述 `ctr_in.py` 命令创建并进入容器，不得替换为普通 `docker run`。`ctr_in.py` 会保留镜像入口脚本，完成用户映射、目录挂载和环境初始化，并进入交互式 Shell。
 >
-> 后续业务仓的源码编译和单元测试命令必须在 `ctr_in.py` 打开的同一个交互式 Shell 中执行，不得退出后改用 `docker exec <容器名> bash -c '<命令>'`。非交互式 Shell 不会完整执行 `/etc/profile.d/` 中的初始化脚本，可能导致Python版本、GCC或CANN环境未正确激活。
+> 后续业务仓的源码编译和单元测试命令必须在 `ctr_in.py` 打开的同一个交互式 Shell 中执行，不得退出后改用 `docker exec <容器名> bash -c '<命令>'`。非交互式 Shell 不会完整执行 `/etc/profile.d/` 中的初始化脚本，可能导致 Python 版本、GCC 或 CANN 环境未正确激活。
 >
-> 自动化工具执行本节时必须分配TTY，并持续复用该交互式会话。会话意外中断时，使用 `~/ctr_in.py <容器名>` 重新交互式进入容器后再继续。
+> 自动化工具执行本节时必须分配 TTY，并持续复用该交互式会话。会话意外中断时，使用 `~/ctr_in.py <容器名>` 重新交互式进入容器后再继续。
 
 ## 8. FAQ
 
