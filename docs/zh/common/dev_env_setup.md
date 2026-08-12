@@ -30,19 +30,13 @@ MindStudio 工具支持两种开发环境安装方式，请根据仓库实际情
 
 若 `docker ps` 出现 permission denied 类错误，请先参考 [7.1 节](#71-执行-docker-命令遇到-permission-denied-类错误提示) 处理 Docker 权限。
 
-## 3. 宿主机：拉取开发专用镜像
+## 3. 宿主机：拉取编译专用镜像
 
 从华为云 SWR 镜像仓库拉取定制好的 MindStudio 编译专用镜像：
 
 ```bash
 docker pull swr.cn-north-4.myhuaweicloud.com/mindstudio-image/mindstudio-build:26.2.0-0801
 ```
-
-> [!CAUTION]注意
->
-> 为保持镜像轻量，该镜像**仅用于编译构建**，未包含 NPU 运行态所需的全部依赖，不可用于实际运行 NPU 程序。
-> 
-> 普通用户启动容器后，会共享宿主机 HOME 目录，在此目录编译的产物会落盘到宿主机。编译完成后请在宿主机或启动 [CANN 运行态容器](https://www.hiascend.com/developer/ascendhub/detail/17da20d1c2b6493cb38765adeba85884) 运行程序。
 
 > [!NOTE]说明
 >
@@ -64,15 +58,27 @@ cd ~ && curl -fLO --retry 3 https://inst.obs.cn-north-4.myhuaweicloud.com/env/ct
 >
 > 此 `ctr_in.py` 脚本功能强大，可作为日常容器操作的通用工具。具体功能及用法可通过 `--help` 参数查看。
 
-## 5. 宿主机：启动并进入开发容器
+## 5. 宿主机：启动并进入编译容器
 
-以普通用户身份执行脚本，并指定已拉取的镜像名称。脚本将自动完成目录挂载、用户映射及环境变量初始化：
+以**普通用户**身份执行脚本，并指定已拉取的编译镜像名称。脚本将自动完成目录挂载、用户映射及环境变量初始化：
 
 ```bash
 ~/ctr_in.py swr.cn-north-4.myhuaweicloud.com/mindstudio-image/mindstudio-build:26.2.0-0801
 ```
 
-> **注意**：不建议以 root 用户执行此脚本。root 模式下既不符合最小权限安全原则，也不会挂载宿主机 HOME 目录，影响日常使用效率。
+> [!CAUTION]注意
+>
+> 本镜像**仅用于编译，不支持 NPU 程序运行**（原因：CANN 容器运行需 root 权限，编译产生大量 root 属主文件污染 HOME 目录；为控制镜像体积深度裁剪了运行库）。
+> 
+> 如需运行 NPU 程序，建议使用如下“**双终端模式**”开发方式，两端共享 HOME 目录，编译、运行与宿主机三套环境互不干扰，开发效率更高：
+>
+> **终端 1（编译）**：启动本编译镜像容器，编译产物输出至 HOME 目录；
+>
+> **终端 2（运行）**：启动 CANN 官方运行容器，从 HOME 目录读取并执行，启动命令示例如下，具体版本等信息请参考 [CANN 官方镜像仓库](https://www.hiascend.com/developer/ascendhub/detail/17da20d1c2b6493cb38765adeba85884)：
+>
+> ```bash
+> ~/ctr_in.py swr.cn-south-1.myhuaweicloud.com/ascendhub/cann:9.1.0-910b-openeuler24.03-py3.12
+> ```
 
 ### 预期输出
 
@@ -99,7 +105,7 @@ mindstudio@alice-build-env:/home/alice$
 
 ## 6. 宿主机：重新进入容器
 
-退出容器或重启宿主机后，可通过以下方式重新进入已创建的开发容器。
+退出容器或重启宿主机后，可通过以下方式重新进入已创建的编译容器。
 
 ### 6.1 方法一：菜单选择式进入（推荐）
 
@@ -150,4 +156,4 @@ ls -l ctr_in.py
 
 ### 7.4 启动后没有看到 MindStudio 欢迎界面？
 
-请先确认是否已经进入容器。如果仍在宿主机，请重新执行 [第 5 章](#5-宿主机启动并进入开发容器) 的启动命令。若容器已启动但未进入，可按 [第 6 章](#6-宿主机重新进入容器) 重新进入。
+请先确认是否已经进入容器。如果仍在宿主机，请重新执行 [第 5 章](#5-宿主机启动并进入编译容器) 的启动命令。若容器已启动但未进入，可按 [第 6 章](#6-宿主机重新进入容器) 重新进入。
