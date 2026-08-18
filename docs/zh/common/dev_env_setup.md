@@ -26,25 +26,27 @@ MindStudio 工具支持两种开发环境安装方式，请根据仓库实际情
 | **Docker Engine** | 已安装且服务正在运行 | 执行 `docker ps`，无报错即表示服务正常启动 |
 | **Python 3**       | 宿主机已安装（任意 3.x 版本） | 执行 `python3 -V`，有版本信息输出即表示已安装 |
 
----
-
-若 `docker ps` 出现 permission denied 类错误，请先参考 [7.1 节](#71-执行-docker-命令遇到-permission-denied-类错误提示) 处理 Docker 权限。
+> 若 `docker ps` 出现 permission denied 类错误，请参考 [FAQ 7.1](#71-执行-docker-命令遇到-permission-denied-类错误提示)。
 
 ## 3. 宿主机：拉取编译专用镜像
 
-从华为云 SWR 镜像仓库拉取定制好的 MindStudio 编译专用镜像：
+从华为云镜像仓库拉取 MindStudio 编译专用镜像，推荐使用如下基于 openEuler 基础系统的镜像（与 CI 构建系统保持一致）：
 
 ```bash
 docker pull swr.cn-north-4.myhuaweicloud.com/mindstudio-image/mindstudio-build:26.2.0-0801
 ```
 
+若对 Ubuntu 系统有特殊需求，也可拉取如下基于 Ubuntu 的镜像（仅用于个人开发调试）：
+
+```bash
+docker pull swr.cn-north-4.myhuaweicloud.com/mindstudio-image/mindstudio-build:26.2.0-0801-ubuntu22.04
+```
+
 > [!NOTE]说明
 >
-> **如何自行构建该镜像？**
->
-> 普通开发者通常无需关注此步骤。仅当需要定制镜像内容、排查镜像分层或复现构建过程时，请参考《[MindStudio 统一构建镜像制作指南](./docker_image_build_guide.md)》。
+> 如需自行构建镜像（定制内容、排查分层等），请参考《[MindStudio 统一构建镜像制作指南](./docker_image_build_guide.md)》。
 
-若镜像拉取失败，请参考 [FAQ 2](#72-拉取镜像失败如何处理)。
+若拉取失败，请参考 [FAQ 7.2](#72-拉取镜像失败如何处理)。
 
 ## 4. 宿主机：下载容器启动脚本
 
@@ -60,7 +62,7 @@ cd ~ && curl -fLO --retry 3 https://inst.obs.cn-north-4.myhuaweicloud.com/env/ct
 
 ## 5. 宿主机：启动并进入编译容器
 
-以**普通用户**身份执行脚本，并指定已拉取的编译镜像名称。脚本将自动完成目录挂载、用户映射及环境变量初始化：
+请以**普通用户**身份执行（root 执行不会自动挂载目录，降低开发效率），脚本将自动完成目录挂载、用户映射及环境初始化，命令示例如下：
 
 ```bash
 ~/ctr_in.py swr.cn-north-4.myhuaweicloud.com/mindstudio-image/mindstudio-build:26.2.0-0801
@@ -146,7 +148,7 @@ sudo usermod -aG docker <当前用户名>
 
 ### 7.3 下载 `ctr_in.py` 失败如何处理？
 
-优先使用 [第 4 章](#4-宿主机下载容器启动脚本) 中的手动下载方式，将脚本拷贝至宿主机 `~/` 目录后执行：
+若 `curl` 下载失败，可手动将 `ctr_in.py` 脚本拷贝至宿主机 `~/` 目录，然后赋予执行权限：
 
 ```bash
 cd ~
