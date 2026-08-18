@@ -1,75 +1,136 @@
-# Operator Tool Development Environment Setup Guide
+# MindStudio Tool Development Environment Setup Guide
 
 <br>
 
-## 1. Pulling the Image
+This document describes how to set up a standardized container environment for MindStudio tool development tasks such as compilation and unit testing (UT). Unless otherwise specified, all commands in this document are run on the **host machine**.
 
-> [!NOTE] Notes on the Build Environment
-> Since glibc follows the principle of "backward compatibility" but not "forward compatibility", to ensure that the compiled executable programs can run on most operating systems, the build image typically uses an earlier version of the operating system.  
-> If a program compiled on a higher version operating system is deployed to a lower version environment, exceptions may occur. The dedicated build image for Scenario 2 was released around 2018 and can be widely adapted to current mainstream legacy runtime environments.
-> However, this operating system version has relatively limited functionality (for example, it does not support VS Code remote connections), so it is only recommended for final compilation and packaging; please use a newer image for daily development and debugging to improve efficiency and experience.
+## 1. Prerequisites
 
-### Scenario Selection Guide
+Ensure that the following dependencies are installed and running properly:
 
-For scenarios where compilation and execution only need to occur in a single environment without considering cross-OS version compatibility, **Scenario 1** is recommended to achieve the highest development efficiency.  
-Conversely, if the compiled software package needs to be deployed to an older operating system, **Scenario 2** should be selected. (It is recommended that you first use the image from Scenario 1 to complete software debugging, ensuring its stability before switching to the Scenario 2 image for the final compilation, thereby balancing development efficiency and runtime compatibility.)
+| Dependency | Description | Verification Command |
+| --- | --- | --- |
+| **Docker Engine** | Installed and the service is running | Run `docker ps`. If no error is reported, the service started properly. |
+| **Python 3** | Installed on the host machine (any 3.x version) | Run `python3 -V`. Version information in the output indicates that Python is installed. |
 
-### Scenario 1: Development and Debugging in a Single Environment
+---
 
-Please use the official CANN container image as the compilation environment. For image details, refer to [CANN Official Image Repository](https://www.hiascend.com/developer/ascendhub/detail/17da20d1c2b6493cb38765adeba85884).  
-Please select an `openEuler` image with a version similar to: `8.5.0-xxx-openeuler24.03-py3.11` (where xxx needs to be filled in according to your Ascend AI processor model).  
-Taking Atlas A2 Training Series/Atlas A2 Inference Series as an example, the pull command is as follows:
+If a permission denied error occurs when you run `docker ps`, refer to [Section 6.1](#61-what-should-i-do-if-a-permission-denied-error-occurs-when-running-docker-commands) to handle Docker permissions first.
 
-```shell
-docker pull swr.cn-south-1.myhuaweicloud.com/ascendhub/cann:8.5.0-910b-openeuler24.03-py3.11
+## 2. Host Machine: Pulling the Dedicated Development Image
+
+Pull the customized MindStudio build image from the Huawei Cloud SWR image repository:
+
+```bash
+docker pull swr.cn-north-4.myhuaweicloud.com/mindstudio-image/mindstudio-build:26.1.0-0701
 ```
 
-### Scenario 2: Packaging and Deployment for Legacy Operating Systems
+If image pulling fails, first check the network proxy or the space in the Docker data directory.
 
-Please obtain the corresponding operator development and compilation-specific Docker image from the Huawei Cloud official container image repository based on your specific environment.
+> [!NOTE] How do I build the image myself?
+>
+> You usually do not need to build the image yourself. Only when you need to customize the image content, troubleshoot image layers, or reproduce the build process, refer to the [MindStudio Unified Build Image Guide](./docker_image_build_guide.md).
 
-- **x86 architecture**:
+## 3. Host Machine: Downloading the Container Startup Script
 
-```shell
-docker pull swr.cn-north-4.myhuaweicloud.com/mindstudio-image/msot:x86_20260211_v01
+Download the helper script for automatically creating and configuring containers, and grant it execute permissions:
+
+```bash
+cd ~ && curl -fLO --retry 3 https://inst.obs.cn-north-4.myhuaweicloud.com/env/ctr_in.py && chmod +x ctr_in.py
 ```
 
-- **Arm architecture**:
+> [!NOTE] Note
+>
+> The `ctr_in.py` script is powerful and can serve as a general-purpose tool for routine container operations. View its specific functions and usage with the `--help` parameter.
 
-```shell
-docker pull swr.cn-north-4.myhuaweicloud.com/mindstudio-image/msot:arm_20260211_v01
+## 4. Host Machine: Starting and Entering the Development Container
+
+Run the script and specify the name of the image you just pulled. The script automatically handles directory mounting, user mapping, and environment variable initialization:
+
+```bash
+~/ctr_in.py swr.cn-north-4.myhuaweicloud.com/mindstudio-image/mindstudio-build:26.1.0-0701
 ```
 
-## 2. Starting the Container
+### Expected Output
 
-Refer to [CANN Container Environment Installation Guide > Section 2](../quick_start/cann_container_setup.md#2-starting-the-container) to start the container.
+After the command runs, the terminal automatically switches to the interactive shell in the container and displays the following MindStudio welcome screen, indicating that the container has started and you have entered it successfully:
 
-## 3. Environment Setup
+```text
+=================================================================
+           >>>>>   MindStudio Build Environment   <<<<<
+    THE END-TO-END TOOLCHAIN TO UNLEASH HUAWEI ASCEND COMPUTE
+=================================================================
+  OS/Arch   : openEuler 24.03 (LTS-SP3) | x86_64
+  Toolchain : GCC 11.2.0 | glibc >= 2.17 | CANN 9.1.0
+              ccache   : /home/alice/.cache/ccache (persistent)
+              uv cache : /home/alice/.cache/uv (persistent)
 
-### 3.1. Environment Configuration for Scenario 1
+  Python 3.11.15 (Active) | Run 'py38' (up to 'py313') to switch
 
-After entering the container, run the following command:
+  Run 'tips' to explore more high-efficiency commands
 
-```shell
-yum install ninja-build -y
-yum install pigz -y
+mindstudio@alice-build-env:/home/alice$
 ```
 
-### 3.2 Environment Configuration for Scenario 2
+## 5. Host Machine: Re-entering the Container
 
-Run the following command to write the CANN environment variable configuration to the `~/.bashrc` file to ensure it takes effect permanently:
+After you exit the container or restart the host machine, you can re-enter the created development environment in either of the following two ways. All commands in this chapter are run on the **host machine**.
 
-```shell
-echo "source /usr/local/Ascend/cann/set_env.sh" >> ~/.bashrc
-source ~/.bashrc
+### 5.1 Method 1: Entering Quickly Using the Script (Recommended)
+
+Run the startup script again. The script intelligently identifies the container created by the current user:
+
+```bash
+~/ctr_in.py
 ```
 
-## 4. FAQ
+If multiple containers exist, enter the corresponding number as prompted in the terminal. If only one container is found, the script enters it directly.
 
-### 4.1 When downloading dependencies, I am prompted to enter my password multiple times. How can I enter it only once?
+### 5.2 Method 2: Using Native Docker Commands
 
-You can configure and save Git credentials using the following command:
+First, query the container name:
 
-```shell
-git config --global credential.helper store
+```bash
+docker ps -a --format "table {{.Names}}\t{{.Status}}\t{{.Image}}"
 ```
+
+Then use the native Docker command to enter the container. Replace `<CONTAINER_NAME>` with the actual container name, for example, `alice_20260606_120000`:
+
+```bash
+docker exec -it <CONTAINER_NAME> bash
+```
+
+## 6. FAQ
+
+### 6.1 What Should I Do If a Permission Denied Error Occurs When Running Docker Commands?
+
+The current user may not be a member of the Docker user group. Run the following command on the host machine with root privileges:
+
+```bash
+sudo usermod -aG docker <username>
+```
+
+After running the command, log in again to the current user session, or run `newgrp docker` to make the user group change take effect immediately. You are advised not to perform routine operations as root.
+
+### 6.2 What Should I Do If Image Pulling Fails?
+
+Troubleshoot in the following order:
+
+1. Run `docker info` to confirm that the Docker service is normal.
+2. Check whether the current network can access `swr.cn-north-4.myhuaweicloud.com`.
+3. If you are on a corporate intranet, configure a Docker proxy according to the actual network policies.
+4. Run `docker system df` to confirm that the Docker data directory has sufficient space.
+
+### 6.3 What Should I Do If Downloading `ctr_in.py` Fails?
+
+Use the manual download method in [Section 3](#3-host-machine-downloading-the-container-startup-script), copy the script to the `~/` directory on the host machine, and then run:
+
+```bash
+cd ~
+chmod +x ctr_in.py
+ls -l ctr_in.py
+```
+
+### 6.4 What If the MindStudio Welcome Screen Does Not Appear After Startup?
+
+First, confirm whether you have entered the container. If you are still on the host machine, run the startup command in [Section 4](#4-host-machine-starting-and-entering-the-development-container) again. If the container has started but you have not entered it, re-enter it as described in [Section 5](#5-host-machine-re-entering-the-container).

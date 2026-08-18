@@ -2,83 +2,243 @@
 
 <br>
 
->[!CAUTION]Note  
->**Disclaimer**  
->This document and related scripts are for learning purposes only. No guarantee is made regarding stability and security in production environments. Users must assess risks and assume corresponding responsibilities on their own.
+> [!CAUTION] Note
+> This document and related scripts are for learning purposes only. Stability and security in production environments are not guaranteed. You must assess the related risks and assume full responsibility.
 
-## 1. Operator Tool Learning Environment Installation
+## 1. Prerequisites
 
-You need to prepare a Linux server equipped with at least one Ascend NPU card, with the NPU driver and firmware already installed.
+Before starting the installation, ensure that the server meets the following requirements. Run all commands in this chapter on the **host machine**.
 
-### 1.1 Operator Tool Installation
+| Item | Requirement | Verification Method |
+|------|-------------|---------------------|
+| **Hardware compute power** | Linux server with at least 1 NPU (based on Ascend 910B/310P/A3 chips, **910B is recommended**), with the driver and firmware correctly installed | Run `npu-smi info` and confirm that the NPU status is normal. |
+| **Container runtime** | Docker installed and running (version ≥ 18.x is recommended) | Run `docker ps`. If no errors are reported, the service started normally. |
+| **Executing user** | Start the container with an ordinary user account. | Run `whoami`. It returns a non-`root` username. |
+| **Script execution** | Python 3 installed (any version) | Run `python3 -V`. If version information is output, it is installed. |
+| **Network communication** | curl installed (any version) | Run `curl -V`. If version information is output, it is installed. |
 
-The operator tool is integrated and released with CANN, and the following two installation methods are provided:
+> 👉 After confirming that the prerequisites are met, if the environment has public network access, you can run all subsequent commands directly by **Copy/Paste** without manual input or concatenation, to avoid command execution failures caused by input errors.
 
-1. **Containerized Runtime Environment**: Recommended method. It can be completed within 5 minutes when the Docker service is running normally. Please refer to the *[CANN Container Environment Setup Guide](./cann_container_setup.md)* for installation.
-2. **Bare Metal or Virtual Machine Environment**: Installation is complex and time-consuming. Multi-user sharing can easily lead to conflicts and potentially difficult-to-resolve environmental issues. If you must use this type of environment, please refer to the *[CANN Official Installation Guide](https://www.hiascend.com/cann/download)* for installation. Using a relatively newer version is sufficient.
+## 2. Host Machine: Selecting and Pulling the CANN Image
 
-### 1.2 Workspace Directory Initialization
+> [!NOTE] Note
+>
+> - The Ascend AI operator development toolchain is released together with CANN. Installing CANN completes the toolchain deployment.
+> - Because the operator compilation environment has complex dependencies, this tutorial **supports only** the CANN containerized deployment mode. Non-container environments such as bare-metal servers and virtual machines are not supported.
 
-**1. Creating Workspace**  
-Create the `workspace` directory to store various files generated during example execution. The path is `~/ot_demo/workspace` (where "ot" is the acronym for Operator Tool):
+### 2.1 Automatically Identifying and Configuring Image Environment Variables Based on the Chip Model
 
-```shell
-mkdir -p ~/ot_demo/workspace
+Run the following command on the host machine (the command reads the NPU PCI ID, matches the image version, and writes the environment variable for use by subsequent processes):
+
+```bash
+source /dev/stdin <<< "$(dev_id=$(lspci -n -D | grep -o '19e5:d[0-9a-f]\{3\}' | head -n1 | cut -d: -f2); case "$dev_id" in 'd500' ) echo "export MY_STUDY_VAR_CANN_IMAGE=swr.cn-south-1.myhuaweicloud.com/ascendhub/cann:9.0.0-310p-openeuler24.03-py3.11-devel; export MY_CHIP_NAME=310P";; 'd802' ) echo "export MY_STUDY_VAR_CANN_IMAGE=swr.cn-south-1.myhuaweicloud.com/ascendhub/cann:9.0.0-910b-openeuler24.03-py3.11-devel; export MY_CHIP_NAME=910B";; 'd803' ) echo "export MY_STUDY_VAR_CANN_IMAGE=swr.cn-south-1.myhuaweicloud.com/ascendhub/cann:9.0.0-a3-openeuler24.03-py3.11-devel; export MY_CHIP_NAME=A3";; * ) echo "unset MY_STUDY_VAR_CANN_IMAGE MY_CHIP_NAME; echo >&2; echo -e '\033[31m[FAIL] Get device ID: $dev_id. Learning is not supported in the current environment.\033[0m' >&2";; esac)"
+[ -n "$MY_STUDY_VAR_CANN_IMAGE" ] && echo -e "\e[32m[PASS] Successfully identified chip [$MY_CHIP_NAME] and auto-selected image:\n    $MY_STUDY_VAR_CANN_IMAGE\e[0m"
 ```
 
-**2. Downloading Repository**  
-Download to the `~/ot_demo` directory. After downloading, the example path is `~/ot_demo/msot/example`:
+> [!NOTE] Note
+>
+> **Command Principle**  
+> The command uses `lspci` to obtain the NPU PCI ID, automatically matches the official CANN image, and assigns the image address to the environment variable `MY_STUDY_VAR_CANN_IMAGE` for later use.  
+> All images are the official CANN images published on Huawei Cloud AscendHub. For image details, see the [CANN Official Image Repository](https://www.hiascend.com/developer/ascendhub/detail/17da20d1c2b6493cb38765adeba85884).
 
-```shell
-git clone https://gitcode.com/Ascend/msot.git ~/ot_demo/msot
+If the command outputs `[PASS]`, the execution succeeded. If it outputs `[FAIL]`, possible causes are as follows:
+
+1. The hardware is outside the scope supported by this tutorial: this learning environment supports only Ascend 910B, 310P, and A3 series chips. Switch to a compatible hardware environment and try again.
+2. The underlying environment is abnormal: `lspci` is not installed, or the current user cannot query the NPU PCI ID using `lspci -n -D`. Contact the environment administrator to confirm the underlying environment.
+
+### 2.2 Pulling the Image
+
+Run the following command on the host machine:
+
+```bash
+docker pull ${MY_STUDY_VAR_CANN_IMAGE}
 ```
 
-> Tip: If the git download fails in your environment, you can directly download the compressed package from gitcode.com and manually transfer it to the server, ensuring the directory structure remains correct.
+If the pull fails because your environment is on a corporate intranet, see the solution in [Section 8.1](#81-obtaining-docker-images-in-an-isolated-intranet).
 
-### 1.3 Obtaining the Chip SoC Model
+## 3. Host Machine: Downloading the Script and Starting the Container
 
-Since the chip SoC model is frequently used in many subsequent commands and the method to obtain it is relatively complex, it is obtained uniformly here and stored in the environment variable `MY_STUDY_VAR_CHIP_SOC_TYPE` for easy reference later.
+### 3.1 Downloading the Container Startup Script
 
->[!CAUTION] Note  
-> The environment variable `MY_STUDY_VAR_CHIP_SOC_TYPE` is only used for this quick start tutorial. Do not use this variable in commercial development.
+Run the following command on the host machine:
 
-#### 1.3.1 Automatically Obtaining the Chip SoC Model
-
-If you want to quickly experience the tool, run the following command to automatically obtain and set the chip SoC model:
-
-```shell
-python3 ~/ot_demo/msot/example/quick_start/public/get_ai_soc_version.py
+```bash
+cd ~ && curl -fLO --retry 3 https://inst.obs.cn-north-4.myhuaweicloud.com/env/ctr_in.py && chmod +x ctr_in.py
 ```
 
-If the execution is successful, run the following as prompted:
+If you cannot download the script because of network restrictions, see the solution in [Section 8.2](#82-transferring-the-container-startup-script).
 
-```shell
-source set_chip_env_var.sh
+### 3.2 Starting the Container
+
+Run the following command on the host machine. When prompted, confirm the container creation information and press Enter:
+
+```bash
+~/ctr_in.py ${MY_STUDY_VAR_CANN_IMAGE}
 ```
 
-This script writes the chip SoC model (with the "Ascend" prefix removed, e.g., 910B4, 910_9392) into the environment variable `MY_STUDY_VAR_CHIP_SOC_TYPE`.
+**Expected output**: If a message similar to the following appears and you stay at the root Shell prompt, the container started successfully:
 
-#### 1.3.2 Manually Obtaining the Chip SoC Model
+```text
+Welcome to 5.10.0-60.139.0.166.oe2203.aarch64
 
-If you want to learn about the concept and acquisition method of the chip SoC model, please refer to [*Ascend Chip SoC Model Acquisition Method*](get_chip_soc_type.md) to manually obtain the chip SoC model, and replace `<YOUR_CHIP_NAME>` in the following command with the value after removing the "Ascend" prefix (e.g., 910B4), then execute:
+System information as of time:  Mon Jun 29 15:21:01 UTC 2026
 
-```shell
-echo "export MY_STUDY_VAR_CHIP_SOC_TYPE=<YOUR_CHIP_NAME>" >> ~/.bashrc && source ~/.bashrc
+System load:    8.44
+Memory used:    1.5%
+Swap used:      0%
+Usage On:       27%
+Users online:   0
+
+[root@xxxxxx ~]#
 ```
 
->[!CAUTION]Note    
->The value of `MY_STUDY_VAR_CHIP_SOC_TYPE` is the value after removing the Ascend prefix:   
->Correct values: 910B4, 910_9392;  
->Incorrect values: Ascend910B4, Ascend910_9392.
+If an error is reported or a container selection interface appears, see [Section 2.1](#21-automatically-identifying-and-configuring-image-environment-variables-based-on-the-chip-model) to confirm that the environment variable `MY_STUDY_VAR_CANN_IMAGE` is correct, and rerun the command.
 
-### 1.4 Installing Python Libraries
+> [!CAUTION] Note
+>
+> After you see the Shell prompt inside the container, run all commands in Chapters 4 to 6 **inside the container**.
 
-The operator project build depends on the following libraries. Please execute the following command to install them:
+## 4. In the Container: Cloning the Example Code Repository
 
-```shell
-pip3 install -r ~/ot_demo/msot/example/quick_start/public/requirements.txt -i https://mirrors.aliyun.com/pypi/simple/
-ln -sf /usr/local/bin/python3 /usr/bin/python3
+In the container, clone the example code to the `~/ot_demo/msot` directory:
+
+```bash
+git clone https://gitcode.com/Ascend/msot.git -b 26.1.0 ~/ot_demo/msot
 ```
 
->[!NOTE] Note  
->Due to the slow download speed from the official website, the above command uses the Alibaba source for installation. If your environment cannot access the Alibaba source, or if you do not trust this source for security reasons, you can remove the `-i xxx` parameter to restore the default source.
+After cloning is complete, the example code is located at `~/ot_demo/msot/example`. If the clone fails because of network problems, see the solution in [Section 8.3](#83-transferring-the-example-code-repository).
+
+## 5. In the Container: Setting the Chip SoC Model
+
+Many subsequent commands need to reference the chip SoC model (system-on-a-chip model, used to identify the chip architecture). This section queries it uniformly and saves it to the environment variable `MY_STUDY_VAR_CHIP_SOC_TYPE` for direct use later.  
+
+Run the following command in the container:
+
+```bash
+echo 'export MY_STUDY_VAR_CHIP_SOC_TYPE=$(python3 -c "import acl; print(acl.get_soc_name().replace(\"Ascend\", \"\"))")' > /etc/profile.d/custom-env.sh && chmod +x /etc/profile.d/custom-env.sh && source /etc/profile.d/custom-env.sh && { [ -n "$MY_STUDY_VAR_CHIP_SOC_TYPE" ] && echo -e "\033[32m[PASS] Chip SoC type: $MY_STUDY_VAR_CHIP_SOC_TYPE\033[0m" || echo -e '\033[31m[FAIL] Failed to set environment variable $MY_STUDY_VAR_CHIP_SOC_TYPE!\033[0m'; }
+```
+
+If `[PASS]` is displayed, the setting succeeded. If `[FAIL]` is displayed, it is usually because the CANN container was not deployed successfully, or you mistakenly ran this step on the host machine (outside the container). Confirm that you are inside the container and try again.
+
+> [!CAUTION] Note
+> The environment variables `MY_STUDY_VAR_CHIP_SOC_TYPE` and `MY_STUDY_VAR_CANN_IMAGE` apply only to this quick start tutorial. Do not use them in commercial development.
+
+## 6. Installation Completion Self-Check
+
+Run the following commands in the container to confirm that the environment required for the quick start is ready:
+
+```bash
+[ -n "$MY_STUDY_VAR_CHIP_SOC_TYPE" ] && echo -e "\033[32m[PASS] Chip SoC type: $MY_STUDY_VAR_CHIP_SOC_TYPE\033[0m" || echo -e "\033[31m[FAIL] Missing environment variable MY_STUDY_VAR_CHIP_SOC_TYPE\033[0m"
+[ -d ~/ot_demo/msot/example/quick_start ] && echo -e "\033[32m[PASS] Example code repository OK\033[0m" || echo -e "\033[31m[FAIL] Example code repository missing\033[0m"
+```
+
+If all the preceding checks output `[PASS]`, the learning environment installation is complete. Return to the quick start document and continue with the subsequent operations.
+
+<br>
+
+## 7. Frequently Asked Questions (FAQ)
+
+### 7.1 How Do I Re-enter the Container After Exiting?
+
+Run either of the following commands on the host machine:
+
+**Method 1 (recommended)**: Run `~/ctr_in.py` and select the target container interactively (if there is only one container, you enter it automatically).
+
+**Method 2 (native command)**: Run `docker exec -it alice_YYMMDD_HHMMSS bash` (replace it with the actual container name).
+
+### 7.2 What If a Permission Denied Error Occurs When Running Docker Commands?
+
+The current user may not be added to the Docker user group. Run the following command on the host machine with root permissions:
+
+```bash
+sudo usermod -aG docker <username>
+```
+
+After running the command, log out and log in to the current user session again, or run `newgrp docker` to make the user group change take effect immediately. You are advised not to use the root identity for daily operations.
+
+## 8. Solutions for Intranet Environments Without Public Network Access
+
+### 8.1 Obtaining Docker Images in an Isolated Intranet
+
+**Solution 1: Configuring a Docker Proxy and Pulling Directly**
+
+This applies to most Linux distributions with Docker version ≥ 18 (compatibility is not guaranteed in all scenarios). If an exception occurs, adjust the settings based on the actual situation.
+
+Edit the Docker service proxy configuration file `/etc/systemd/system/docker.service.d/http-proxy.conf`. An example is as follows (replace the username, password, proxy address, and port based on the actual environment):
+
+```text
+[Service]
+Environment="HTTP_PROXY=http://username:password@proxy.example.com:8080"
+Environment="HTTPS_PROXY=http://username:password@proxy.example.com:8080"
+Environment="NO_PROXY=localhost,127.0.0.1,.example.com"
+```
+
+After saving the file, reload and restart the Docker service:
+
+```bash
+sudo systemctl daemon-reload
+sudo systemctl restart docker
+```
+
+You can then run `docker pull` normally.
+
+**Solution 2: Importing the CANN Image Offline**
+
+If the proxy solution is not feasible, first run the commands in [Section 2.1](#21-automatically-identifying-and-configuring-image-environment-variables-based-on-the-chip-model) on the intranet NPU server to obtain the value of the environment variable `MY_STUDY_VAR_CANN_IMAGE` for the current chip model. Then copy the image name to a machine that has public network access and the same CPU architecture, and run the following commands:
+
+```bash
+docker pull <MY_STUDY_VAR_CANN_IMAGE>
+docker save -o cann.tar <MY_STUDY_VAR_CANN_IMAGE>
+```
+
+After transferring `cann.tar` to the intranet server using a USB flash drive or other methods, run the following commands on the intranet server to load it:
+
+```bash
+docker load -i cann.tar
+docker images | grep cann
+```
+
+After the load is complete, return to [Chapter 3](#3-host-machine-downloading-the-script-and-starting-the-container) to start the container.
+
+### 8.2 Transferring the Container Startup Script
+
+In a browser that can access the current webpage, enter the following link to download the `ctr_in.py` script, and manually copy it to the `~/` directory of the intranet server:
+
+```text
+https://inst.obs.cn-north-4.myhuaweicloud.com/env/ctr_in.py
+```
+
+After copying, run the following commands on the host machine of the intranet server:
+
+```bash
+cd ~
+chmod +x ctr_in.py
+ls -l ctr_in.py
+```
+
+After confirming that `ctr_in.py` exists and has execute permission, return to [Section 3.2](#32-starting-the-container) to start the container.
+
+### 8.3 Transferring the Example Code Repository
+
+In a browser that can access the current webpage, enter the following link. On the page, click the **Download ZIP** button to download the code repository package to your local machine:
+
+```text
+https://gitcode.com/Ascend/msot
+```
+
+Transfer the downloaded zip package to the `~` directory in the container of the intranet server (you can use methods such as the `docker cp` command, mounted directories, or network transfer to transfer it into the container).
+
+Run the following command in the container to decompress the package. Replace `<MSOT_ZIP>` with the actual zip package file name:
+
+```bash
+unzip <MSOT_ZIP> -d ~/ot_demo
+```
+
+Then run the following commands to move the example code repository to the `~/ot_demo/msot` directory and confirm that the directory location is correct:
+
+```bash
+mv ~/ot_demo/msot-* ~/ot_demo/msot
+ls ~/ot_demo/msot/example/quick_start
+```
+
+If the `ls` command reports no errors, the example code repository is synchronized. Then return to [Chapter 5](#5-in-the-container-setting-the-chip-soc-model) to set the chip SoC model.
