@@ -146,7 +146,11 @@ function change_mode() {
     local _path=$2
     local _type=$3
 
-    if [ ! x"${install_for_all}" = "x" ] && [ ${install_for_all} = y ]; then
+    # install_for_all 只对数字（八进制）权限做“组权限复制给other”的转换，
+    # 符号权限（如 u+w/u-w，create_softlink 内部临时开关写权限）须原样透传，
+    # 否则会被拼成非法模式（u+w -> u++）导致 chmod 静默失败、ln 拒绝写入。
+    if [ ! x"${install_for_all}" = "x" ] && [ ${install_for_all} = y ] \
+        && [ -n "$(echo "${_mode}" | grep -E '^[0-7]{3,4}$')" ]; then
         _mode="$(expr substr ${_mode} 1 2)$(expr substr ${_mode} 2 1)"
     fi
     if [ ${_type} = "dir" ]; then
