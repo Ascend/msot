@@ -21,7 +21,7 @@
 
 ## 2. 宿主机：选择并拉取 CANN 镜像
 
-> [!NOTE]说明
+> [!NOTE]
 >
 > - 昇腾 AI 算子开发工具链随 CANN 统一发布，安装 CANN 即完成工具链部署。
 > - 鉴于算子编译环境依赖复杂，本教程**仅支持** CANN 容器化部署方式，不支持裸机或虚拟机等非容器环境。
@@ -35,7 +35,7 @@ source /dev/stdin <<< "$(dev_id=$(lspci -n -D | grep -o '19e5:d[0-9a-f]\{3\}' | 
 [ -n "$MY_STUDY_VAR_CANN_IMAGE" ] && echo -e "\e[32m[PASS] Successfully identified chip [$MY_CHIP_NAME] and auto-selected image:\n    $MY_STUDY_VAR_CANN_IMAGE\e[0m"
 ```
 
-> [!NOTE]说明
+> [!NOTE]
 >
 > **命令原理**  
 > 通过 `lspci` 获取 NPU 的 PCI ID，自动匹配 CANN 官方镜像，并将镜像地址赋给环境变量 `MY_STUDY_VAR_CANN_IMAGE`，供后续使用。  

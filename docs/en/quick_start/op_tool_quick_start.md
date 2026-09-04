@@ -57,7 +57,7 @@ command -v msopprof >/dev/null && echo -e "\033[32m[PASS] msopprof command OK\03
 
 First, design the operator algorithm. With the msKPP tool, you can obtain operator performance modeling results in seconds, estimate performance without hardware, and quickly verify the feasibility of the implementation plan. Follow the steps to experience the effect first; the principles can be read later:
 
-> [!NOTE] Note   
+> [!NOTE]
 > 
 > **msKPP Tool Principles**   
 > msKPP is not a traditional executable program but a dedicated Python class library for Ascend. Users need to `import` relevant modules, write and execute Python scripts, and generate performance analysis result files to complete the modeling. The internal principle involves pre-collecting performance data of various instruction operations in real environments, and modeling and estimating various performance overheads based on the user-defined operator execution flow.
@@ -82,7 +82,7 @@ If the output is `[PASS]`, continue the experience. If the output is `[FAIL]`, s
 
 2. Develop the Python script
 
-    > [!NOTE] Note  
+    > [!NOTE]
     > 
     > **msKPP Domain-Specific Language (DSL) Solution**   
     > This set of libraries and interfaces is a "dialect" specifically designed for Ascend performance modeling. It requires dedicated learning to master and cannot be written directly using only general Python syntax. However, its usage is relatively simple and can be applied after a brief study.
@@ -144,7 +144,7 @@ After the algorithm design is complete, you can proceed to the operator code wri
 
 2. Develop the operator definition configuration file.
 
-    > [!NOTE] Note   
+    > [!NOTE]
     > 
     > **Key Point (Optional Reading): msOpGen Input Configuration File**   
     > A custom-format JSON configuration file, which can be simply analogized to defining a C function declaration, including the function name, input parameters, and return value type information.
@@ -172,7 +172,7 @@ After the algorithm design is complete, you can proceed to the operator code wri
 
 4. View generated results.
 
-    > [!NOTE] Note   
+    > [!NOTE]
     > 
     > **Key Point (Optional Reading): Key Concepts**       
     > Host Side: Code running on the CPU, responsible for data preprocessing, task scheduling, and operator invocation.   
@@ -200,7 +200,7 @@ The generated project structure may appear large and complex, but we **only need
 
 #### 2.3.2 Implementing Core Logic
 
-> [!NOTE] Note   
+> [!NOTE]
 > 
 > **Key Point (Optional Reading): Implementation Principles of Operator Kernel Code Files**  
 > `op_host/add_custom.cpp`: Implements the Tiling computation logic on the Host side and operator prototype registration.  
@@ -232,7 +232,7 @@ python3 ~/ot_demo/msot/example/quick_start/msopgen/keep_soc_info.py set ./op_hos
 
 2. Deploy the operator.
 
-    >[!NOTE] Note   
+    >[!NOTE]
     > 
     > **Key Point: What Is Deploying Operators**  
     > Deploying operators refers to registering the operator with the CANN framework. Essentially, it involves copying the binary files of the operator to a system public directory, allowing other programs to automatically discover and invoke the operator through standard interfaces (such as CANN API or PyTorch). The `*.run` deployment package format can be simply understood as a self-extracting archive.
@@ -315,7 +315,8 @@ Overwrite the original implementation with the prepared source file containing d
 \cp -f ~/ot_demo/msot/example/quick_start/mssanitizer/bug_code/add_custom.cpp op_kernel/add_custom.cpp
 ```
 
->[!NOTE] Note  
+> [!NOTE]
+> 
 > The key modification is as follows: the read length in the `AscendC::DataCopy` function call is changed to twice the original (`2 * this->tileLength`), causing the access to exceed the allocation range of `xGm` in GM memory, thereby triggering an "illegal read" error.
 
 #### 2.4.3 Recompiling and Deploying
@@ -351,7 +352,8 @@ If the tool outputs the following error report, it indicates successful executio
 ======    #6 /root/ot_demo/workspace/src/caller/AddCustom/build_out/op_kernel/AddCustom_ascend910b/kernel_0/kernel_meta_AddCustom_ab1b6750d7f510985325b603cb06dc8b/kernel_meta/AddCustom_ab1b6750d7f510985325b603cb06dc8b_2130445_kernel.cpp:37:5
 ```
 
-> [!NOTE] Note  
+> [!NOTE]
+> 
 > The operator may still execute successfully even with memory issues, which is exactly where the value of this tool lies: memory problems are usually intermittent. In most cases, even when memory anomalies exist, the program still runs normally. Only when the problem accumulates to a critical point does a sudden crash occur, making it difficult to locate the issue directly from the surface.
 
 #### 2.4.5 Reverting Manual Modifications
@@ -505,7 +507,7 @@ If the operator performance does not meet expectations, you can use the msOpProf
     sed -i '1i npu_op_kernel_options(ascendc_kernels ALL OPTIONS -g)' op_kernel/CMakeLists.txt
     ```
 
-    > [!NOTE] Note   
+    > [!NOTE]
     > 
     > **Key Point (Optional Reading): Why the `-O` optimization level is switched back and forth between tools**   
     > During the debugging phase, to support breakpoints and variable inspection, `-O0` must be used to disable optimization and preserve accurate symbol mapping. However, the performance gap between `-O0` and `-O2` can be several times. Therefore, performance analysis must be based on code compiled with `-O2` (or the default optimization level). Otherwise, the collected data will severely deviate from real-world scenarios and lose its reference value.
@@ -519,7 +521,8 @@ If the operator performance does not meet expectations, you can use the msOpProf
 
 #### 2.6.2 Starting On-Board and Simulation Collection
 
-> [!NOTE] Note   
+> [!NOTE]
+>
 > **Differences Between On-Board and Simulation Collection Information**   
 > On-board: Can accurately capture operator runtime, Pipe usage, memory bandwidth, cache behavior, and other real hardware characteristics, which are often key metrics that simulators struggle to reproduce with high fidelity.  
 > Simulation: Provides more complete and stable analysis capabilities in areas such as instruction stream tracing and code hotspot localization, but has limited simulation accuracy for hardware-related behaviors like memory access latency and bandwidth bottlenecks.  
@@ -560,9 +563,9 @@ The data shows that the task is evenly divided into 8 blocks, all scheduled to t
 - BIN file   
 It can be opened using the `MindStudio Insight` tool, which provides an intuitive graphical display of various performance views, such as: computation memory heatmaps, cache heatmaps, and operator code hotspot maps.
 
-  > [!NOTE] Note  
+  > [!NOTE]
   > 
-  > To experience visual chart viewing, refer to the <a href="https://gitcode.com/Ascend/msinsight/blob/26.1.0/docs/zh/install_guide/mindstudio_insight_install_guide.md" target="_blank">MindStudio Insight Tool Documentation</a> to install the Insight tool.
+  > To experience visual chart viewing, refer to the <a href="https://gitcode.com/Ascend/msinsight/blob/26.1.0/docs/en/install_guide/mindstudio_insight_install_guide.md" target="_blank">MindStudio Insight Tool Documentation</a> to install the Insight tool.
 
 #### 2.6.4 Reverting Manual Modifications
 
@@ -606,7 +609,7 @@ This tutorial only covers the introductory usage of each tool. Each tool offers 
 
 **Step 3: Landing Real Business: From Teaching to Production**  
 
-Deeply study the [Ascend C Programming Guide (Official Tutorial)](https://www.hiascend.com/en/ascend-c?utm_source=cann&utm_medium=article&utm_campaign=alll) to systematically master core concepts such as multi-level pipelining, data layout, and memory management. On this basis, try to apply the toolchain to the development and tuning of actual business operators, gradually building complete capabilities from prototype verification to production-level delivery.
+Deeply study the [Ascend C Programming Guide (Official Tutorial)](https://www.hiascend.com/zh/ascend-c?utm_source=cann&utm_medium=article&utm_campaign=alll) to systematically master core concepts such as multi-level pipelining, data layout, and memory management. On this basis, try to apply the toolchain to the development and tuning of actual business operators, gradually building complete capabilities from prototype verification to production-level delivery.
 
 ## 3. FAQ
 

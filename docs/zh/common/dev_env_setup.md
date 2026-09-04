@@ -27,7 +27,9 @@ docker pull swr.cn-north-4.myhuaweicloud.com/mindstudio-image/mindstudio-build:2
 
 若镜像拉取失败，请优先检查网络代理或 Docker 数据目录空间。
 
-> [!NOTE] 如何自行构建该镜像？
+> [!NOTE]
+> 
+> 如何自行构建该镜像？
 >
 > 普通开发者通常无需自行构建镜像。仅当需要定制镜像内容、排查镜像分层或复现构建过程时，请参考文档：《[MindStudio 统一构建镜像制作指南](./docker_image_build_guide.md)》。
 
@@ -39,7 +41,7 @@ docker pull swr.cn-north-4.myhuaweicloud.com/mindstudio-image/mindstudio-build:2
 cd ~ && curl -fLO --retry 3 https://inst.obs.cn-north-4.myhuaweicloud.com/env/ctr_in.py && chmod +x ctr_in.py
 ```
 
-> [!NOTE]说明
+> [!NOTE]
 >
 > 此 `ctr_in.py` 脚本功能强大，可作为日常容器操作的通用工具。具体功能及用法可通过 `--help` 参数查看。
 

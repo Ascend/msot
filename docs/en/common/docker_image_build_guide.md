@@ -17,7 +17,7 @@ To improve the efficiency of routine updates and distribution, the image uses a 
 | **Second layer (Layer 2)** | GCC 11 | Core compilation toolchain |
 | **Bottom layer (Layer 1)** | openEuler base system | Operating system foundation that provides the basic system libraries |
 
-> [!NOTE]Note
+> [!NOTE]
 >
 > **Primary Software Environment**
 >
@@ -104,7 +104,7 @@ Parameters:
 | --- | --- |
 | -t ${IMG_TAG} | Specifies the tag of the built image. |
 | --force | Forces a rebuild, avoiding the reuse of intermediate states that do not meet expectations. |
-| -c <URL> | Specifies the download URL of the CANN run package. Pass two CANN packages: `toolkit` and `ops` |
+| -c \<URL> | Specifies the download URL of the CANN run package. Pass two CANN packages: `toolkit` and `ops` |
 
 > [!CAUTION]Caution
 >

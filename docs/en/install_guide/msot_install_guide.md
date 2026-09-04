@@ -6,7 +6,7 @@
 
 This toolchain is integrated into CANN. If CANN is already installed and you do not need to update this tool, you can use it directly without installing it as described in this document.
 
-If CANN is not yet installed in your environment, refer to [CANN Quick Installation](https://www.hiascend.com/cann/download) to install the Ascend NPU driver and CANN software (including the Toolkit and ops packages), and configure the environment variables.
+If CANN is not yet installed in your environment, refer to [CANN Quick Installation](https://www.hiascend.com/en/cann/download) to install the Ascend NPU driver and CANN software (including the Toolkit and ops packages), and configure the environment variables.
 
 If you need to upgrade this tool separately or use the latest version, you can install it using any of the following methods: [online installation](#21-online-installation), [offline installation](#22-offline-installation), or [source code installation](#23-source-code-installation).
 
@@ -14,11 +14,11 @@ If you need to upgrade this tool separately or use the latest version, you can i
 
 ### 2.1 Online Installation
 
-If your device has internet access, you can complete the download and installation of a single tool with one command, and you can freely choose to install some or all of the tools. Refer to the MindStudio [download](https://www.hiascend.com/developer/software/mindstudio/download) page on the Ascend community website, select the corresponding CANN version, select "Operator Development" as the usage scenario, and select "Online Installation" as the installation method. The system will guide you through the subsequent operations.
+If your device has internet access, you can complete the download and installation of a single tool with one command, and you can freely choose to install some or all of the tools. Refer to the MindStudio [download](https://www.hiascend.com/en/developer/software/mindstudio/download) page on the Ascend community website, select the corresponding CANN version, select "Operator Development" as the usage scenario, and select "Online Installation" as the installation method. The system will guide you through the subsequent operations.
 
 ### 2.2 Offline Installation
 
-For devices in an environment without internet access, such as an enterprise intranet, first download the complete offline installation package on a machine with internet access, and then transfer it to the target device for installation. Refer to the MindStudio [download](https://www.hiascend.com/developer/software/mindstudio/download) page on the Ascend community website, select the corresponding CANN version, select "Operator Development" as the usage scenario, and select "Offline Installation" as the installation method to obtain the corresponding installation package and operation guide.
+For devices in an environment without internet access, such as an enterprise intranet, first download the complete offline installation package on a machine with internet access, and then transfer it to the target device for installation. Refer to the MindStudio [download](https://www.hiascend.com/en/developer/software/mindstudio/download) page on the Ascend community website, select the corresponding CANN version, select "Operator Development" as the usage scenario, and select "Offline Installation" as the installation method to obtain the corresponding installation package and operation guide.
 
 ### 2.3 Source Code Installation
 
@@ -79,7 +79,7 @@ If output similar to the following is displayed, the installation is successful:
 [mindstudio-operator-tools] [2026-03-02 12:16:42] [INFO]: mindstudio-operator-tools package install success! The new version takes effect immediately.
 ```
 
-> [!NOTE] 
+> [!NOTE]
 > 
 > **Installation Path Description**
 > 
@@ -110,7 +110,7 @@ If the output is similar to the following, the uninstallation is successful:
 [mindstudio-operator-tools] [2026-03-02 12:18:24] [INFO]: End Time: 2026-03-02 12:18:24
 ```
 
-> [!NOTE] 
+> [!NOTE]
 > 
 > Uninstallation Path Description
 > 

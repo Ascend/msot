@@ -57,7 +57,7 @@ command -v msopprof >/dev/null && echo -e "\033[32m[PASS] msopprof command OK\03
 
 首先，进行算子算法设计。借助 msKPP 工具，可在秒级时间内获得算子性能建模结果，在无硬件条件下预估性能，快速验证实现方案的可行性。可先按步骤体验效果，原理部分稍后阅读：
 
-> [!NOTE]说明   
+> [!NOTE]
 > 
 > **知识点：msKPP 工具原理**   
 > msKPP 并非传统可执行程序，而是一套专用于昇腾的 Python 类库。用户需通过 `import` 相关模块、编写并执行 Python 脚本，生成性能分析结果文件以完成建模。内部原理是预先采集真实环境中各类指令操作的性能数据，基于用户定义的算子执行流程，对各种性能开销进行建模与估算。
@@ -82,7 +82,7 @@ chip=$(npu-smi info -m 2>/dev/null | grep -oP 'Ascend\s*\S+' | head -1); case "$
 
 2. 开发 Python 脚本
 
-    > [!NOTE]说明  
+    > [!NOTE]
     > 
     > **知识点（可选阅读）：msKPP 的 DSL 语言方案（Domain-Specific Language，领域特定语言）**   
     > 这套类库及接口是专为昇腾性能建模而设计的“方言”，需经过专门学习方可掌握，无法仅凭通用 Python 语法直接编写，但用法较简单，稍加学习即可应用。
@@ -144,7 +144,7 @@ MSKPP{timestamp}/
 
 2. 开发算子定义配置文件
 
-    > [!NOTE]说明   
+    > [!NOTE]
     > 
     > **知识点（可选阅读）：msOpGen 输入配置文件**   
     > 自定义格式的 JSON 配置文件，可以简单类比理解为定义了一个 C 语言函数的声明，包括：函数名、入参及返回值的类型信息。
@@ -172,7 +172,7 @@ MSKPP{timestamp}/
 
 4. 查看生成的结果
 
-    > [!NOTE]说明   
+    > [!NOTE]
     > 
     > **知识点（可选阅读）：关键概念**       
     > Host 侧：运行于 CPU 的代码，负责数据预处理、任务调度及算子调用。   
@@ -200,7 +200,7 @@ MSKPP{timestamp}/
 
 #### 2.3.2 实现核心逻辑
 
-> [!NOTE]说明   
+> [!NOTE]
 > 
 > **知识点（可选阅读）：算子核心代码文件实现原理**  
 > op_host/add_custom.cpp：实现 Host 侧的 Tiling 计算逻辑与算子原型注册。  
@@ -230,9 +230,9 @@ python3 ~/ot_demo/msot/example/quick_start/msopgen/keep_soc_info.py set ./op_hos
     bash ./build.sh
     ```
 
-2. 部署算子  
+2. 部署算子
 
-    >[!NOTE]说明   
+    > [!NOTE]
     > 
     > **知识点：什么是部署算子**  
     > 部署算子是指将算子注册到 CANN 框架中，本质上是将算子的二进制文件拷贝至系统公共目录，使其他程序能够通过标准接口（如 CANN API 或 PyTorch 等）自动发现并调用该算子。`*.run` 的部署包格式可以简单理解为一种自解压的压缩包。
@@ -315,7 +315,8 @@ sed -i '1i npu_op_kernel_options(ascendc_kernels ALL OPTIONS -sanitizer)' op_ker
 \cp -f ~/ot_demo/msot/example/quick_start/mssanitizer/bug_code/add_custom.cpp op_kernel/add_custom.cpp
 ```
 
->[!NOTE]说明  
+> [!NOTE]
+> 
 > 关键修改如下：将 `AscendC::DataCopy` 函数调用中的读取长度修改为 2 倍（`2 * this->tileLength`），导致访问超出 GM 内存中 `xGm` 的分配范围，从而触发“非法读取”错误。
 
 #### 2.4.3 重新编译部署
@@ -351,7 +352,8 @@ mssanitizer --tool=memcheck -- bash run.sh
 ======    #6 /root/ot_demo/workspace/src/caller/AddCustom/build_out/op_kernel/AddCustom_ascend910b/kernel_0/kernel_meta_AddCustom_ab1b6750d7f510985325b603cb06dc8b/kernel_meta/AddCustom_ab1b6750d7f510985325b603cb06dc8b_2130445_kernel.cpp:37:5
 ```
 
-> [!NOTE]说明  
+> [!NOTE]
+>
 > 算子出现内存问题后仍可能执行成功，这正体现了该工具的价值：内存问题通常具有偶发性，在多数情况下即使存在内存异常，程序仍可正常运行；仅当问题累积至临界点时才会突发崩溃，难以通过表象直接定位。
 
 #### 2.4.5 恢复手工修改
@@ -505,7 +507,7 @@ source ~/ot_demo/msot/example/quick_start/msdebug/set_kernel_obj_env.sh
     sed -i '1i npu_op_kernel_options(ascendc_kernels ALL OPTIONS -g)' op_kernel/CMakeLists.txt
     ```
 
-    > [!NOTE]说明   
+    > [!NOTE]
     > 
     > **知识点（可选阅读）：为何 -O 优化等级在各工具间切来切去**   
     > 调试阶段为支持断点与变量查看，必须使用 -O0 关闭优化，以保留准确的符号映射；但 -O0 与 -O2 的性能差距可达数倍，因此性能分析必须基于 -O2（或默认优化级别）编译的代码，否则采集的数据将严重偏离真实场景，失去参考价值。
@@ -519,7 +521,8 @@ source ~/ot_demo/msot/example/quick_start/msdebug/set_kernel_obj_env.sh
 
 #### 2.6.2 启动真机与仿真采集
 
-> [!NOTE]说明   
+> [!NOTE]
+>
 > **知识点：上板和仿真采集信息的区别**   
 > 上板：可精确捕获算子运行耗时、各 Pipe 使用情况、内存带宽、Cache 行为等真实硬件特性，而这些往往是仿真器难以高保真复现的关键指标。  
 > 仿真：在指令流追踪、代码热点定位等方面提供更完整、稳定的分析能力，但对内存访问延迟、带宽瓶颈等硬件相关行为的模拟精度有限。  
@@ -560,7 +563,7 @@ source ~/ot_demo/msot/example/quick_start/msdebug/set_kernel_obj_env.sh
 - BIN 文件   
 可使用 `MindStudio Insight` 工具打开，以图形化方式直观展示各类性能视图，例如：计算内存热力图、Cache 热力图以及算子代码热点图等。
 
-  > [!NOTE]说明  
+  > [!NOTE]
   > 
   > 若想体验可视化的图表查看，请参考 <a href="https://gitcode.com/Ascend/msinsight/blob/26.1.0/docs/zh/install_guide/mindstudio_insight_install_guide.md" target="_blank">《MindStudio Insight 工具文档》</a>安装 Insight 工具。
 

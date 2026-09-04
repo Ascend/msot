@@ -79,7 +79,7 @@ chmod +x ascend-mindstudio-operator-tools_*.run
 [mindstudio-operator-tools] [2026-03-02 12:16:42] [INFO]: mindstudio-operator-tools package install success! The new version takes effect immediately.
 ```
 
-> [!NOTE] 
+> [!NOTE]
 > 
 > **安装路径说明**
 > 
@@ -110,7 +110,7 @@ chmod +x ascend-mindstudio-operator-tools_*.run
 [mindstudio-operator-tools] [2026-03-02 12:18:24] [INFO]: End Time: 2026-03-02 12:18:24
 ```
 
-> [!NOTE] 
+> [!NOTE]
 > 
 > 卸载路径说明
 > 

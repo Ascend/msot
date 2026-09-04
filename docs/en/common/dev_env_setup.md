@@ -27,7 +27,9 @@ docker pull swr.cn-north-4.myhuaweicloud.com/mindstudio-image/mindstudio-build:2
 
 If image pulling fails, first check the network proxy or the space in the Docker data directory.
 
-> [!NOTE] How do I build the image myself?
+> [!NOTE]
+> 
+> How do I build the image myself?
 >
 > You usually do not need to build the image yourself. Only when you need to customize the image content, troubleshoot image layers, or reproduce the build process, refer to the [MindStudio Unified Build Image Guide](./docker_image_build_guide.md).
 
@@ -39,7 +41,7 @@ Download the helper script for automatically creating and configuring containers
 cd ~ && curl -fLO --retry 3 https://inst.obs.cn-north-4.myhuaweicloud.com/env/ctr_in.py && chmod +x ctr_in.py
 ```
 
-> [!NOTE] Note
+> [!NOTE]
 >
 > The `ctr_in.py` script is powerful and can serve as a general-purpose tool for routine container operations. View its specific functions and usage with the `--help` parameter.
 
