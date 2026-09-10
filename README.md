@@ -12,6 +12,8 @@
 
 </div>
 
+简体中文 | [English](README_EN.md)
+
 ## ✨ 最新消息
 
 <span style="font-size:14px;">
@@ -24,7 +26,7 @@
 
 MindStudio Operator Tools（msOT）算子开发工具链，聚焦算子开发中的关键挑战。通过提供算子设计、开发框架生成、功能调试、异常检测与多维性能调优等能力，降低算子开发复杂度，提升高性能算子的交付效率。
 
-<img src="./docs/zh/figures/readme/fullview.svg?v=2026033001" width="1200"/>
+<img src="./docs/zh/figures/readme/fullview.svg" width="1200"/>
 
 ## ⚙️ 功能介绍
 
