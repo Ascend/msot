@@ -86,7 +86,7 @@ chip=$(npu-smi info -m 2>/dev/null | grep -oP 'Ascend\s*\S+' | head -1); case "$
     > 
     > **知识点（可选阅读）：msKPP 的 DSL 语言方案（Domain-Specific Language，领域特定语言）**   
     > 这套类库及接口是专为昇腾性能建模而设计的“方言”，需经过专门学习方可掌握，无法仅凭通用 Python 语法直接编写，但用法较简单，稍加学习即可应用。
-    > 常规开发流程：需先导入 Tensor、Chip 以及算子实现所必需的指令（例如 vadd），通过 `with` 语句进入算子实现代码的上下文，再创建 Tensor 以执行具体操作。样例脚本中已做了详细注释，其他指令接口说明请参考《[msKPP 工具接口说明](https://gitcode.com/Ascend/mskpp/blob/master/docs/zh/api_reference/mskpp_api_reference.md)》。
+    > 常规开发流程：需先导入 Tensor、Chip 以及算子实现所必需的指令（例如 vadd），通过 `with` 语句进入算子实现代码的上下文，再创建 Tensor 以执行具体操作。样例脚本中已做了详细注释，其他指令接口说明请参考《[msKPP 工具接口说明](https://gitcode.com/Ascend/mskpp/blob/26.2.0/docs/zh/api_reference/mskpp_api_reference.md)》。
 
     由于这是快速入门，将准备好的 msKPP DSL 脚本复制到此即视为开发完成（本教程聚焦工具链使用，实际开发需自行实现）：
 
@@ -542,27 +542,29 @@ source ~/ot_demo/msot/example/quick_start/msdebug/set_kernel_obj_env.sh
 
 工具在指定 `--output` 目录下生成 `.csv` 和 `.bin` 格式的结果文件，若输出未报错，则表明执行成功：
 
-- CSV 文件   
-例如 `MemoryUB.csv`，打开可以看到如下信息：  
-数据显示任务被均分为 8 个 block，全部调度至 Vector Core 执行。例如 Block 0 的带宽（1.02 GB/s）明显高于 Block 1（0.77 GB/s），如果差异过大，可能提示存在优化空间：
+- CSV 文件
 
-  | block_id | sub_block_id | aiv_time(us) | aiv_total_cycles | aiv_ub_read_bw_vector(GB/s) | aiv_ub_write_bw_vector(GB/s) | 
-  |:--------:|:------------:|:------------:|:----------------:|:---------------------------:|:----------------------------:|
-  |    0     |   vector0    |  7.456666  |      13422      |          1.023164           |           0.511582           | 
-  |    1     |   vector0    |  9.914444  |      17846      |          0.769523           |           0.384762           | 
-  |    2     |   vector0    |  10.001111 |      18002      |          0.762855           |           0.381427           | 
-  |    3     |   vector0    |  9.684444  |      17432      |          0.787799           |           0.393899           | 
-  |    4     |   vector0    |  9.747222  |      17545      |          0.782725           |           0.391363           | 
-  |    5     |   vector0    |  9.062222  |      16312      |          0.84189            |           0.420945           | 
-  |    6     |   vector0    |  9.293889  |      16729      |          0.820904           |           0.410452           | 
-  |    7     |   vector0    |  8.658889  |      15586      |          0.881105           |           0.440553           | 
+    例如 `MemoryUB.csv`，打开可以看到如下信息：  
+    数据显示任务被均分为 8 个 block，全部调度至 Vector Core 执行。例如 Block 0 的带宽（1.02 GB/s）明显高于 Block 1（0.77 GB/s），如果差异过大，可能提示存在优化空间：
 
-- BIN 文件   
-可使用 `MindStudio Insight` 工具打开，以图形化方式直观展示各类性能视图，例如：计算内存热力图、Cache 热力图以及算子代码热点图等。
+    | block_id | sub_block_id | aiv_time(us) | aiv_total_cycles | aiv_ub_read_bw_vector(GB/s) | aiv_ub_write_bw_vector(GB/s) | 
+    |:--------:|:------------:|:------------:|:----------------:|:---------------------------:|:----------------------------:|
+    |    0     |   vector0    |  7.456666  |      13422      |          1.023164           |           0.511582           | 
+    |    1     |   vector0    |  9.914444  |      17846      |          0.769523           |           0.384762           | 
+    |    2     |   vector0    |  10.001111 |      18002      |          0.762855           |           0.381427           | 
+    |    3     |   vector0    |  9.684444  |      17432      |          0.787799           |           0.393899           | 
+    |    4     |   vector0    |  9.747222  |      17545      |          0.782725           |           0.391363           | 
+    |    5     |   vector0    |  9.062222  |      16312      |          0.84189            |           0.420945           | 
+    |    6     |   vector0    |  9.293889  |      16729      |          0.820904           |           0.410452           | 
+    |    7     |   vector0    |  8.658889  |      15586      |          0.881105           |           0.440553           | 
 
-  > [!NOTE]说明  
-  > 
-  > 若想体验可视化的图表查看，请参考 <a href="https://gitcode.com/Ascend/msinsight/blob/master/docs/zh/install_guide/mindstudio_insight_install_guide.md" target="_blank">《MindStudio Insight 工具文档》</a>安装 Insight 工具。
+- BIN 文件
+
+    可使用 `MindStudio Insight` 工具打开，以图形化方式直观展示各类性能视图，例如：计算内存热力图、Cache 热力图以及算子代码热点图等。
+
+    > [!NOTE]
+    > 
+    > 若想体验可视化的图表查看，请参考 <a href="https://gitcode.com/Ascend/msinsight/blob/26.2.0/docs/zh/install_guide/mindstudio_insight_install_guide.md" target="_blank">《MindStudio Insight 工具文档》</a>安装 Insight 工具。
 
 #### 2.6.4 恢复手工修改
 
@@ -598,11 +600,11 @@ source ~/ot_demo/msot/example/quick_start/msdebug/set_kernel_obj_env.sh
 
 | 工具 | 高级能力说明 |
 |------|--------------|
-| [msKPP](https://gitcode.com/Ascend/mskpp/blob/master/docs/zh/user_guide/mskpp_user_guide.md) | 使用 Cache 命中率、随路转换等建模、多种 Tiling 方案的性能对比分析等。 |
-| [msOpGen](https://gitcode.com/Ascend/msopgen/blob/master/docs/zh/user_guide/msopgen_user_guide.md) | 复杂算子模板定制、多输入多输出算子的工程生成等。 |
-| [msSanitizer](https://gitcode.com/Ascend/mssanitizer/blob/master/docs/zh/user_guide/mssanitizer_user_guide.md) | 竞争条件检测、同步异常诊断、未初始化变量检查等更多检测模式。 |
-| [msDebug](https://gitcode.com/Ascend/msdebug/blob/master/docs/zh/user_guide/msdebug_user_guide.md) | 内存查看、核切换、解析 Core dump 文件等高级调试技巧。 |
-| [msOpProf](https://gitcode.com/Ascend/msopprof/blob/master/docs/zh/user_guide/msopprof_user_guide.md) | 结合 [MindStudio Insight](https://gitcode.com/Ascend/msinsight/blob/master/docs/zh/install_guide/mindstudio_insight_install_guide.md) 进行可视化性能分析，包括计算内存热力图、Cache 热力图及代码热点图。 |
+| [msKPP](https://gitcode.com/Ascend/mskpp/blob/26.2.0/docs/zh/user_guide/mskpp_user_guide.md) | 使用 Cache 命中率、随路转换等建模、多种 Tiling 方案的性能对比分析等。 |
+| [msOpGen](https://gitcode.com/Ascend/msopgen/blob/26.2.0/docs/zh/user_guide/msopgen_user_guide.md) | 复杂算子模板定制、多输入多输出算子的工程生成等。 |
+| [msSanitizer](https://gitcode.com/Ascend/mssanitizer/blob/26.2.0/docs/zh/user_guide/mssanitizer_user_guide.md) | 竞争条件检测、同步异常诊断、未初始化变量检查等更多检测模式。 |
+| [msDebug](https://gitcode.com/Ascend/msdebug/blob/26.2.0/docs/zh/user_guide/msdebug_user_guide.md) | 内存查看、核切换、解析 Core dump 文件等高级调试技巧。 |
+| [msOpProf](https://gitcode.com/Ascend/msopprof/blob/26.2.0/docs/zh/user_guide/msopprof_user_guide.md) | 结合 [MindStudio Insight](https://gitcode.com/Ascend/msinsight/blob/26.2.0/docs/zh/install_guide/mindstudio_insight_install_guide.md) 进行可视化性能分析，包括计算内存热力图、Cache 热力图及代码热点图。 |
 
 **第三步：落地真实业务 —— 从教学走向生产**  
 

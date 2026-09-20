@@ -39,7 +39,7 @@
 
 ```bash
 cd ~
-git clone https://gitcode.com/Ascend/msot.git
+git clone https://gitcode.com/Ascend/msot.git -b 26.2.0
 ```
 
 #### 2.3.2 执行编译
@@ -83,7 +83,8 @@ chmod +x ascend-mindstudio-operator-tools_*.run
 ./ascend-mindstudio-operator-tools_*.run --install
 ```
 
-安装过程中，若环境中已有旧版工具，会提示是否替换：输入 `y` 并回车即可执行覆盖安装。    
+安装过程中，若环境中已有旧版工具，会提示是否替换：输入 `y` 并回车即可执行覆盖安装。
+
 若输出类似以下信息，则表明安装成功：
 
 ```text
@@ -92,7 +93,7 @@ chmod +x ascend-mindstudio-operator-tools_*.run
 [mindstudio-operator-tools] [2026-03-02 12:16:42] [INFO]: mindstudio-operator-tools package install success! The new version takes effect immediately.
 ```
 
-> [!NOTE] 
+> [!NOTE]
 > 
 > **安装路径说明**
 > 
@@ -123,7 +124,7 @@ chmod +x ascend-mindstudio-operator-tools_*.run
 [mindstudio-operator-tools] [2026-03-02 12:18:24] [INFO]: End Time: 2026-03-02 12:18:24
 ```
 
-> [!NOTE] 
+> [!NOTE]
 > 
 > 卸载路径说明
 > 

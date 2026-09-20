@@ -47,7 +47,7 @@ MindStudio Operator Tools（msOT）算子开发工具链，聚焦算子开发中
 
 ## 📦 安装指南
 
-介绍 msOT 工具的环境依赖与安装方法，请参见《[msOT 安装指南](./docs/zh/install_guide/msot_install_guide.md)》。
+msOT工具支持在线安装、离线安装和源码安装三种安装方式，请参见《[msOT 安装指南](./docs/zh/install_guide/msot_install_guide.md)》。
 
 ## 📘 使用指南
 

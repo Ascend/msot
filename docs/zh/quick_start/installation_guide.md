@@ -35,10 +35,11 @@ source /dev/stdin <<< "$(dev_id=$(lspci -n -D | grep -o '19e5:d[0-9a-f]\{3\}' | 
 [ -n "$MY_STUDY_VAR_CANN_IMAGE" ] && echo -e "\e[32m[PASS] Successfully identified chip [$MY_CHIP_NAME] and auto-selected image:\n    $MY_STUDY_VAR_CANN_IMAGE\e[0m"
 ```
 
-> [!NOTE]说明
+> [!NOTE]
 >
 > **命令原理**  
-> 通过 `lspci` 获取 NPU 的 PCI ID，自动匹配 CANN 官方镜像，并将镜像地址赋给环境变量 `MY_STUDY_VAR_CANN_IMAGE`，供后续使用。  
+> 通过 `lspci` 获取 NPU 的 PCI ID，自动匹配 CANN 官方镜像，并将镜像地址赋给环境变量 `MY_STUDY_VAR_CANN_IMAGE`，供后续使用。
+> 
 > 所有镜像均来自华为云 AscendHub 上发布的 CANN 官方镜像。如需了解镜像详情，请参阅 [CANN 官方镜像仓库](https://www.hiascend.com/developer/ascendhub/detail/17da20d1c2b6493cb38765adeba85884)。
 
 若命令执行后输出 `[PASS]`，则表示执行成功；若输出 `[FAIL]`，可能原因如下：
@@ -110,7 +111,7 @@ git clone https://gitcode.com/Ascend/msot.git ~/ot_demo/msot
 
 ## 5. 容器内：设置芯片 SoC 型号
 
-后续多条命令需引用芯片 SoC 型号（片上系统型号，用于标识芯片架构）。此处统一查询并保存到环境变量 `MY_STUDY_VAR_CHIP_SOC_TYPE`，便于后续直接调用。  
+后续多条命令需引用芯片 SoC 型号（片上系统型号，用于标识芯片架构）。此处统一查询并保存到环境变量 `MY_STUDY_VAR_CHIP_SOC_TYPE`，便于后续直接调用。
 
 在容器内执行如下命令：
 
