@@ -16,7 +16,7 @@ You can support this project in the following ways:
 ## 1. Contribution Workflow
 
 1. **Fork the repository**: Fork the source code repository to your personal repository, then clone your personal repository to your local development environment.
-2. **Create a branch**: Create a feature branch based on the latest main branch. The branch name should be concise and reflect the changes (e.g., `fix_xxx_bug`, `feature_xxx`).
+2. **Create a branch**: Create a feature branch based on the latest main branch. The branch name should be concise and reflect the changes (for example, `fix_xxx_bug`, `feature_xxx`).
 3. **Code development**: Develop on the feature branch, follow the [Code Style](#2-code-style), and keep commit records clear and atomic.
 4. **Local testing**: Perform thorough functional verification of the code, supplement unit tests as needed based on the developed modules, and ensure all tests pass.
 5. **Documentation update**: Supplement or update documentation related to the changes, follow the [Documentation Standards](#3-documentation-standards).
@@ -37,7 +37,7 @@ You can support this project in the following ways:
 ### 2.2 C++ Code Style
 
 - **Consistency**: Follow the project's existing coding style and maintain consistency with surrounding code.
-- **Naming conventions**: Use PascalCase for class and struct names (e.g., `DataManager`) and camelCase for function names (e.g., `parseData`).
+- **Naming conventions**: Use PascalCase for class and struct names (for example, `DataManager`) and camelCase for function names (for example, `parseData`).
 - **Comment requirements**: Complex logic and public interfaces must include comments describing the functionality, parameters, and return values.
 - **Exception handling**: Handle exceptions properly; swallowing exceptions without handling or logging is prohibited. Use RAII for resource acquisition to ensure exception safety.
 
@@ -71,7 +71,7 @@ Before submitting a Pull Request, please ensure:
   
 ### 5.2 Creating a PR
 
-When creating a pull request on [GitCode](https://gitcode.com/), please fill in the following completely:
+When creating a pull request on [AtomGit](https://atomgit.com/), please fill in the following completely:
 
 1. **Title**: Briefly summarize the topic or feature of this change.
 2. **Description**: Explain what was changed, the reason for the modification, and the self-test status (including environment and results) to facilitate the reviewer's understanding.

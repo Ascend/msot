@@ -12,12 +12,12 @@ This is the main repository and does not contain specific tool code. Please refe
 
 | Tool Name            | Function |                      Source Repository                      |
 |-----------------|------|:----------------------------------------------:|
-| **msKPP**       | Performance prediction |    [Click to View](https://gitcode.com/Ascend/mskpp)    |
-| **msOpGen**     | Project generation |   [Click to View](https://gitcode.com/Ascend/msopgen)   |
-| **msSanitizer** | Anomaly detection | [Click to View](https://gitcode.com/Ascend/mssanitizer) |
-| **msDebug**     | Native debugging |   [Click to View](https://gitcode.com/Ascend/msdebug)   |
-| **msOpProf**    | Performance analysis |  [Click to View](https://gitcode.com/Ascend/msopprof)   |
-| **msKL**        | Quick invocation |    [Click to View](https://gitcode.com/Ascend/mskl)     |
-| **msOpTuner**   | Parameter tuning |   [Click to View](https://gitcode.com/Ascend/msoptuner)   |
-| **msTX**        | Interface extension |   [Click to View](https://gitcode.com/Ascend/mstx)   |
-| **msOpCom**     | Basic components |   [Click to View](https://gitcode.com/Ascend/msopcom)   |
+| **msKPP**       | Performance prediction |    [Click to View](https://atomgit.com/Ascend/mskpp)    |
+| **msOpGen**     | Project generation |   [Click to View](https://atomgit.com/Ascend/msopgen)   |
+| **msSanitizer** | Anomaly detection | [Click to View](https://atomgit.com/Ascend/mssanitizer) |
+| **msDebug**     | Native debugging |   [Click to View](https://atomgit.com/Ascend/msdebug)   |
+| **msOpProf**    | Performance analysis |  [Click to View](https://atomgit.com/Ascend/msopprof)   |
+| **msKL**        | Quick invocation |    [Click to View](https://atomgit.com/Ascend/mskl)     |
+| **msOpTuner**   | Parameter tuning |   [Click to View](https://atomgit.com/Ascend/msoptuner)   |
+| **msTX**        | Interface extension |   [Click to View](https://atomgit.com/Ascend/mstx)   |
+| **msOpCom**     | Basic components |   [Click to View](https://atomgit.com/Ascend/msopcom)   |

@@ -4,7 +4,7 @@
 
 This document describes how to build the MindStudio compilation image based on the openEuler operating system, with GCC, Python, and Ascend CANN software packages integrated.
 
-This document is intended only for developers who need to **customize the image content or reproduce the image build process**. If you only need to set up a routine development environment, first refer to the [MindStudio Tool Development Environment Installation Guide](./dev_env_setup.md) to pull the published image directly.
+This document is intended only for developers who need to **customize the image content or reproduce the image build process**. If you only need to set up a routine development environment, first refer to the [MindStudio Tool Development Environment Setup Guide](./dev_env_setup.md).
 
 ## 1. Applicable Scenarios and Image Composition
 
@@ -13,11 +13,11 @@ To improve the efficiency of routine updates and distribution, the image uses a 
 | Image Layer | Core Components | Description |
 | :--- | :--- | :--- |
 | **Top layer (Layer 4)** | Ascend CANN software packages | The part most frequently updated by the service, including the CANN runtime and development environment |
-| **Third layer (Layer 3)** | Python environment | Python environment installed per the PyPA standard, forming the base build image together with GCC |
-| **Second layer (Layer 2)** | GCC 11 | Core compilation toolchain |
+| **Third layer (Layer 3)** | Python environment and related toolchain | Python environment installed per the PyPA standard, forming the base build image together with GCC |
+| **Second layer (Layer 2)** | GCC 11 and related toolchain | Core compilation toolchain |
 | **Bottom layer (Layer 1)** | openEuler base system | Operating system foundation that provides the basic system libraries |
 
-> [!NOTE]
+> [!NOTE]Note
 >
 > **Primary Software Environment**
 >
@@ -32,11 +32,11 @@ Ensure that the host meets the following requirements:
 
 | Dependency | Requirement | Verification Command |
 | --- | --- | --- |
-| **Docker engine** | Version 23 or later is recommended. This example uses 26.1.3 | `docker info` returns information without errors. |
+| **Docker Engine** | Version 23.0 or later, and the Docker service is running properly | `docker info` returns information without errors. |
 | **Docker Buildx** | Installed and runnable | `docker buildx version` outputs version information. |
-| **Python 3** | Any 3.x version installed | `python3 -V` outputs version information. |
-| **curl** | Used to download build scripts | `curl -V` outputs version information. |
-| **Drive space** | The Docker data directory must have enough space to store the build context, base images, and build cache | `df -h $(docker info -f '{{.DockerRootDir}}')` shows that Avail is greater than 20 GB. |
+| **Python 3** | Installed (any 3.x version) | `python3 -V` outputs version information. |
+| **curl** | Installed (any version) | `curl -V` outputs version information. |
+| **Drive space** | The Docker data directory must have enough space to store the build context, base images, and build cache | `df -h $(docker info -f '{{.DockerRootDir}}')` shows that Avail is at least 20 GB. |
 | **Network access** | Direct Internet access to the script download URL, CANN run package URLs, and so on | `curl -I https://inst.obs.cn-north-4.myhuaweicloud.com/env/ctr_in.py` returns `200 OK`. |
 
 If `docker info` reports a permission denied error, first resolve the Docker permission issue as described in [Section 8.1](#81-what-to-do-when-docker-commands-report-a-permission-denied-error).
@@ -79,6 +79,15 @@ tar zxvf dockerfile.tar.gz
 cd docker
 ```
 
+> [!CAUTION]Caution
+>
+> The `-v` parameter of the `tar zxvf` extraction command outputs the file list to stdout. **Never** combine the extraction command with a truncating pipe such as `| head` or `| tail` (for example, `tar zxvf xxx.tar.gz | head -20`). After `head` reads the specified number of lines, it closes the pipe. The tar process then receives the SIGPIPE signal and is terminated. Therefore, only some files are extracted and no error message is displayed.
+>
+> Correct practice:
+>
+> - Use `tar zxf` for extraction (without `-v`, no stdout output, and unaffected by pipes).
+> - Use `tar ztf xxx.tar.gz | head -20` to view the file list (`-t` only lists files without extracting. Therefore, truncation has no side effects.)
+
 ## 5. Host: Setting the Image Tag
 
 Run the following commands. The system automatically appends the suffix based on the hardware architecture (ARM64/AMD64) of the current machine and sets the environment variable:
@@ -90,25 +99,27 @@ echo "IMG_TAG=${IMG_TAG}"
 
 ## 6. Host: Running the Image Build
 
-Run the Python script to start the build. The entire build process usually takes about 30 minutes. The actual duration depends on the network speed, drive performance, and Docker cache hits:
+Run the Python script to start the build. The entire build process usually takes about 20 minutes. The actual duration depends on the network speed, drive performance, and Docker cache hits:
 
 ```bash
 python3 build_image.py -t ${IMG_TAG} --force \
--c https://ascend-cann-open.obs.cn-north-4.myhuaweicloud.com/CANN/CANN%209.1.0-beta.3/Ascend-cann_9.1.0-beta.3_linux-$(arch).run \
--c https://ascend-repo.obs.cn-east-2.myhuaweicloud.com/CANN/CANN%209.1.T6/Ascend-cann-910b-ops_9.1.0-beta.3_linux-$(arch).run
+-c https://ascend-cann-open.obs.cn-north-4.myhuaweicloud.com/CANN/CANN%209.1.0/Ascend-cann_9.1.0_linux-$(arch).run  \
+-c https://ascend-cann-open.obs.cn-north-4.myhuaweicloud.com/CANN/CANN%209.1.0/Ascend-cann-910b-ops_9.1.0_linux-$(arch).run
 ```
 
 Parameters:
 
 | Parameter | Description |
 | --- | --- |
-| -t ${IMG_TAG} | Specifies the tag of the built image. |
-| --force | Forces a rebuild, avoiding the reuse of intermediate states that do not meet expectations. |
-| -c \<URL> | Specifies the download URL of the CANN run package. Pass two CANN packages: `toolkit` and `ops` |
+| `-t ${IMG_TAG}` | Specifies the tag of the built image. |
+| `--force` | Forces a rebuild, avoiding the reuse of intermediate states that do not meet expectations. |
+| `-c <URL>` | Specifies the download URL of the CANN run package. Pass two CANN packages: `toolkit` and `ops`. |
 
 > [!CAUTION]Caution
 >
-> The CANN run package URLs in the preceding command are only examples. To build an image with another CANN version, replace them with the run package URLs of the corresponding version and ensure that the CANN package versions are consistent.
+> The preceding command is the default environment build baseline for source compilation and unit tests of current MindStudio tools. When the documentation of a service repository does not explicitly specify another version, you must use the preceding toolkit and ops software package URLs as is, and ensure that all CANN software packages use the same version.
+>
+> To upgrade the unified build environment, modify only the default command and the supporting software versions in this guide. Service repositories do not need to maintain version information separately.
 
 ## 7. Host: Verifying and Starting the Image
 
@@ -124,11 +135,19 @@ Download the container startup script:
 cd ~ && curl -fLO --retry 3 https://inst.obs.cn-north-4.myhuaweicloud.com/env/ctr_in.py && chmod +x ctr_in.py
 ```
 
-Start the container. Because the most recently built image appears at the top of the `docker images` output, the script automatically selects the first result that matches the tag as the image to start:
+Run the following command to start and enter the container in a session with an interactive terminal (TTY). Because the most recently built image appears at the top of the `docker images` output, the script automatically selects the first result that matches the tag as the image to start:
 
 ```bash
 ~/ctr_in.py "$(docker images --format '{{.Repository}}:{{.Tag}}' | grep "${IMG_TAG}" | head -n1)"
 ```
+
+> [!CAUTION]Caution
+>
+> You must use the preceding `ctr_in.py` command to create and enter the container. Do not replace it with a plain `docker run`. `ctr_in.py` preserves the image entrypoint script, maps users, mounts directories, initializes the environment, and enters an interactive shell.
+>
+> The source compilation and unit test commands for subsequent service repositories must run in the same interactive shell opened by `ctr_in.py`. Do not exit it and then switch to `docker exec <container_name> bash -c '<command>'`. A non-interactive shell does not fully run the initialization scripts in `/etc/profile.d/`, which may prevent the Python version, GCC, or CANN environment from being activated correctly.
+>
+> When an automated tool runs this section, it must allocate a TTY and keep reusing that interactive session. If the session is interrupted unexpectedly, use `~/ctr_in.py <container_name>` to enter the container interactively again before you continue.
 
 ## 8. FAQ
 

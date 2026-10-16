@@ -1,4 +1,4 @@
-# MindStudio Operator Tools Installation Guide
+# msOT Installation Guide
 
 <br>
 
@@ -24,41 +24,54 @@ For devices in an environment without internet access, such as an enterprise int
 
 If you need to use the features of the latest code, you can download the code from this repository, compile, package, and install the operator toolchain yourself.
 
-#### 2.3.1 Preparing the Compilation Environment
+#### 2.3.1 Preparing the Environment
 
-Configure the environment by referring to the following document: [Operator Tool Development Environment Setup Guide](../common/dev_env_setup.md).
+All source code compilation uses the standard MindStudio build environment.
 
-#### 2.3.2 Cloning the Repository
+- For daily development or when you use a released image, refer to the [MindStudio Tool Development Environment Setup Guide](../common/dev_env_setup.md).
+- When you need to reproduce the environment from a base operating system, perform source code build verification or unit test verification, you must refer to the [MindStudio Unified Build Image Creation Guide](../common/docker_image_build_guide.md) and build the environment image on site from the openEuler base image.
+
+The source code compilation and unit test commands later in this document are all run in the container of the previously specified image or the environment image built on site. The CANN software package version, GCC version, and Python version are subject to the unified image creation guide.
+
+After the image is built, you must use the `ctr_in.py` command provided in Chapter 7 of the unified image creation guide to start and enter the container in an interactive terminal. Do not use a plain `docker run` to create a container, and do not use `docker exec <container_name> bash -c '<command>'` to replace the interactive environment. Otherwise, the initialization of Python, GCC, and the CANN environment may be skipped.
+
+After you enter the interactive shell of the container opened by `ctr_in.py`, run the following command to clone this repository:
 
 ```bash
 cd ~
-git clone https://gitcode.com/Ascend/msot.git
+git clone https://atomgit.com/Ascend/msot.git -b 26.2.0
 ```
 
-#### 2.3.3 Compilation and Packaging
+#### 2.3.2 Performing Compilation
 
-Use the one-click script to automatically complete the download and build process of dependency repositories (takes about 20 minutes for the first time):
+Stay in the shell of the same interactive container opened by `ctr_in.py`, and run the following command to automatically download dependencies and complete the build:
 
 ```bash
-cd msot
+cd ~/msot
 python3 build.py
 ```
 
-A message similar to the following indicates a successful build:
+After a successful build, the run package is generated in the `artifacts/` directory.
 
-```text
-Self-extractable archive "ascend-mindstudio-operator-tools_1.0.0_aarch64.run" successfully created.
-[100%] Built target package_msot
+#### 2.3.3 Performing Unit Tests (Optional)
+
+This step is not required for installation. To verify the basic functions of the code, you can perform unit tests:
+
+```bash
+cd ~/msot
+python3 build.py test
 ```
+
+A command return code of 0 with no failed test cases indicates that the unit tests pass.
 
 #### 2.3.4 Installation
 
 ##### 2.3.4.1 Preparing the Run Package
 
-The run package will be generated in the `output` directory. Run the following command to add executable permissions to it:
+The run package is generated in the `artifacts` directory. Run the following command to add executable permissions to it:
 
 ```bash
-cd output
+cd ~/msot/artifacts
 chmod +x ascend-mindstudio-operator-tools_*.run
 ```
 
@@ -70,7 +83,8 @@ Copy the run package to the runtime environment (copying is not required for loc
 ./ascend-mindstudio-operator-tools_*.run --install
 ```
 
-During installation, if an older version of the tool already exists in the environment, you will be prompted to replace it: enter `y` and press Enter to perform an overwrite installation.  
+During installation, if an older version of the tool already exists in the environment, you will be prompted to replace it: enter `y` and press Enter to perform an overwrite installation.
+
 If output similar to the following is displayed, the installation is successful:
 
 ```text
@@ -80,9 +94,9 @@ If output similar to the following is displayed, the installation is successful:
 ```
 
 > [!NOTE]
-> 
-> **Installation Path Description**
-> 
+>
+> **Installation Paths**
+>
 > The installation path is determined by the following priorities (from highest to lowest):
 >
 > 1. `--install-path` specified on the CLI: installs to the specified directory (absolute path recommended).
@@ -111,9 +125,9 @@ If the output is similar to the following, the uninstallation is successful:
 ```
 
 > [!NOTE]
-> 
+>
 > Uninstallation Path Description
-> 
+>
 > By default, it will be uninstalled from the `$HOME/Ascend` directory. If a custom path was specified using `--install-path` during installation,
 > the same path must also be specified during uninstallation, for example:
 >
