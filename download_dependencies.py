@@ -57,6 +57,38 @@ class DependencyManager:
             logging.error(f"Error executing command: {' '.join(cmd)}")
             raise e
 
+    @staticmethod
+    def _try_shell_cmd(cmd, cwd=None):
+        """执行命令并返回 (是否成功, stderr)，失败原因用于诊断。"""
+        logging.info(f"Run CMD: {' '.join(cmd)}")
+        result = subprocess.run(cmd, cwd=cwd, stdout=subprocess.DEVNULL,
+                                stderr=subprocess.PIPE, text=True)
+        return result.returncode == 0, (result.stderr or "").strip()
+
+    def _fetch_revision(self, mod_dir, revision):
+        """只拉取指定分支/标签（浅层），避免 --tags --all 拉取整个仓库（如 msdebug）导致极慢。"""
+        # build.py 会传入 origin/<branch> 形式，去掉远端前缀后才能拼出远端分支名
+        name = revision[len("origin/"):] if revision.startswith("origin/") else revision
+        refs = [revision] if revision.startswith("refs/") else \
+            [f"refs/heads/{name}", f"refs/tags/{name}", name]
+        last_err = ""
+        for ref in refs:
+            ok, last_err = self._try_shell_cmd(["git", "fetch", "--depth=1", "origin", ref], cwd=mod_dir)
+            if ok:
+                return True, ""
+        return False, last_err
+
+    def _checkout_revision(self, mod_dir, revision):
+        ok, err = self._fetch_revision(mod_dir, revision)
+        if ok:
+            self._exec_shell_cmd(["git", "checkout", "--detach", "FETCH_HEAD"], cwd=mod_dir)
+            return
+        # 兜底：远端不允许按 ref/SHA 单独拉取时，退回全量 fetch，保证可用性
+        logging.warning(f"Fetch {revision} failed ({err or 'unknown error'}), falling back to full fetch")
+        self._exec_shell_cmd(["git", "config", "remote.origin.fetch", "+refs/heads/*:refs/remotes/origin/*"], cwd=mod_dir)
+        self._exec_shell_cmd(["git", "fetch", "--tags", "--all"], cwd=mod_dir)
+        self._exec_shell_cmd(["git", "checkout", revision], cwd=mod_dir)
+
     def _download_submodule_recursively(self, path):
         mod_dir = self.root / path
         script = mod_dir / "download_dependencies.py"
@@ -64,9 +96,13 @@ class DependencyManager:
 
         logging.info(f"Download submodule: {path}")
         if self.args.revision:
-            self._exec_shell_cmd(["git", "config", "remote.origin.fetch", "+refs/heads/*:refs/remotes/origin/*"], cwd=mod_dir)
-            self._exec_shell_cmd(["git", "fetch", "--tags", "--all"], cwd=mod_dir)
-            self._exec_shell_cmd(["git", "checkout", self.args.revision], cwd=mod_dir)
+            if Path(path).name == "msdebug":
+                # msdebug 为 LLVM 大仓，只拉取指定分支/标签，避免全量 fetch 极慢
+                self._checkout_revision(mod_dir, self.args.revision)
+            else:
+                self._exec_shell_cmd(["git", "config", "remote.origin.fetch", "+refs/heads/*:refs/remotes/origin/*"], cwd=mod_dir)
+                self._exec_shell_cmd(["git", "fetch", "--tags", "--all"], cwd=mod_dir)
+                self._exec_shell_cmd(["git", "checkout", self.args.revision], cwd=mod_dir)
 
         cmd = [sys.executable, script.name] + (
             ["-r", self.args.revision] if self.args.revision else []) + self.args.command
