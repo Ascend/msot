@@ -21,7 +21,7 @@ Before starting the installation, ensure that the server meets the following req
 
 ## 2. Host Machine: Selecting and Pulling the CANN Image
 
-> [!NOTE]
+> [!NOTE] Note
 >
 > - The Ascend AI operator development toolchain is released together with CANN. Installing CANN completes the toolchain deployment.
 > - Because the operator compilation environment has complex dependencies, this tutorial **supports only** the CANN containerized deployment mode. Non-container environments such as bare-metal servers and virtual machines are not supported.
@@ -35,11 +35,11 @@ source /dev/stdin <<< "$(dev_id=$(lspci -n -D | grep -o '19e5:d[0-9a-f]\{3\}' | 
 [ -n "$MY_STUDY_VAR_CANN_IMAGE" ] && echo -e "\e[32m[PASS] Successfully identified chip [$MY_CHIP_NAME] and auto-selected image:\n    $MY_STUDY_VAR_CANN_IMAGE\e[0m"
 ```
 
-> [!NOTE]
+> [!NOTE] Note
 >
 > **Command Principle**  
 > The command uses `lspci` to obtain the NPU PCI ID, automatically matches the official CANN image, and assigns the image address to the environment variable `MY_STUDY_VAR_CANN_IMAGE` for later use.  
-> All images are the official CANN images published on Huawei Cloud AscendHub. For image details, see the [CANN Official Image Repository](https://www.hiascend.com/en/developer/ascendhub/detail/17da20d1c2b6493cb38765adeba85884).
+> All images are the official CANN images published on Huawei Cloud AscendHub. For image details, see the [CANN Official Image Repository](https://www.hiascend.com/developer/ascendhub/detail/17da20d1c2b6493cb38765adeba85884).
 
 If the command outputs `[PASS]`, the execution succeeded. If it outputs `[FAIL]`, possible causes are as follows:
 
@@ -110,7 +110,7 @@ After cloning is complete, the example code is located at `~/ot_demo/msot/exampl
 
 ## 5. In the Container: Setting the Chip SoC Model
 
-Many subsequent commands need to reference the chip SoC model (system-on-a-chip model, used to identify the chip architecture). This section queries it uniformly and saves it to the environment variable `MY_STUDY_VAR_CHIP_SOC_TYPE` for direct use later.  
+Many subsequent commands need to reference the chip SoC model (system-on-a-chip model, used to identify the chip architecture). This section queries it uniformly and saves it to the environment variable `MY_STUDY_VAR_CHIP_SOC_TYPE` for direct use later.
 
 Run the following command in the container:
 

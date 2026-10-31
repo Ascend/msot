@@ -40,6 +40,7 @@ MindStudio Operator Tools（msOT）算子开发工具链，聚焦算子开发中
 | 检测 | [**msSanitizer**](https://gitcode.com/Ascend/mssanitizer) | **【异常检测】** 提供内存、竞争、未初始化及同步检测，支持多核程序内存问题的精准定位。             |
 | 调试 | [**msDebug**](https://gitcode.com/Ascend/msdebug) | **【原生调试】** 基于昇腾处理器的原生环境调试，支持变量查看、单步执行及上板调试。               |
 | 调优 | [**msOpProf**](https://gitcode.com/Ascend/msopprof) | **【性能分析】** 支持上板与仿真数据采集，通过 MindStudio Insight 可视化工具定位性能瓶颈。 |
+| 智能体 | [**msAgent**](https://gitcode.com/Ascend/msagent) | **【调试调优】** 在性能调优、精度分析、模型量化、算子优化、文档体验与代码审查等任务中更快定位问题并形成可执行建议。 |
 
 ## 🚀 快速入门
 
@@ -81,10 +82,6 @@ MindStudio Operator Tools（msOT）算子开发工具链，聚焦算子开发中
 
 ## 🙏 致谢
 
-msOT 由华为公司的下列部门联合贡献：    
-🔹 昇腾计算MindStudio开发部  
-🔹 昇腾计算生态使能部  
-🔹 华为云昇腾云服务  
-🔹 2012编译器实验室  
-🔹 2012马尔科夫实验室  
-感谢来自社区的每一个 PR，欢迎贡献 msOT！
+本工具由华为技术有限公司与开发者联合贡献。
+
+感谢来自社区的每一个PR，欢迎贡献。
