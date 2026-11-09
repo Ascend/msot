@@ -39,7 +39,7 @@ After you enter the interactive shell of the container opened by `ctr_in.py`, ru
 
 ```bash
 cd ~
-git clone https://atomgit.com/Ascend/msot.git -b 26.2.0
+git clone https://gitcode.com/Ascend/msot.git -b 26.2.0
 ```
 
 #### 2.3.2 Performing Compilation

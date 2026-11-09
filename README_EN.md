@@ -8,7 +8,7 @@
  [![AI Q&A (ZRead)](https://badgen.net/badge/AI%20Q%26A/ZRead/blue)](https://zread.ai/mindstudio-docs/26.2.0) 
  [![Exact Search](https://badgen.net/badge/Exact%20Search/ReadTheDocs/blue)](https://mindstudio-operator-tools-docs.readthedocs.io/zh-cn/latest/) 
  [![Ascend Community](https://badgen.net/badge/Ascend%20Community/Community/blue)](https://www.hiascend.com/en/developer/software/mindstudio) 
- [![Report Issues](https://badgen.net/badge/Report%20Issues/Issues/blue)](https://atomgit.com/Ascend/msot/issues) 
+ [![Report Issues](https://badgen.net/badge/Report%20Issues/Issues/blue)](https://gitcode.com/Ascend/msot/issues) 
 
 </div>
 
@@ -34,12 +34,12 @@ The operator development toolchain provides the following series of tools:
 
 | Category | Tool Name | Feature Overview                                                      |
 |:--:| :--- |:----------------------------------------------------------|
-| Design | [**msKPP**](https://atomgit.com/Ascend/mskpp) | **[Performance Prediction]** Supports inputting operator descriptions to predict the performance upper limit of an operator under a specific algorithm implementation.                    |
-| Build | [**msOpGen**](https://atomgit.com/Ascend/msopgen) | **[Project Generation]** An operator development efficiency improvement tool that provides template project generation capabilities, simplifying project setup.                  |
-| Verification | [**msKL**](https://atomgit.com/Ascend/mskl) | **[Quick Invocation]** Provides a Python interface to quickly launch and run Kernels, facilitating rapid functional verification.         |
-| Detection | [**msSanitizer**](https://atomgit.com/Ascend/mssanitizer) | **[Anomaly Detection]** Provides memory, race condition, uninitialized access, and synchronization detection, supporting precise localization of memory issues in multi-core programs.             |
-| Debugging | [**msDebug**](https://atomgit.com/Ascend/msdebug) | **[Native Debugging]** Native environment debugging based on Ascend processors, supporting variable inspection, single-step execution, and on-device debugging.               |
-| Tuning | [**msOpProf**](https://atomgit.com/Ascend/msopprof) | **[Performance Analysis]** Supports on-device and simulation data collection, and locates performance bottlenecks through the MindStudio Insight visualization tool. |
+| Design | [**msKPP**](https://gitcode.com/Ascend/mskpp) | **[Performance Prediction]** Supports inputting operator descriptions to predict the performance upper limit of an operator under a specific algorithm implementation.                    |
+| Build | [**msOpGen**](https://gitcode.com/Ascend/msopgen) | **[Project Generation]** An operator development efficiency improvement tool that provides template project generation capabilities, simplifying project setup.                  |
+| Verification | [**msKL**](https://gitcode.com/Ascend/mskl) | **[Quick Invocation]** Provides a Python interface to quickly launch and run Kernels, facilitating rapid functional verification.         |
+| Detection | [**msSanitizer**](https://gitcode.com/Ascend/mssanitizer) | **[Anomaly Detection]** Provides memory, race condition, uninitialized access, and synchronization detection, supporting precise localization of memory issues in multi-core programs.             |
+| Debugging | [**msDebug**](https://gitcode.com/Ascend/msdebug) | **[Native Debugging]** Native environment debugging based on Ascend processors, supporting variable inspection, single-step execution, and on-device debugging.               |
+| Tuning | [**msOpProf**](https://gitcode.com/Ascend/msopprof) | **[Performance Analysis]** Supports on-device and simulation data collection, and locates performance bottlenecks through the MindStudio Insight visualization tool. |
 
 ## 🚀 Quick Start
 
@@ -66,18 +66,18 @@ Welcome to participate in project contributions. Please refer to the [Contributi
 
 ## ⚖️ Related Notes
 
-🔹 [Release Notes](https://atomgit.com/Ascend/msot/releases)   
+🔹 [Release Notes](https://gitcode.com/Ascend/msot/releases)   
 🔹 [License Notice](./docs/en/legal/license_notice.md)    
 🔹 [Security Statement](./docs/en/legal/security_statement.md)     
 🔹 [Disclaimer](./docs/en/legal/disclaimer.md)     
 
 ## 🤝 Suggestions and Communication
 
-Everyone is welcome to contribute to the community. If you have any questions or suggestions, please submit an [Issue](https://atomgit.com/Ascend/msot/issues), and we will respond as soon as possible. Thank you for your support.
+Everyone is welcome to contribute to the community. If you have any questions or suggestions, please submit an [Issue](https://gitcode.com/Ascend/msot/issues), and we will respond as soon as possible. Thank you for your support.
 
 |                                                                            Real-Time Interaction (WeChat Group)                                                                             |                                                                                  Official Information (Official Account)                                                                                   | In-Depth Support (Assistant/Forum)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
 |:------------------------------------------------------------------------------------------------------------------------------------------------------------------:|:------------------------------------------------------------------------------------------------------------------------------------------------------------------------------:|:----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------:|
-| <img src="https://raw.atomgit.com/Ascend/docs/files/master/common/Writing_Template/figures/qr_code_wechat_work.png" width="120"><br><sub>*Scan the QR code to join the technical discussion group*</sub> | <img src="https://raw.atomgit.com/Ascend/docs/files/master/common/Writing_Template/figures/qr_code_wechat_official_account.png" width="120"><br><sub>*Scan the QR code to follow the official account*</sub> | Scan the QR code to join the group and follow the official account for the fastest way to connect with MindStudio users and developers:<br> **Ask questions quickly:** Discuss technical issues with community members in real time.<br>**Stay up to date:** Receive notifications about version releases and feature updates as soon as they are available.<br> **Share experience:** Exchange best practices and hands-on experience with developers.  <br> <br> **More support channels**: 👉 Ascend Assistant: [![WeChat](https://img.shields.io/badge/WeChat-07C160?style=flat-square&logo=wechat&logoColor=white)](https://atomgit.com/Ascend/msit/blob/master/docs/zh/figures/readme/xiaozhushou.png) 👉 Ascend Forum: [![Website](https://img.shields.io/badge/Website-%231e37ff?style=flat-square&logo=RSS&logoColor=white)](https://www.hiascend.com/forum/) |
+| <img src="https://raw.gitcode.com/Ascend/docs/files/master/common/Writing_Template/figures/qr_code_wechat_work.png" width="120"><br><sub>*Scan the QR code to join the technical discussion group*</sub> | <img src="https://raw.gitcode.com/Ascend/docs/files/master/common/Writing_Template/figures/qr_code_wechat_official_account.png" width="120"><br><sub>*Scan the QR code to follow the official account*</sub> | Scan the QR code to join the group and follow the official account for the fastest way to connect with MindStudio users and developers:<br> **Ask questions quickly:** Discuss technical issues with community members in real time.<br>**Stay up to date:** Receive notifications about version releases and feature updates as soon as they are available.<br> **Share experience:** Exchange best practices and hands-on experience with developers.  <br> <br> **More support channels**: 👉 Ascend Assistant: [![WeChat](https://img.shields.io/badge/WeChat-07C160?style=flat-square&logo=wechat&logoColor=white)](https://gitcode.com/Ascend/msit/blob/master/docs/zh/figures/readme/xiaozhushou.png) 👉 Ascend Forum: [![Website](https://img.shields.io/badge/Website-%231e37ff?style=flat-square&logo=RSS&logoColor=white)](https://www.hiascend.com/forum/) |
 
 ## 🙏 Acknowledgments
 

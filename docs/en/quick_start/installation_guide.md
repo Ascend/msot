@@ -104,7 +104,7 @@ If an error is reported or a container selection interface appears, see [Section
 In the container, clone the example code to the `~/ot_demo/msot` directory:
 
 ```bash
-git clone https://atomgit.com/Ascend/msot.git ~/ot_demo/msot
+git clone https://gitcode.com/Ascend/msot.git ~/ot_demo/msot
 ```
 
 After cloning is complete, the example code is located at `~/ot_demo/msot/example`. If the clone fails because of network problems, see the solution in [Section 8.3](#83-transferring-the-example-code-repository).
@@ -224,7 +224,7 @@ After confirming that `ctr_in.py` exists and has execute permission, return to [
 In a browser that can access the current webpage, enter the following link. On the page, click the **Download ZIP** button to download the code repository package to your local machine:
 
 ```text
-https://atomgit.com/Ascend/msot
+https://gitcode.com/Ascend/msot
 ```
 
 Transfer the downloaded zip package to the `~` directory in the container of the intranet server (you can use methods such as the `docker cp` command, mounted directories, or network transfer to transfer it into the container).

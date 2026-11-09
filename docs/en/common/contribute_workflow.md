@@ -71,7 +71,7 @@ Before submitting a Pull Request, please ensure:
   
 ### 5.2 Creating a PR
 
-When creating a pull request on [AtomGit](https://atomgit.com/), please fill in the following completely:
+When creating a pull request on [AtomGit](https://gitcode.com/), please fill in the following completely:
 
 1. **Title**: Briefly summarize the topic or feature of this change.
 2. **Description**: Explain what was changed, the reason for the modification, and the self-test status (including environment and results) to facilitate the reviewer's understanding.
