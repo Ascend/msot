@@ -78,7 +78,7 @@ cd ~ && curl -fLO --retry 3 https://inst.obs.cn-north-4.myhuaweicloud.com/env/ct
 
 **预期输出**：出现类似如下提示信息，并停留在 root Shell 提示符，表示容器已成功启动：
 
-```text
+```output
 Welcome to 5.10.0-60.139.0.166.oe2203.aarch64
 
 System information as of time:  Mon Jun 29 15:21:01 UTC 2026
@@ -110,7 +110,7 @@ git clone https://gitcode.com/Ascend/msot.git ~/ot_demo/msot
 
 ## 5. 容器内：设置芯片 SoC 型号
 
-后续多条命令需引用芯片 SoC 型号（片上系统型号，用于标识芯片架构）。此处统一查询并保存到环境变量 `MY_STUDY_VAR_CHIP_SOC_TYPE`，便于后续直接调用。  
+后续多条命令需引用芯片 SoC 型号（片上系统型号，用于标识芯片架构）。此处统一查询并保存到环境变量 `MY_STUDY_VAR_CHIP_SOC_TYPE`，便于后续直接调用。
 
 在容器内执行如下命令：
 
@@ -148,7 +148,7 @@ echo 'export MY_STUDY_VAR_CHIP_SOC_TYPE=$(python3 -c "import acl; print(acl.get_
 
 ### 7.2 执行 Docker 命令遇到 permission denied 类错误提示？
 
-可能当前用户未加入 Docker 用户组。可使用 root 权限在宿主机执行：
+可能当前用户未加入 Docker 用户组，可使用 root 权限在宿主机执行：
 
 ```bash
 sudo usermod -aG docker <当前用户名>

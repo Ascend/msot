@@ -6,7 +6,7 @@
 
 MindStudio 算子开发工具链包含多种工具。本文档以开发一个简单加法算子为例，带您贯穿算子开发全流程，直观体验工具链带来的高效与便捷。
 
-**体验地图 (核心操作仅需 10 分钟，可全程 Copy/Paste 快速执行)**     
+**体验地图（核心操作仅需 10 分钟，可全程 Copy/Paste 快速执行）**     
 > **执行顺序建议**：步骤 1 为基础；完成 1 后可体验 2 或 3；步骤 4、5、6 均依赖步骤 3 生成的工程，但这三者之间相互独立，可按需选学。
  
 | 步骤 | 环节 | 核心工具 | 实测操作耗时 | 建议原理学习 |
@@ -120,7 +120,7 @@ MSKPP{timestamp}/
 
 以 Instruction_statistic.csv 为例，其内容如下：
 
-| Instruction  | Duration(us) | Cycle | Size(B) | Ops  |
+| Instruction  | Duration(μs) | Cycle | Size(Byte) | Ops  |
 |:--------------:|:--------------:|:-------:|:---------:|:------:|
 | MOV-GM_TO_UB |    0.3081    |  570  |  6144   |  -   |
 |     VADD     |    0.0135    |  25   |    -    | 1536 |
@@ -279,7 +279,7 @@ test pass
 | 现象 | 可能原因 | 处理方式 |
 |------|----------|----------|
 | 超过 30 秒无返回 | NPU 卡繁忙 | 按 Ctrl+C 终止，切换至其他空闲卡重试（指定方法见上文“关于 NPU 设备选择的说明”） |
-| 出现如下 ACL 报错 | NPU 卡异常（硬件故障、驱动问题等）；<br>`/dev/hisi_hdc` 设备异常，比如未挂载、无权限等；<br>内存等系统资源不足； | 解决 NPU 卡故障或更换为正常卡后重试；错误码含义参见 [《ACL 错误码表》](https://www.hiascend.com/document/detail/zh/CANNCommunityEdition/850/API/appdevgapi/aclcppdevg_03_1345.html) |
+| 出现如下 ACL 报错 | NPU 卡异常（硬件故障、驱动问题等）；<br>`/dev/hisi_hdc` 设备异常，比如未挂载、无权限等；<br>内存等系统资源不足 | 解决 NPU 卡故障或更换为正常卡后重试；错误码含义参见 [《ACL 错误码表》](https://www.hiascend.com/document/detail/zh/CANNCommunityEdition/850/API/appdevgapi/aclcppdevg_03_1345.html) |
 
 ```text
 aclrtSetDevice failed. ERROR: xxxxxx
@@ -335,9 +335,9 @@ mssanitizer --tool=memcheck -- bash run.sh
 若工具输出如下错误报告，则表明已成功执行，并识别到构造的越界访问（不同版本的显示可能会稍有不同，不影响学习工具使用）：  
 
 1. illegal read of size 224：表示非法读取了 224 字节。   
-2. op_kernel/add_custom.cpp:44:9：表明越界访问发生在 add_custom.cpp 第 44 行。   
+2. op_kernel/add_custom.cpp:44:9：表明越界访问发生在 add_custom.cpp 第 44 行。
 
-```text
+```output
 ====== ERROR: illegal read of size 224
 ======    at 0x12c0c001af00 on GM in AddCustom_ab1b6750d7f510985325b603cb06dc8b_0
 ======    in block aiv(7) on device 0
@@ -438,7 +438,8 @@ source ~/ot_demo/msot/example/quick_start/msdebug/set_kernel_obj_env.sh
     b add_custom.cpp:34
     ```
 
-    >[!CAUTION]注意  
+    > [!CAUTION]
+    > 
     > 若此前未在宿主机正确启用 `/proc/debug_switch`，执行上述断点设置将触发警告，而在后续步骤运行 `run` 命令时将触发调试器错误（例如 `'A' packet returned an error: 8`），表明 msDebug 无法正常工作。
 
 3. 运行算子
@@ -451,7 +452,7 @@ source ~/ot_demo/msot/example/quick_start/msdebug/set_kernel_obj_env.sh
 
     显示如下信息，则表示成功命中断点（不同版本的显示可能会稍有不同，不影响学习工具使用）：
 
-    ```text
+    ```output
     Process 2799 launched: '/root/ot_demo/workspace/src/caller/build/execute_add_op' (aarch64)
     Running on NPU [0]. If this is the first run on this card, scheduling may take a few seconds; please wait...
     [Launch of Kernel AddCustom_ab1b6750d7f510985325b603cb06dc8b_0 on Device 0]
@@ -542,27 +543,30 @@ source ~/ot_demo/msot/example/quick_start/msdebug/set_kernel_obj_env.sh
 
 工具在指定 `--output` 目录下生成 `.csv` 和 `.bin` 格式的结果文件，若输出未报错，则表明执行成功：
 
-- CSV 文件   
-例如 `MemoryUB.csv`，打开可以看到如下信息：  
-数据显示任务被均分为 8 个 block，全部调度至 Vector Core 执行。例如 Block 0 的带宽（1.02 GB/s）明显高于 Block 1（0.77 GB/s），如果差异过大，可能提示存在优化空间：
+- CSV 文件
 
-  | block_id | sub_block_id | aiv_time(us) | aiv_total_cycles | aiv_ub_read_bw_vector(GB/s) | aiv_ub_write_bw_vector(GB/s) | 
-  |:--------:|:------------:|:------------:|:----------------:|:---------------------------:|:----------------------------:|
-  |    0     |   vector0    |  7.456666  |      13422      |          1.023164           |           0.511582           | 
-  |    1     |   vector0    |  9.914444  |      17846      |          0.769523           |           0.384762           | 
-  |    2     |   vector0    |  10.001111 |      18002      |          0.762855           |           0.381427           | 
-  |    3     |   vector0    |  9.684444  |      17432      |          0.787799           |           0.393899           | 
-  |    4     |   vector0    |  9.747222  |      17545      |          0.782725           |           0.391363           | 
-  |    5     |   vector0    |  9.062222  |      16312      |          0.84189            |           0.420945           | 
-  |    6     |   vector0    |  9.293889  |      16729      |          0.820904           |           0.410452           | 
-  |    7     |   vector0    |  8.658889  |      15586      |          0.881105           |           0.440553           | 
+    例如 `MemoryUB.csv`，打开可以看到如下信息：
 
-- BIN 文件   
-可使用 `MindStudio Insight` 工具打开，以图形化方式直观展示各类性能视图，例如：计算内存热力图、Cache 热力图以及算子代码热点图等。
+    数据显示任务被均分为 8 个 block，全部调度至 Vector Core 执行。例如 Block 0 的带宽（1.02 GB/s）明显高于 Block 1（0.77 GB/s），如果差异过大，可能提示存在优化空间：
 
-  > [!NOTE]说明  
-  > 
-  > 若想体验可视化的图表查看，请参考 <a href="https://gitcode.com/Ascend/msinsight/blob/master/docs/zh/install_guide/mindstudio_insight_install_guide.md" target="_blank">《MindStudio Insight 工具文档》</a>安装 Insight 工具。
+    | block_id | sub_block_id | aiv_time(μs) | aiv_total_cycles | aiv_ub_read_bw_vector(GB/s) | aiv_ub_write_bw_vector(GB/s) | 
+    |:--------:|:------------:|:------------:|:----------------:|:---------------------------:|:----------------------------:|
+    |    0     |   vector0    |  7.456666  |      13422      |          1.023164           |           0.511582           | 
+    |    1     |   vector0    |  9.914444  |      17846      |          0.769523           |           0.384762           | 
+    |    2     |   vector0    |  10.001111 |      18002      |          0.762855           |           0.381427           | 
+    |    3     |   vector0    |  9.684444  |      17432      |          0.787799           |           0.393899           | 
+    |    4     |   vector0    |  9.747222  |      17545      |          0.782725           |           0.391363           | 
+    |    5     |   vector0    |  9.062222  |      16312      |          0.84189            |           0.420945           | 
+    |    6     |   vector0    |  9.293889  |      16729      |          0.820904           |           0.410452           | 
+    |    7     |   vector0    |  8.658889  |      15586      |          0.881105           |           0.440553           | 
+
+- BIN 文件
+
+    可使用 `MindStudio Insight` 工具打开，以图形化方式直观展示各类性能视图，例如：计算内存热力图、Cache 热力图以及算子代码热点图等。
+
+    > [!NOTE]
+    > 
+    > 若想体验可视化的图表查看，请参考 <a href="https://gitcode.com/Ascend/msinsight/blob/master/docs/zh/install_guide/mindstudio_insight_install_guide.md" target="_blank">《MindStudio Insight 工具文档》</a>安装 Insight 工具。
 
 #### 2.6.4 恢复手工修改
 

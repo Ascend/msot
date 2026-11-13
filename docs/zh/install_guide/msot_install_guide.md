@@ -83,10 +83,11 @@ chmod +x ascend-mindstudio-operator-tools_*.run
 ./ascend-mindstudio-operator-tools_*.run --install
 ```
 
-安装过程中，若环境中已有旧版工具，会提示是否替换：输入 `y` 并回车即可执行覆盖安装。    
+安装过程中，若环境中已有旧版工具，会提示是否替换：输入 `y` 并回车即可执行覆盖安装。
+
 若输出类似以下信息，则表明安装成功：
 
-```text
+```output
 [mindstudio-operator-tools] [2026-03-02 12:16:42] [INFO]: all subpackage installed succeed
 [mindstudio-operator-tools] [2026-03-02 12:16:42] [INFO]: InstallPath: /usr/local/Ascend/cann-xxx
 [mindstudio-operator-tools] [2026-03-02 12:16:42] [INFO]: mindstudio-operator-tools package install success! The new version takes effect immediately.
@@ -117,15 +118,15 @@ chmod +x ascend-mindstudio-operator-tools_*.run
 
 若输出类似以下信息，则表明卸载成功：
 
-```text
+```output
 [mindstudio-operator-tools] [2026-03-02 12:18:24] [INFO]: all subpackage uninstalled succeed
 [mindstudio-operator-tools] [2026-03-02 12:18:24] [INFO]: mindstudio-operator-tools uninstall success!
 [mindstudio-operator-tools] [2026-03-02 12:18:24] [INFO]: End Time: 2026-03-02 12:18:24
 ```
 
-> [!NOTE] 
+> [!NOTE]
 > 
-> 卸载路径说明
+> **卸载路径说明**
 > 
 > 默认将在 `$HOME/Ascend` 目录下卸载。若安装时通过 `--install-path` 指定了自定义路径，
 > 则卸载时也需指定相同的路径，例如：
