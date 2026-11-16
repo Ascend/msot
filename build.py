@@ -60,16 +60,16 @@ class BuildManager:
 
     用法:
         python build.py                  完整构建（拉取依赖 + Release 编译）
-        python build.py local            本地构建（跳过依赖拉取, Release 编译）
+        python build.py local            本地构建（使用预置依赖，跳过 Git patch/LFS 步骤，Release 编译）
         python build.py test             单元测试（拉取依赖 + Debug 编译 + 执行测试）
-        python build.py test local       单元测试（跳过依赖拉取, Debug 编译 + 执行测试）
+        python build.py test local       单元测试（使用预置依赖，跳过 Git patch/LFS 步骤，Debug 编译 + 执行测试）
         python build.py -r <revision>    指定依赖的内部源码仓(例如msopcom)的 Git 分支/标签/commit
         python build.py -v <version>     指定构建版本号，同时覆盖 --build-version 和 --whl-version
         python build.py -e KEY=VALUE     指定额外构建选项，可多次使用
         python build.py --exclude-tools msdebug,msopprof  排除指定子工具
 
     参数说明:
-        - 参数: command : 构建动作: 为空时为全构建, local 为跳过依赖下载, test 为运行单元测试。
+        - 参数: command : 构建动作: 为空时为全构建, local 为使用预置依赖并跳过 Git patch/LFS 步骤, test 为运行单元测试。
         - 参数: -r, --revision : 指定 Git 修订版本或标签用于依赖检出。
         - 参数: -v, --version : 指定构建版本号；若设置，则同时覆盖 --build-version 和 --whl-version 的值。
         - 参数: --build-version, --whl-version : 历史参数，保留用于兼容；设置了 --version 时以 --version 为准。
@@ -86,7 +86,7 @@ class BuildManager:
         argument_parser = argparse.ArgumentParser(description='Build the project and optionally run tests.')
         argument_parser.add_argument('command', nargs='*', default=[],
                                      choices=[[], 'local', 'test'],
-                                     help='Build action: omit for full build, "local" to skip dependency download, "test" to run unit tests')
+                                     help='Build action: omit for full build, "local" to use pre-staged dependencies and skip git apply/lfs steps, "test" to run unit tests')
         argument_parser.add_argument('-r', '--revision',
                                      help='Specify Git revision for internal dependent repo (e.g., msopcom).')
         argument_parser.add_argument('--build-version', type=str, default=None, help='Build version for run/exe/dmg packages')
@@ -225,7 +225,10 @@ class BuildManager:
             unit_test_build_dir.mkdir(exist_ok=True)
             os.chdir(unit_test_build_dir)
 
-            self._execute_command(["cmake", "..", "-DBUILD_TESTS=ON"])
+            self._execute_command([
+                "cmake", "..", "-DBUILD_TESTS=ON",
+                "-DMSOT_NO_GIT=%s" % ("ON" if 'local' in self.parsed_arguments.command else "OFF"),
+            ])
             # 待测试用例准备好后添加测试执行命令
         else:
             # -------------------- 产品构建 --------------------
@@ -239,6 +242,7 @@ class BuildManager:
                 "cmake",
                 "..",
                 "-DMSOT_EXCLUDE_TOOLS=%s" % ",".join(self.parsed_arguments.exclude_tools),
+                "-DMSOT_NO_GIT=%s" % ("ON" if 'local' in self.parsed_arguments.command else "OFF"),
             ]
             self._execute_command(cmake_command)
             self._execute_command(["make", "-j", str(self.build_jobs)])

@@ -1,6 +1,8 @@
 set(MSDEBUG_PATH ${ROOT_DIR}/msdebug)
 set(ARGS "-DCMAKE_INSTALL_PREFIX=${CMAKE_INSTALL_PREFIX}/msdebug"
-    "-DCMAKE_BUILD_TYPE=Release")
+    "-DCMAKE_BUILD_TYPE=Release"
+    "-DMSOT_NO_GIT=${MSOT_NO_GIT}"
+    "-DUSE_PREBUILT_LLVM=ON")
 set(GENERATOR "-G" "Unix Makefiles")
 # 查找 Ninja
 find_program(NINJA ninja)
