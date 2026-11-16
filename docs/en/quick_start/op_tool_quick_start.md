@@ -4,19 +4,19 @@
 
 ## 1. Overview
 
-The MindStudio operator development toolchain includes a variety of tools. This document uses the development of a simple addition operator as an example to guide you through the entire operator development process, allowing you to intuitively experience the efficiency and convenience brought by the toolchain.
+The MindStudio operator development toolchain provides tools for the entire operator development lifecycle. This tutorial walks you through developing a simple addition operator so that you can experience the efficiency and convenience of the toolchain.
 
-**Experience Map (Core operations take only 10 minutes, and can be executed quickly with Copy/Paste throughout)**     
-> **Recommended Procedure**: Step 1 is the foundation; after completing Step 1, you can experience Step 2 or Step 3; Steps 4, 5, and 6 all depend on the project generated in Step 3, but these three are independent of each other and can be learned as needed.
+**Learning Roadmap (The core operations take only 10 minutes, with commands ready to copy and paste)**
+> **Recommended order**: Step 1 is required. After completing it, you can try Step 2 or Step 3. Steps 4, 5, and 6 depend on the project generated in Step 3, but are otherwise independent and can be explored as needed.
 
- | Step | Phase | Core Tools | Measured Operation Time | Recommended Theory Learning |
- | :---: | :---: | :--- | :---: | :---: |
- | **1** | **Environment Preparation** | CANN container image | 3 minutes | 5 minutes |
- | **2** | **Operator Design** | msKPP | 30 seconds | 5 minutes |
- | **3** | **Project Development** | msOpGen | 1 minute | 20 minutes |
- | **4** | **Anomaly Detection** | msSanitizer | 1 minute | 10 minutes |
- | **5** | **Native Debugging** | msDebug | 1 minute | 10 minutes |
- | **6** | **Performance Tuning** | msOpProf | 1 minute | 10 minutes |
+| Step | Phase | Core Tool | Measured Hands-on Time | Suggested Background Reading Time |
+| :---: | :---: | :--- | :---: | :---: |
+| **1** | **Environment Preparation** | `CANN container image` | 3 minutes | 5 minutes |
+| **2** | **Operator Design** | `msKPP` | 30 seconds | 5 minutes |
+| **3** | **Project Development** | `msOpGen` | 1 minute | 20 minutes |
+| **4** | **Anomaly Detection** | `msSanitizer` | 1 minute | 10 minutes |
+| **5** | **Native Debugging** | `msDebug` | 1 minute | 10 minutes |
+| **6** | **Performance Tuning** | `msOpProf` | 1 minute | 10 minutes |
 
 ## 2. Procedure
 
@@ -33,79 +33,65 @@ This tutorial **supports only** standardized CANN container environments. Bare-m
 > **Estimated time for an environment with public network access: about 3 minutes (the exact time depends on network conditions)**  
 > After the installation is complete, you will obtain a standardized container environment with all operator tools, sample code, and dependent libraries preinstalled.
 
-#### 2.1.2 Running the Environment Self-Check Script (Must Pass)
+#### 2.1.2 Checking the Environment
 
-Before the hands-on experience, **copy the entire script that follows**, paste it into the terminal in the container, and run it. You can continue only when all output shows `[PASS]`. Otherwise, return to the preceding section and prepare the environment strictly as required:
+Before starting the hands-on steps, run the following commands in Bash inside the container, with the CANN environment loaded, to set the variable and check the environment:
 
 ```bash
-# 1. Container environment check
-[ -f /.dockerenv ] && [ -n "$ASCEND_HOME_PATH" ] && [ -n "$ATB_HOME_PATH" ] && echo -e "\033[32m[PASS] CANN container environment OK \033[0m" || echo -e '\033[31m[FAIL] Non-standard container or not inside the container!\033[0m'
-# 2. Chip model variable check
-[ -n "$MY_STUDY_VAR_CHIP_SOC_TYPE" ] && echo -e "\033[32m[PASS] Chip Soc type: $MY_STUDY_VAR_CHIP_SOC_TYPE\033[0m" || echo -e "\033[31m[FAIL] Missing environment variable \$MY_STUDY_VAR_CHIP_SOC_TYPE\033[0m"
-# 3. Sample code repository check
-[ -d ~/ot_demo/msot/example/quick_start ] && echo -e "\033[32m[PASS] Example code repository OK\033[0m" || echo -e "\033[31m[FAIL] Code repository missing\033[0m"
-# 4. Core tool command check
-command -v msopgen >/dev/null && echo -e "\033[32m[PASS] msopgen command OK\033[0m" || echo -e "\033[31m[FAIL] msopgen command missing\033[0m"
-command -v mssanitizer >/dev/null && echo -e "\033[32m[PASS] mssanitizer command OK\033[0m" || echo -e "\033[31m[FAIL] mssanitizer command missing\033[0m"
-command -v msdebug >/dev/null && echo -e "\033[32m[PASS] msdebug command OK\033[0m" || echo -e "\033[31m[FAIL] msdebug command missing\033[0m"
-command -v msopprof >/dev/null && echo -e "\033[32m[PASS] msopprof command OK\033[0m" || echo -e "\033[31m[FAIL] msopprof command missing\033[0m"
+source ~/ot_demo/msot/example/quick_start/scripts/set_chip_soc_env.sh &&
+bash ~/ot_demo/msot/example/quick_start/scripts/check_env.sh --task core
 ```
 
-🚀 **All subsequent experience phases are executed in the container and fully support fast Copy/Paste execution. Follow all the steps in each section in order. Do not skip or reorder the steps.**
+The message `Environment check successful, summary 0 failure(s).` indicates that the check passed.
+
+🚀 **Run all subsequent steps inside the container. Follow the sections in order when working through the complete tutorial, because later steps reuse artifacts produced earlier.**
 
 ### 2.2 [Design] Operator Modeling Design (msKPP)
 
-First, design the operator algorithm. With the msKPP tool, you can obtain operator performance modeling results in seconds, estimate performance without hardware, and quickly verify the feasibility of the implementation plan. Follow the steps to experience the effect first; the principles can be read later:
+Start by designing the operator algorithm. msKPP provides fast performance modeling to estimate performance without executing the operator on hardware and assess the feasibility of an implementation. Follow these steps to use the tool:
 
-> [!NOTE] Note   
-> 
-> **msKPP Tool Principles**   
-> msKPP is not a traditional executable program but a dedicated Python class library for Ascend. Users need to `import` relevant modules, write and execute Python scripts, and generate performance analysis result files to complete the modeling. The internal principle involves pre-collecting performance data of various instruction operations in real environments, and modeling and estimating various performance overheads based on the user-defined operator execution flow.
+> [!NOTE]
+> **msKPP Tool Principles**
+>
+> msKPP includes Python libraries designed for Ascend. Import the relevant modules, then write and run a Python script to generate performance analysis files and modeling results.
 
 #### 2.2.1 Checking the Environment
 
-This tool **supports only the Ascend 910B** series of chips. Run the following command:
+The msKPP tool in this tutorial **supports only Ascend 910B-series chips**. Run the following command to check the chip type:
 
 ```bash
-chip=$(npu-smi info -m 2>/dev/null | grep -oP 'Ascend\s*\S+' | head -1); case "$chip" in 'Ascend 910B'* ) echo -e "\n\e[32m[PASS] Chip SoC type [$chip] check passed. Please continue with the experience.\e[0m";; * ) echo -e "\n\033[31m[FAIL] Get chip: ${chip:-None}. The current environment does not support this tool. Please skip this experience.\033[0m" >&2;; esac
+bash ~/ot_demo/msot/example/quick_start/scripts/check_env.sh --task mskpp
 ```
 
-If the output is `[PASS]`, continue the experience. If the output is `[FAIL]`, switch to an environment with an Ascend 910B chip before continuing the experience. If you cannot switch for now, skip this section.
+The message `Environment check successful` indicates that the check passed and you can continue. Otherwise, switch to an environment with an Ascend 910B-series chip or skip this section.
 
-#### 2.2.2 Writing a Python Modeling Script
+#### 2.2.2 Developing the Modeling Script
 
-1. Create a sub-workspace directory
-
-    ```bash
-    mkdir -p ~/ot_demo/workspace/mskpp && cd ~/ot_demo/workspace/mskpp
-    ```
-
-2. Develop the Python script
-
-    > [!NOTE] Note  
-    > 
-    > **msKPP Domain-Specific Language (DSL) Solution**   
-    > This set of libraries and interfaces is a "dialect" specifically designed for Ascend performance modeling. It requires dedicated learning to master and cannot be written directly using only general Python syntax. However, its usage is relatively simple and can be applied after a brief study.
-    > Standard development process: You must first import `Tensor`, `Chip`, and the instructions necessary for operator implementation (for example, `vadd`). Use the `with` statement to enter the context of the operator implementation code, and then create Tensors to perform specific operations. The sample script contains detailed comments. For descriptions of other instruction interfaces, refer to the [msKPP Tool Interface Description](https://gitcode.com/Ascend/mskpp/blob/master/docs/en/api_reference/mskpp_api_reference.md).
-
-    As this is a quick start, copying the prepared msKPP DSL script here is considered development completion (this tutorial focuses on toolchain usage; actual development requires you to implement it yourself):
+1. Prepare the workspace and modeling sample.
 
     ```bash
-    \cp -f ~/ot_demo/msot/example/quick_start/mskpp/mskpp_demo.py ./
+    bash ~/ot_demo/msot/example/quick_start/scripts/prepare_sample.sh --sample mskpp --dest ~/ot_demo/workspace/mskpp
+    cd ~/ot_demo/workspace/mskpp
     ```
+
+    The message `Prepare sample successful` indicates success. This quick start focuses on tool usage and provides a sample script; its path is printed in the log. For actual development, implement or edit the script to meet your requirements.
+
+> [!NOTE]
+> **Background (Optional): The msKPP Domain-Specific Language (DSL)**
+>
+> These libraries and interfaces form a DSL designed for Ascend performance modeling. Using them requires familiarity with their APIs in addition to general Python syntax, but you can get started with a brief introduction.
+>
+> A typical workflow imports `Tensor`, `Chip`, and the required instructions, such as `vadd`, enters the operator implementation context using a `with` statement, and creates tensors to perform the operations. See the sample script comments for details and the [msKPP API Reference](https://gitcode.com/Ascend/mskpp/blob/master/docs/en/api_reference/mskpp_api_reference.md) for other instruction interfaces.
 
 #### 2.2.3 Executing Performance Modeling
 
-Run the Python script to start performance modeling. If the execution succeeds, a result directory named `MSKPP{timestamp}` is automatically generated in the current directory:
+Run the following command to execute the Python script and start performance modeling:
 
 ```bash
 python3 mskpp_demo.py
 ```
 
-If the script reports an error indicating `Chip is unsupported`, the possible causes are as follows:
-
-1. **Hardware incompatibility**: Confirm whether the current chip model is of the 910B series (you can obtain it with the `npu-smi info` command). This tool supports only 910B series chips. Switch to an environment with 910B series chips before proceeding.  
-2. **Environment variable not configured**: Check whether the environment variable `MY_STUDY_VAR_CHIP_SOC_TYPE` is correctly set. If the variable is empty, refer to Section 5 of the [Operator Development Toolchain Learning Environment Installation Guide](./installation_guide.md#5-in-the-container-setting-the-chip-soc-model) to reconfigure it.
+The message `MSKPP modeling completed successfully` indicates success. A result directory named `MSKPP{timestamp}` is automatically created in the current directory. See the log for its actual path.
 
 #### 2.2.4 Viewing Modeling Results
 
@@ -120,7 +106,7 @@ MSKPP{timestamp}/
 
 Taking `Instruction_statistic.csv` as an example, its content is as follows:
 
-| Instruction  | Duration (µs) | Cycle | Size(B) | Ops  |
+| Instruction  | Duration(us) | Cycle | Size(B) | Ops  |
 |:--------------:|:--------------:|:-------:|:---------:|:------:|
 | MOV-GM_TO_UB |    0.3081    |  570  |  6144   |  -   |
 |     VADD     |    0.0135    |  25   |    -    | 1536 |
@@ -130,56 +116,51 @@ From the above content, it can be seen that MOV-UB_TO_GM (moving from UB to GM) 
 
 ### 2.3 [Development] Building the Operator Project (msOpGen)
 
-After the algorithm design is complete, you can proceed to the operator code writing phase. Operator projects are relatively complex and contain a large amount of framework code. The msOpGen tool can automatically generate a complete operator project framework, allowing developers to focus on core algorithm implementation and avoid wasting time on repetitive tasks such as project setup and compilation configuration. Follow the operations first to experience the effect; the theory section can be read later:
+After designing the algorithm, implement the operator. Operator projects typically contain substantial framework code. msOpGen generates the complete project framework so that you can focus on the core algorithm instead of repetitive project setup and build configuration. Follow these steps to use the tool:
 
 #### 2.3.1 Generating Project Framework
 
-1. Create a sub-workspace directory.
+1. Prepare the workspace and msOpGen input configuration file.
 
-    Create a subdirectory named `src` as the root directory for the operator source code. All subsequent source code operations will be based on this path:
-
-    ```bash
-    mkdir -p ~/ot_demo/workspace/src && cd ~/ot_demo/workspace/src/
-    ```
-
-2. Develop the operator definition configuration file.
-
-    > [!NOTE] Note   
-    > 
-    > **Key Point (Optional Reading): msOpGen Input Configuration File**   
-    > A custom-format JSON configuration file, which can be simply analogized to defining a C function declaration, including the function name, input parameters, and return value type information.
-    > For example, `msopgen_demo.json` defines the name of the operator, the names, types, and data layout formats of its input and output variables.
-    > The operator function declaration code is uniformly generated by the tool, which produces an empty function (with only the function name, input parameters, and return value). The function body needs to be implemented by the user.
-
-    As this is a quick start guide, copying the prepared configuration file here is considered development complete (this tutorial focuses on toolchain usage; actual development requires you to implement it yourself):
+    Run the following script to create the `src` subdirectory and prepare the operator definition configuration file:
 
     ```bash
-    \cp -f ~/ot_demo/msot/example/quick_start/msopgen/msopgen_demo.json ./
+    bash ~/ot_demo/msot/example/quick_start/scripts/prepare_sample.sh --sample opgen --dest ~/ot_demo/workspace/src
+    cd ~/ot_demo/workspace/src/
     ```
 
-3. Generate code framework based on configuration.
+    The message `Prepare sample successful` indicates success. This quick start provides a sample operator definition JSON file so that you can focus on tool usage. Its path is printed in the script log. For actual development, implement or edit the configuration to meet your requirements.
 
-    Run the following command to generate an Ascend C operator project. Parameter description: `-lan cpp` indicates that Ascend C code is to be generated. `-c` specifies the chip SoC model (processing may differ across different chips):
+    > [!NOTE]
+    > **Background (Optional): The msOpGen Input Configuration File**
+    >
+    > The JSON file defines structured information about the operator, including its name, inputs, and outputs. It is comparable to a C function declaration that specifies the function name, input parameters, and return types.
+    >
+    > For example, `msopgen_demo.json` defines the operator name and the names, types, and data layouts of its inputs and outputs. The tool generates the function declaration and an empty implementation containing only the name, parameters, and return value. You must implement the function body for your requirements.
+
+2. Generate the operator code framework.
+
+    Run the following command to generate an Ascend C operator project. `-lan cpp` specifies Ascend C code, and `-c` specifies the chip SoC model:
 
     ```bash
     msopgen gen -i msopgen_demo.json -c ai_core-ascend${MY_STUDY_VAR_CHIP_SOC_TYPE} -lan cpp -out AddCustom
     ```
 
-    >[!CAUTION] Note          
-    > In the code framework generated by the preceding command, the implementation of the specific operator is empty and cannot perform addition normally. You must modify it as described in [2.3.2 Implementing Core Logic](#232-implementing-core-logic) before it can run correctly. 
+    The message `Generation completed` indicates success. For detailed parameter descriptions, refer to the *User Guide* in the [msOpGen repository](https://gitcode.com/Ascend/msopgen).
 
-    For detailed explanations of the parameters in the preceding command, refer to the *User Guide* of the [msOpGen code repository](https://gitcode.com/Ascend/msopgen).
+    > [!CAUTION]
+    > The generated operator implementation is empty and cannot perform addition. Implement the core logic as described in [2.3.2 Implementing Core Logic](#232-implementing-core-logic) before running the operator.
 
-4. View generated results.
+3. View the generated results.
 
-    > [!NOTE] Note   
-    > 
-    > **Key Point (Optional Reading): Key Concepts**       
+    > [!NOTE]
+    > **Background (Optional): Key Concepts**
+    >
     > Host Side: Code running on the CPU, responsible for data preprocessing, task scheduling, and operator invocation.   
     > Kernel Side: Code running on the NPU, responsible for executing the actual large-scale parallel computation logic.   
     > Tiling: Partitioning large-scale data into blocks to improve Local Memory utilization and optimize memory access efficiency.
 
-The generated project structure may appear large and complex, but we **only need to focus on the three C++ files marked as [User Extension Points]**. The rest are framework code, which do not need to be viewed or modified unless there are special requirements:
+    The generated project may look large and complex, but you **only need to focus on the three C++ files marked as [User Extension Points]**. The remaining files provide framework code and do not need to be inspected or modified unless required:
 
     ```text
     AddCustom
@@ -200,24 +181,20 @@ The generated project structure may appear large and complex, but we **only need
 
 #### 2.3.2 Implementing Core Logic
 
-> [!NOTE] Note   
-> 
-> **Key Point (Optional Reading): Implementation Principles of Operator Kernel Code Files**  
+> [!NOTE]
+> **Background (Optional): How the Operator Source Files Work Together**
+>
 > `op_host/add_custom.cpp`: Implements the Tiling computation logic on the Host side and operator prototype registration.  
 > `op_kernel/add_custom_tiling.h`: Defines the data structure for the Tiling strategy.  
 > `op_kernel/add_custom.cpp`: Implements the specific computation logic of the addition operator on the Kernel side (GM→UB→vector addition→UB→GM).   
 > If you need a deeper understanding of the functions and collaboration mechanisms of the three aforementioned files, in addition to referring to the code comments, you are advised to read the <a href="https://www.hiascend.com/developer/blog/details/0239124507827469022" target="_blank">Ascend C Programming Introductory Tutorial (Pure Practical Information)</a> in detail.  
-> The `keep_soc_info.py` script works as follows: it automatically obtains the SoC chip type information of the current environment and refreshes it into the C++ files.
+> The helper below preserves the SoC from the generated Host file. It does not guess the current chip again or use a temporary cache shared across projects.
 
-Implement the specific algorithm logic in the three [User Extension Point] files mentioned above. As this is a quick start, copying the three prepared C++ files here is considered development completion (this tutorial focuses on toolchain usage; actual development requires implementing the core logic yourself):
+Implement the algorithm in the three [User Extension Point] files. This tutorial uses the published addition implementation: the helper validates a supported, unedited generated template, prepares the three C++ files and the sibling `caller` sample, and records a project-local normal teaching baseline. It does not generate, build, deploy or run the project. Actual development requires your own implementation:
 
 ```bash
 cd ~/ot_demo/workspace/src/AddCustom/
-python3 ~/ot_demo/msot/example/quick_start/msopgen/keep_soc_info.py get ./op_host/add_custom.cpp # Obtain the SoC information of the current environment
-\cp -f ~/ot_demo/msot/example/quick_start/msopgen/code/op_host/add_custom.cpp ./op_host/
-\cp -f ~/ot_demo/msot/example/quick_start/msopgen/code/op_kernel/add_custom_tiling.h ./op_kernel/
-\cp -f ~/ot_demo/msot/example/quick_start/msopgen/code/op_kernel/add_custom.cpp ./op_kernel/
-python3 ~/ot_demo/msot/example/quick_start/msopgen/keep_soc_info.py set ./op_host/add_custom.cpp # Refresh the SoC information in the code to that of the current environment
+bash ~/ot_demo/msot/example/quick_start/scripts/prepare_add_demo.sh --project .
 ```
 
 #### 2.3.3 Compiling and Deploying Operators
@@ -232,9 +209,9 @@ python3 ~/ot_demo/msot/example/quick_start/msopgen/keep_soc_info.py set ./op_hos
 
 2. Deploy the operator.
 
-    >[!NOTE] Note   
-    > 
-    > **Key Point: What Is Deploying Operators**  
+    > [!NOTE]
+    > **What Does Operator Deployment Mean?**
+    >
     > Deploying operators refers to registering the operator with the CANN framework. Essentially, it involves copying the binary files of the operator to a system public directory, allowing other programs to automatically discover and invoke the operator through standard interfaces (such as CANN API or PyTorch). The `*.run` deployment package format can be simply understood as a self-extracting archive.
 
     Run the following command to deploy the operator:
@@ -253,15 +230,15 @@ python3 ~/ot_demo/msot/example/quick_start/msopgen/keep_soc_info.py set ./op_hos
 
 #### 2.3.4 Verifying Operator Functionality
 
-> [!CAUTION] Note   
-> **Notes on NPU Device Selection**   
-> Executing the following `run.sh` script will actually run the operator and will randomly select an idle NPU to execute the task.
-> If you want to specify an NPU for execution, use the NPU information returned by the `npu-smi info` command and invoke it with its sequence number (value range: [0, number of NPUs - 1]) as follows: `bash ./run.sh 2`
+> [!CAUTION]
+> **Notes on NPU Device Selection**
+>
+> The following `run.sh` script runs the operator. By default, it uses the results of `npu-smi info` to select the first idle NPU in the displayed order.
+> To specify an NPU, use its sequence number from the device information returned by `npu-smi info` (range: [0, number of NPUs - 1]). For example: `bash ./run.sh 2`.
 
 Execute the operator invocation project to verify the operator functionality (this example executes 1.0 + 2.0, with an expected result of 3.0):
 
 ```bash
-\cp -rf ~/ot_demo/msot/example/quick_start/msopgen/caller ~/ot_demo/workspace/src/
 cd ~/ot_demo/workspace/src/caller
 bash ./run.sh
 ```
@@ -274,58 +251,44 @@ result is:
 test pass
 ```
 
-If you do not see the preceding output, troubleshoot according to the following table:
-
-| Symptom | Possible Cause | Handling |
-|------|----------|----------|
-| No result for more than 30 seconds | The NPU is busy | Press Ctrl+C to terminate, switch to another idle NPU, and retry (see "Notes on NPU Device Selection" for how to specify an NPU). |
-| The following ACL error appears | The NPU is abnormal (hardware fault, driver issue, and so on).<br>`/dev/hisi_hdc` device abnormality, for example, not mounted or no permission.<br>Insufficient system resources such as memory. | Resolve the NPU fault or switch to a normal NPU and then retry. See [ACL Error Code Table](https://www.hiascend.com/document/detail/en/CANNCommunityEdition/850/API/appdevgapi/aclcppdevg_03_1345.html) for the meaning of the error codes. |
+If errors such as the following occur, use the troubleshooting table below:
 
 ```text
 aclrtSetDevice failed. ERROR: xxxxxx
 Init acl failed. ERROR: 1
 ```
 
-#### 2.3.5 Backing Up the Kernel-Side `CMakeLists.txt`
-
-The execution of the subsequent three tools requires modification of this `CMakeLists.txt`. Keep this backup for restoring the environment:
-
-```bash
-\cp ~/ot_demo/workspace/src/AddCustom/op_kernel/CMakeLists.txt ~/ot_demo/workspace/src/AddCustom/op_kernel/CMakeLists.txt.bak
-```
+| Symptom | Possible Cause | Action |
+|------|----------|----------|
+| No result for more than 30 seconds | The NPU is busy. | Press Ctrl+C to stop, select another idle NPU, and retry. See "Notes on NPU Device Selection" above for how to specify an NPU. |
+| ACL errors such as those above | An NPU hardware or driver problem; an unavailable or inaccessible `/dev/hisi_hdc` device; or insufficient system resources such as memory. | Resolve the device problem or use a healthy NPU and retry. See the [ACL Error Code Table](https://www.hiascend.com/document/detail/en/CANNCommunityEdition/850/API/appdevgapi/aclcppdevg_03_1345.html) for error code details. |
 
 ### 2.4 [Detection] Operator Anomaly Detection (msSanitizer)
 
-After the operator development is complete, you can use the msSanitizer tool to detect serious runtime defects such as memory out-of-bounds, race conditions, uninitialized variables, or synchronization anomalies, thereby efficiently locating potential hidden errors. Follow the operation to experience the effect first; the principle part can be read later:
+After developing the operator, use msSanitizer to detect serious runtime defects such as out-of-bounds memory accesses, race conditions, uninitialized variables, and synchronization errors:
 
-#### 2.4.1 Modifying Compilation Options
+#### 2.4.1 Preparing Detection Options and Source Code
 
-To enable the detection capability, you need to insert the sanitizer compilation option at the first line of the `CMakeLists.txt` on the Kernel side to inject detection stub code:
+Configure `-sanitizer` at the beginning of the kernel-side `CMakeLists.txt` to enable instrumentation, and specify `--fixture oob` to prepare teaching source code containing an out-of-bounds access:
 
 ```bash
 cd ~/ot_demo/workspace/src/AddCustom
-sed -i '1i npu_op_kernel_options(ascendc_kernels ALL OPTIONS -sanitizer)' op_kernel/CMakeLists.txt
+bash ~/ot_demo/msot/example/quick_start/scripts/prepare_mode.sh --project . --mode sanitizer --fixture oob
 ```
 
-#### 2.4.2 Constructing a Memory Out-of-Bounds Error
+The message `Successfully prepared sanitizer mode` indicates that sanitizer mode was prepared successfully.
 
-Overwrite the original implementation with the prepared source file containing defective code to **artificially introduce an out-of-bounds access**:
+> [!NOTE]
+> The teaching defect doubles the copy length in an `AscendC::DataCopy` call (`2 * this->tileLength`). This causes an access beyond the GM allocation for `xGm`, triggering an "illegal read" error.
 
-```bash
-\cp -f ~/ot_demo/msot/example/quick_start/mssanitizer/bug_code/add_custom.cpp op_kernel/add_custom.cpp
-```
-
->[!NOTE] Note  
-> The key modification is as follows: the read length in the `AscendC::DataCopy` function call is changed to twice the original (`2 * this->tileLength`), causing the access to exceed the allocation range of `xGm` in GM memory, thereby triggering an "illegal read" error.
-
-#### 2.4.3 Recompiling and Deploying
+#### 2.4.2 Recompiling and Deploying
 
 ```bash
 bash ./build.sh
 bash ./build_out/custom_opp_openEuler_aarch64.run
 ```
 
-#### 2.4.4 Executing Memory Sanitization
+#### 2.4.3 Running Memory Checking
 
 ```bash
 cd ~/ot_demo/workspace/src/caller
@@ -351,34 +314,24 @@ If the tool outputs the following error report, it indicates successful executio
 ======    #6 /root/ot_demo/workspace/src/caller/AddCustom/build_out/op_kernel/AddCustom_ascend910b/kernel_0/kernel_meta_AddCustom_ab1b6750d7f510985325b603cb06dc8b/kernel_meta/AddCustom_ab1b6750d7f510985325b603cb06dc8b_2130445_kernel.cpp:37:5
 ```
 
-> [!NOTE] Note  
-> The operator may still execute successfully even with memory issues, which is exactly where the value of this tool lies: memory problems are usually intermittent. In most cases, even when memory anomalies exist, the program still runs normally. Only when the problem accumulates to a critical point does a sudden crash occur, making it difficult to locate the issue directly from the surface.
+> [!NOTE]
+> An operator may appear to run successfully despite memory errors. This illustrates the value of the tool: memory defects may be intermittent or remain silent without an obvious failure (silent failure). A crash may occur only under certain conditions, so functional output alone is not sufficient to identify the problem.
 
-#### 2.4.5 Reverting Manual Modifications
+#### 2.4.4 Restoring the Normal Sample
 
-To prepare for subsequent tool usage, revert the manual modifications:
+Run the following command to restore the sample source files and kernel-side CMake configuration. The deployed operator is unchanged; explicitly rebuild and redeploy it in the next section:
 
 ```bash
-\cp -f ~/ot_demo/msot/example/quick_start/msopgen/code/op_kernel/add_custom.cpp ~/ot_demo/workspace/src/AddCustom/op_kernel/
-\cp -f ~/ot_demo/workspace/src/AddCustom/op_kernel/CMakeLists.txt.bak ~/ot_demo/workspace/src/AddCustom/op_kernel/CMakeLists.txt
+bash ~/ot_demo/msot/example/quick_start/scripts/restore_demo.sh --project ~/ot_demo/workspace/src/AddCustom
 ```
+
+The message `Successfully restored source files` indicates success.
 
 ### 2.5 [Debugging] Breakpoint Debugging of Operator Code (msDebug)
 
-If the operator functions abnormally, you can use the msDebug tool for breakpoint debugging to efficiently locate issues. Follow the steps to experience the effect first; the principles can be read later:
+If the operator behaves unexpectedly, use msDebug to set breakpoints and investigate the problem:
 
 #### 2.5.1 Enabling Kernel Debug Switch
-
->[!CAUTION] Note    
-> **msDebug requires the kernel debug switch `/proc/debug_switch` to be enabled with root privileges**  
-> 
-> The switch is disabled by default and can be modified only by root. msDebug works correctly only after the switch is enabled.  
-> 
-> **Operations in the container are usually ineffective:**  
-> Even if you successfully write to `/proc/debug_switch` as root inside the container, because the host commonly virtualizes `/proc` through mechanisms such as copy-on-write (CoW), shadow files, or overlay mounts, the setting **affects only the container view** and does not actually take effect in the kernel. Therefore, even if `cat /proc/debug_switch` shows 1, msDebug may still be unavailable and may return errors during debugging (for example, `'A' packet returned an error: 8`).  
-> 
-> **Recommended Practice:**  
-> If you are in a shared development machine, a common container, or an environment without host access, contact your system administrator for assistance in enabling it, or switch to a host environment with root privileges to experience this feature.
 
 Check whether the kernel debug switch `debug_switch` is enabled:
 
@@ -386,25 +339,32 @@ Check whether the kernel debug switch `debug_switch` is enabled:
 cat /proc/debug_switch
 ```
 
-If the output value is not 1, open a new **host terminal** and run the following command with root privileges. After the command completes, return to the current container terminal and continue with the subsequent steps:
+If the reported value is not `1`, open a new **host terminal** and run the following commands as root:
 
 ```bash
 echo 1 > /proc/debug_switch
 cat /proc/debug_switch
 ```
 
-If `cat /proc/debug_switch` outputs `1`, the setting was successful. If it cannot be successfully set to `1`, the msDebug function is unavailable, and you can only skip the msDebug experience in this section.
+If `cat /proc/debug_switch` reports `1`, the switch is enabled. If it cannot be enabled, skip the msDebug exercise in this section.
+
+> [!CAUTION]
+> `/proc/debug_switch` is a virtual file under `/proc`, provided by the Ascend driver to control whether msDebug can debug operator kernels running on the NPU.
+>
+> Container mounts and permission restrictions can affect access to this interface. Have an administrator configure and verify the switch on the host. An unavailable debug environment may cause errors during debugging, such as `'A' packet returned an error: 8`; this error alone does not identify the cause.
 
 #### 2.5.2 Modifying Compilation Options and Redeploying
 
 1. Modify compilation options.
 
-    Insert the configuration at the first line of the Kernel-side `CMakeLists.txt` to enable debug information and disable compilation optimization:
+    Prepare debug mode by adding `-g -O0` at the beginning of the kernel-side `CMakeLists.txt` to enable debug information and disable optimization:
 
     ```bash
     cd ~/ot_demo/workspace/src/AddCustom
-    sed -i '1i npu_op_kernel_options(ascendc_kernels ALL OPTIONS -g -O0)' op_kernel/CMakeLists.txt
+    bash ~/ot_demo/msot/example/quick_start/scripts/prepare_mode.sh --project . --mode debug
     ```
+
+    The message `Successfully prepared debug mode` indicates success.
 
 2. Recompile and deploy the operator.
 
@@ -415,7 +375,7 @@ If `cat /proc/debug_switch` outputs `1`, the setting was successful. If it canno
 
 #### 2.5.3 Setting Debug Environment Variables
 
-Set `LAUNCH_KERNEL_PATH` through a script to specify the operator obj loading path and import debug symbol information:
+Source the following script to set `LAUNCH_KERNEL_PATH`, specifying the operator object file to load for debugging symbols:
 
 ```bash
 source ~/ot_demo/msot/example/quick_start/msdebug/set_kernel_obj_env.sh
@@ -430,20 +390,22 @@ source ~/ot_demo/msot/example/quick_start/msdebug/set_kernel_obj_env.sh
     msdebug execute_add_op
     ```
 
-2. Set breakpoint.
+2. Set a breakpoint.
 
-    After the `(msdebug)` prompt appears, set a breakpoint at line 34 of `add_custom.cpp`:
+    After the `(msdebug)` prompt appears, run the following command to set a breakpoint at line 34 of `add_custom.cpp`:
 
     ```text
     b add_custom.cpp:34
     ```
 
-    >[!CAUTION] Note  
-    > If `/proc/debug_switch` was not correctly enabled on the host machine beforehand, setting the breakpoint as described in the preceding step will trigger a warning, and running the `run` command in the subsequent steps will trigger a debugger error (for example, `'A' packet returned an error: 8`), indicating that msDebug cannot work properly.
+    A message beginning with `Breakpoint 1: XXX` indicates that the breakpoint was set.
+
+    > [!CAUTION]
+    > If `/proc/debug_switch` is not enabled on the host, NPU kernel debugging may fail when you run the program, for example with `'A' packet returned an error: 8`. Successfully resolving a breakpoint does not by itself confirm that runtime debugging is available.
 
 3. Run the operator.
 
-    Enter `run` to start the program and wait for the breakpoint to be hit:
+    Run the following command to start the program and wait for it to hit the breakpoint:
 
     ```text
     run
@@ -453,7 +415,7 @@ source ~/ot_demo/msot/example/quick_start/msdebug/set_kernel_obj_env.sh
 
     ```text
     Process 2799 launched: '/root/ot_demo/workspace/src/caller/build/execute_add_op' (aarch64)
-    Running on NPU [0]. If this is the first run on this NPU, scheduling may take a few seconds; please wait...
+    Running on NPU [0]. If this is the first run on this card, scheduling may take a few seconds; please wait...
     [Launch of Kernel AddCustom_ab1b6750d7f510985325b603cb06dc8b_0 on Device 0]
     1 location added to breakpoint 1
     Process 2799 stopped
@@ -482,33 +444,39 @@ source ~/ot_demo/msot/example/quick_start/msdebug/set_kernel_obj_env.sh
     q
     ```
 
-#### 2.5.5 Reverting Manual Modifications
+#### 2.5.5 Restoring Debug Preparation
 
-Prepare for subsequent tool usage by reverting manual modifications:
+Run the following command to restore the sample source files and kernel-side CMake configuration. The deployed operator is unchanged; explicitly rebuild and redeploy it in the next section:
 
 ```bash
-\cp -f ~/ot_demo/workspace/src/AddCustom/op_kernel/CMakeLists.txt.bak ~/ot_demo/workspace/src/AddCustom/op_kernel/CMakeLists.txt
+bash ~/ot_demo/msot/example/quick_start/scripts/restore_demo.sh --project ~/ot_demo/workspace/src/AddCustom
 ```
+
+The message `Successfully restored source files` indicates success.
 
 ### 2.6 [Tuning] Analyzing Operator Performance (msOpProf)
 
-If the operator performance does not meet expectations, you can use the msOpProf tool to collect runtime performance data for in-depth analysis and optimization, ensuring efficient execution of the operator on different Ascend hardware platforms. Follow the steps to experience the effect first; the principles can be read later:
+If operator performance does not meet expectations, use msOpProf to collect runtime performance data for detailed analysis and optimization across Ascend hardware platforms.
 
 #### 2.6.1 Modifying Compilation Options and Recompiling/Deploying
 
 1. Modify compilation options.
 
-    Insert a configuration line at the first line of the Kernel-side `CMakeLists.txt` to enable debug information:
+    Prepare profile mode by adding `-g` at the beginning of the kernel-side `CMakeLists.txt` to enable symbol information while preserving the project's existing optimization policy:
 
     ```bash
     cd ~/ot_demo/workspace/src/AddCustom
-    sed -i '1i npu_op_kernel_options(ascendc_kernels ALL OPTIONS -g)' op_kernel/CMakeLists.txt
+    bash ~/ot_demo/msot/example/quick_start/scripts/prepare_mode.sh --project . --mode profile
     ```
 
-    > [!NOTE] Note   
-    > 
-    > **Key Point (Optional Reading): Why the `-O` optimization level is switched back and forth between tools**   
-    > During the debugging phase, to support breakpoints and variable inspection, `-O0` must be used to disable optimization and preserve accurate symbol mapping. However, the performance gap between `-O0` and `-O2` can be several times. Therefore, performance analysis must be based on code compiled with `-O2` (or the default optimization level). Otherwise, the collected data will severely deviate from real-world scenarios and lose its reference value.
+    The message `Successfully prepared profile mode` indicates success.
+
+    > [!NOTE]
+    > **Background (Optional): Why Different Tools Use Different `-O` Optimization Levels**
+    >
+    > `-O0` disables most compiler optimizations, making execution during debugging more closely follow the source structure and simplifying breakpoint setting, single-stepping, and variable inspection. Debug symbols must still be generated using `-g`.
+    >
+    > `-O2` enables more compiler optimizations. When single-stepping in a debugger, execution may skip source lines, multiple source lines may map to the same execution location, or functions may be inlined. Performance may differ severalfold from an `-O0` build. Performance analysis should use the same optimization configuration as the production deployment, typically `-O2` or the project's default optimization configuration. Avoid retaining debugging mode's `-O0`, which may cause the collected results to differ from actual production performance.
 
 2. Recompile and deploy the operator.
 
@@ -519,34 +487,42 @@ If the operator performance does not meet expectations, you can use the msOpProf
 
 #### 2.6.2 Starting On-Board and Simulation Collection
 
-> [!NOTE] Note   
-> **Differences Between On-Board and Simulation Collection Information**   
-> On-board: Can accurately capture operator runtime, Pipe usage, memory bandwidth, cache behavior, and other real hardware characteristics, which are often key metrics that simulators struggle to reproduce with high fidelity.  
-> Simulation: Provides more complete and stable analysis capabilities in areas such as instruction stream tracing and code hotspot localization, but has limited simulation accuracy for hardware-related behaviors like memory access latency and bandwidth bottlenecks.  
-> Therefore, you are advised to combine both methods to complement each other's strengths for comprehensive performance diagnosis. If you do not have real hardware (NPU) in some scenarios, you can use simulation mode for preliminary performance estimation and hotspot analysis.
+> [!NOTE]
+> **Differences Between Simulation and On-Board Profiling**
+>
+> Simulation provides stable, preliminary analysis of instruction traces and code hotspots without requiring a physical NPU, but has limited accuracy for hardware-dependent behavior such as memory access latency and bandwidth bottlenecks.
+>
+> On-board profiling runs the operator on a physical device to capture actual execution time, pipe utilization, memory bandwidth, cache behavior, and other hardware characteristics.
+>
+> Combine both methods for efficient, comprehensive performance analysis.
 
-1. Perform on-board performance profiling.
+1. Perform simulator performance profiling.
+
+    ```bash
+    cd ~/ot_demo/workspace/src/caller/build
+    msopprof simulator --soc-version=Ascend${MY_STUDY_VAR_CHIP_SOC_TYPE} --output=./msopprof_output_sim ./execute_add_op
+    ```
+
+    The message `Op profiling finish.` indicates success. See the path following `Profiling results saved in` in the log for the results.
+
+2. Perform on-board performance profiling.
 
     ```bash
     cd ~/ot_demo/workspace/src/caller/build
     msopprof --output=./msopprof_output_npu ./execute_add_op
     ```
 
-2. Perform simulator performance profiling.
-
-    ```bash
-    msopprof simulator --soc-version=Ascend${MY_STUDY_VAR_CHIP_SOC_TYPE} --output=./msopprof_output_sim ./execute_add_op
-    ```
+    The message `Op profiling finish.` indicates success. See the path following `Profiling results saved in` in the log for the results.
 
 #### 2.6.3 Viewing Performance Data Results
 
-The tool generates result files in `.csv` and `.bin` formats in the specified `--output` directory. If no errors are reported in the output, the execution is successful:
+The tool generates `.csv` and `.bin` result files in the directory specified by `--output`:
 
 - CSV files   
-For example, opening `MemoryUB.csv` reveals the following information:  
-The data shows that the task is evenly divided into 8 blocks, all scheduled to the Vector Core for execution. For instance, the bandwidth of Block 0 (1.02 GB/s) is significantly higher than that of Block 1 (0.77 GB/s). If the difference is too large, it may indicate potential optimization opportunities:
 
-  | block_id | sub_block_id | aiv_time(µs) | aiv_total_cycles | aiv_ub_read_bw_vector(GB/s) | aiv_ub_write_bw_vector(GB/s) | 
+  For example, `MemoryUB.csv` contains the following information. The task is divided evenly among 8 blocks, all scheduled on vector cores. Block 0 has higher bandwidth (1.02 GB/s) than Block 1 (0.77 GB/s). A large difference may indicate an opportunity for optimization:
+
+  | block_id | sub_block_id | aiv_time(us) | aiv_total_cycles | aiv_ub_read_bw_vector(GB/s) | aiv_ub_write_bw_vector(GB/s) |
   |:--------:|:------------:|:------------:|:----------------:|:---------------------------:|:----------------------------:|
   |    0     |   vector0    |  7.456666  |      13422      |          1.023164           |           0.511582           | 
   |    1     |   vector0    |  9.914444  |      17846      |          0.769523           |           0.384762           | 
@@ -557,19 +533,20 @@ The data shows that the task is evenly divided into 8 blocks, all scheduled to t
   |    6     |   vector0    |  9.293889  |      16729      |          0.820904           |           0.410452           | 
   |    7     |   vector0    |  8.658889  |      15586      |          0.881105           |           0.440553           | 
 
-- BIN file   
-It can be opened using the `MindStudio Insight` tool, which provides an intuitive graphical display of various performance views, such as: computation memory heatmaps, cache heatmaps, and operator code hotspot maps.
+- BIN files
 
-  > [!NOTE] Note  
+  Open these files in MindStudio Insight for graphical performance views, such as compute and memory heatmaps, cache heatmaps, and code hotspot maps.
+
+  > [!NOTE]
   > 
   > To experience visual chart viewing, refer to the <a href="https://gitcode.com/Ascend/msinsight/blob/master/docs/en/install_guide/mindstudio_insight_install_guide.md" target="_blank">MindStudio Insight Tool Documentation</a> to install the Insight tool.
 
-#### 2.6.4 Reverting Manual Modifications
+#### 2.6.4 Restoring Profile Preparation
 
-To prepare for subsequent tool usage, revert the manual modifications:
+Restore the sample source configuration. The deployed operator and profiling results are unchanged. To run the restored normal operator, explicitly rebuild and redeploy it:
 
 ```bash
-\cp -f ~/ot_demo/workspace/src/AddCustom/op_kernel/CMakeLists.txt.bak ~/ot_demo/workspace/src/AddCustom/op_kernel/CMakeLists.txt
+bash ~/ot_demo/msot/example/quick_start/scripts/restore_demo.sh --project ~/ot_demo/workspace/src/AddCustom
 ```
 
 ### 2.7 [Completion] Advanced Learning Path
@@ -582,7 +559,7 @@ At this point, you have fully walked through the entire operator development pro
 | ----------- | --------------------------------- |
 | **msKPP** | Write DSL scripts for operator performance modeling and estimate performance bottlenecks without hardware. |
 | **msOpGen** | Automatically generate operator project frameworks based on configuration files, and complete compilation, deployment, and functional verification. |
-| **msSanitizer** | Inject detection stub code to locate the source code location of runtime defects such as memory out-of-bounds. |
+| **msSanitizer** | Instrument operators to locate runtime defects such as out-of-bounds memory accesses in the source code. |
 | **msDebug** | Start breakpoint debugging, set breakpoints in NPU operator code, and inspect variables. |
 | **msOpProf** | Collect performance data through both on-board and simulation modes, and analyze the execution efficiency of each Block. |
 
@@ -598,15 +575,15 @@ This tutorial only covers the introductory usage of each tool. Each tool offers 
 
 | Tool | Advanced Capabilities |
 |------|--------------|
-| [msKPP](https://gitcode.com/Ascend/mskpp/blob/master/docs/en/user_guide/mskpp_user_guide.md) | Modeling using cache hit rate and in-line conversion, performance comparison analysis of multiple Tiling strategies, and so on. |
+| [msKPP](https://gitcode.com/Ascend/mskpp/blob/master/docs/en/user_guide/mskpp_user_guide.md) | Modeling cache hit rates and on-the-fly conversion, comparing the performance of multiple Tiling strategies, and more. |
 | [msOpGen](https://gitcode.com/Ascend/msopgen/blob/master/docs/en/user_guide/msopgen_user_guide.md) | Complex operator template customization, project generation for multi-input multi-output operators, and so on. |
 | [msSanitizer](https://gitcode.com/Ascend/mssanitizer/blob/master/docs/en/user_guide/mssanitizer_user_guide.md) | More detection modes such as race condition detection, synchronization anomaly diagnosis, and uninitialized variable checking. |
 | [msDebug](https://gitcode.com/Ascend/msdebug/blob/master/docs/en/user_guide/msdebug_user_guide.md) | Advanced debugging techniques such as memory viewing, core switching, and parsing Core dump files. |
 | [msOpProf](https://gitcode.com/Ascend/msopprof/blob/master/docs/en/user_guide/msopprof_user_guide.md) | Visual performance analysis combined with [MindStudio Insight](https://gitcode.com/Ascend/msinsight/blob/master/docs/en/install_guide/mindstudio_insight_install_guide.md), including compute memory heatmaps, cache heatmaps, and code hotspot maps. |
 
-**Step 3: Landing Real Business: From Teaching to Production**  
+**Step 3: Applying the Toolchain to Real Workloads: From Learning to Production**
 
-Deeply study the [Ascend C Programming Guide (Official Tutorial)](https://www.hiascend.com/zh/ascend-c?utm_source=cann&utm_medium=article&utm_campaign=alll) to systematically master core concepts such as multi-level pipelining, data layout, and memory management. On this basis, try to apply the toolchain to the development and tuning of actual business operators, gradually building complete capabilities from prototype verification to production-level delivery.
+Study the [Ascend C Programming Guide (Official Tutorial)](https://www.hiascend.com/zh/ascend-c?utm_source=cann&utm_medium=article&utm_campaign=alll) to build a systematic understanding of multi-level pipelining, data layouts, and memory management. Then apply the toolchain to developing and tuning operators for real workloads, progressing from prototype validation to production delivery.
 
 ## 3. FAQ
 
@@ -643,7 +620,7 @@ execute_add_op: symbol lookup error: ./build/execute_add_op: undefined symbol: a
 
 **Root Cause**
 
-After deploying the operator, the `.so` file was not added to the environment variable `LD_LIBRARY_PATH` as prompted in the output.
+After deployment, the directory containing the operator's `.so` library was not added to `LD_LIBRARY_PATH` as instructed in the deployment output.
 
 **Solution**
 
@@ -661,7 +638,7 @@ WARNING:  Unable to resolve breakpoint to any actual locations.
 
 **Root Cause**
 
-The specified breakpoint line may be an empty line, a comment, or another line where a breakpoint cannot be set, or `/proc/debug_switch` was not set successfully. Refer to the next section for the reason.
+The specified line may be blank, contain a comment, or otherwise have no executable code where a breakpoint can be resolved. Also check the debug switch and runtime prerequisites described in the next section.
 
 **Solution**
 
@@ -677,9 +654,8 @@ error: 'A' packet returned an error: 8
 
 **Root Cause**
 
-The `/proc/debug_switch = 1` setting was not successfully applied. Verify whether the value on the host machine has been changed back to 0. If you are operating in a container environment provided by a cloud service provider, even if `/proc/debug_switch` is successfully set and queried as `1` inside the container,  
-this status may be false. For security reasons, the underlying host typically isolates the `/proc` directory through mechanisms such as copy-on-write (CoW), shadow files, or overlay mounts, causing the setting to not actually take effect.
+This error indicates that a debug launch request failed. Possible causes include `/proc/debug_switch` not being enabled, restricted device access, or incompatibility between the driver and debugging components.
 
 **Solution**
 
-Log in to the host machine (note: not inside the container) with root privileges, and set `/proc/debug_switch = 1` as described in [2.5.1 Enabling Kernel Debug Switch](#251-enabling-kernel-debug-switch). If the setting cannot be applied successfully, you can only skip this tool experience.
+Container mounts and permission restrictions may affect access to and modification of `/proc/debug_switch`. An administrator should configure the switch on the host and confirm that its state is `1`. If the switch is enabled but debugging still fails, use the relevant logs to further investigate device access permissions and compatibility between the driver and debugging components.

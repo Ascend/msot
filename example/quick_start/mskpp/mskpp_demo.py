@@ -1,5 +1,23 @@
+import copy
+import logging
 import os
 from mskpp import vadd, Tensor, Chip
+
+
+class ConsoleLogFormatter(logging.Formatter):
+    def format(self, record):
+        record = copy.copy(record)
+        record.msg = record.getMessage().lstrip()
+        record.args = ()
+        return super().format(record)
+
+
+def configure_console_logging():
+    formatter = ConsoleLogFormatter("%(asctime)s [%(levelname)s] %(message)s", "%Y-%m-%d %H:%M:%S")
+    for handler in logging.getLogger().handlers:
+        if isinstance(handler, logging.StreamHandler) and not isinstance(handler, logging.FileHandler):
+            handler.setFormatter(formatter)
+
 
 def my_vadd(gm_x, gm_y, gm_z):
     # 向量Add的基本数据通路：
@@ -24,6 +42,7 @@ def my_vadd(gm_x, gm_y, gm_z):
     gm_z.load(out[0])
 
 if __name__ == '__main__':
+    configure_console_logging()
     chip_name = os.getenv("MY_STUDY_VAR_CHIP_SOC_TYPE", "")
     with Chip("Ascend" + chip_name) as chip:  # 格式为Ascendxxxyy，其中xxxyy为用户实际使用的具体芯片SoC型号
         chip.enable_trace()  # 使能算子模拟流水图的功能，生成trace.json文件
@@ -34,3 +53,5 @@ if __name__ == '__main__':
         in_y = Tensor("GM", "FP16", [32, 48], format="ND")
         in_z = Tensor("GM", "FP16", [32, 48], format="ND")
         my_vadd(in_x, in_y, in_z)
+
+    logging.info("MSKPP modeling completed successfully, result path is: %s.", chip.output_dir)

@@ -70,7 +70,8 @@ fi
 
 if [ -n "$O_FILE" ]; then
     export LAUNCH_KERNEL_PATH="$O_FILE"
-    echo "Find obj file, exec cmd:export LAUNCH_KERNEL_PATH=$LAUNCH_KERNEL_PATH"
+    printf '%s [INFO] Find obj file, exec cmd:export LAUNCH_KERNEL_PATH=%s\n' \
+        "$(date '+%Y-%m-%d %H:%M:%S')" "$LAUNCH_KERNEL_PATH"
 else
     echo "Error: No ${PATTERN} file found under '${SEARCH_PATH}'" >&2
     return 1

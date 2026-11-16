@@ -16,6 +16,7 @@
 | **执行用户** | 使用普通用户账户启动容器                                                        | 执行 `whoami`，返回非 `root` 的用户名    |
 | **脚本执行** | 已安装 Python 3（任意版本）                                                  | 执行 `python3 -V`，有版本信息输出即表示已安装  |
 | **网络通信** | 已安装 curl（任意版本）                                                      | 执行 `curl -V`，有版本信息输出即表示已安装     |
+| **设备查询** | 已安装 lspci（任意版本）                                                      | 执行 `lspci --version`，有版本信息输出即表示已安装     |
 
 > 👉 确认前置条件满足后，若环境具备公网访问能力，后续命令可全程直接 **Copy/Paste** 执行，无需手动输入或拼接，以避免因输入错误导致命令执行失败。
 
@@ -44,7 +45,7 @@ source /dev/stdin <<< "$(dev_id=$(lspci -n -D | grep -o '19e5:d[0-9a-f]\{3\}' | 
 若命令执行后输出 `[PASS]`，则表示执行成功；若输出 `[FAIL]`，可能原因如下：
 
 1. 硬件不在本教程支持范围内：本学习环境仅支持昇腾 910B、310P 及 A3 系列芯片，请切换至兼容的硬件环境后重试；
-2. 底层环境异常：未安装 `lspci`，或当前用户无法通过 `lspci -n -D` 查询 NPU PCI ID，请联系环境管理员确认底层环境。
+2. 底层环境异常：未安装 `lspci` 或当前用户无法通过 `lspci -n -D` 查询 NPU PCI ID，请联系环境管理员确认底层环境。
 
 ### 2.2 拉取镜像
 
@@ -110,17 +111,24 @@ git clone https://gitcode.com/Ascend/msot.git ~/ot_demo/msot
 
 ## 5. 容器内：设置芯片 SoC 型号
 
-后续多条命令需引用芯片 SoC 型号（片上系统型号，用于标识芯片架构）。此处统一查询并保存到环境变量 `MY_STUDY_VAR_CHIP_SOC_TYPE`，便于后续直接调用。
-
-在容器内执行如下命令：
+后续命令需要通过环境变量 `MY_STUDY_VAR_CHIP_SOC_TYPE` 引用芯片 SoC 型号，在已加载 CANN 环境的容器内，执行如下命令设置环境变量：
 
 ```bash
-echo 'export MY_STUDY_VAR_CHIP_SOC_TYPE=$(python3 -c "import acl; print(acl.get_soc_name().replace(\"Ascend\", \"\"))")' > /etc/profile.d/custom-env.sh && chmod +x /etc/profile.d/custom-env.sh && source /etc/profile.d/custom-env.sh && { [ -n "$MY_STUDY_VAR_CHIP_SOC_TYPE" ] && echo -e "\033[32m[PASS] Chip SoC type: $MY_STUDY_VAR_CHIP_SOC_TYPE\033[0m" || echo -e '\033[31m[FAIL] Failed to set environment variable $MY_STUDY_VAR_CHIP_SOC_TYPE!\033[0m'; }
+source ~/ot_demo/msot/example/quick_start/scripts/set_chip_soc_env.sh
 ```
 
-若显示 `[PASS]`，表示设置成功；若显示 `[FAIL]`，通常是因为未成功部署 CANN 容器，或误在宿主机（容器外）执行了本步骤，请确认已进入容器后重试。
+回显 `Environment variable set successfully`，表示变量已在**当前终端及其后续启动的子进程**中生效。同时创建 `/etc/profile.d/custom-env.sh`，供后续新session或重新登录 Shell 时自动查询芯片型号；
+
+若持久化因权限不足或文件系统只读而无法完成，脚本会输出 `[WARNING]`，自动退回仅设置当前 session。此时需在后续新终端中需重新执行上述 `source` 命令。
+
+如果明确只需要当前 session设置，不读取或写入持久化配置，可执行：
+
+```bash
+source ~/ot_demo/msot/example/quick_start/scripts/set_chip_soc_env.sh --session-only
+```
 
 > [!CAUTION]注意
+> 必须使用 `source`，不能替换为 `bash` 执行，否则子进程无法设置当前终端的环境变量。
 > 环境变量 `MY_STUDY_VAR_CHIP_SOC_TYPE` 与 `MY_STUDY_VAR_CANN_IMAGE` 仅适用于本快速入门教程，请勿在商业开发中使用。
 
 ## 6. 安装完成自检
@@ -128,11 +136,10 @@ echo 'export MY_STUDY_VAR_CHIP_SOC_TYPE=$(python3 -c "import acl; print(acl.get_
 在容器内执行以下命令，确认快速入门所需环境已准备完成：
 
 ```bash
-[ -n "$MY_STUDY_VAR_CHIP_SOC_TYPE" ] && echo -e "\033[32m[PASS] Chip SoC type: $MY_STUDY_VAR_CHIP_SOC_TYPE\033[0m" || echo -e "\033[31m[FAIL] Missing environment variable MY_STUDY_VAR_CHIP_SOC_TYPE\033[0m"
-[ -d ~/ot_demo/msot/example/quick_start ] && echo -e "\033[32m[PASS] Example code repository OK\033[0m" || echo -e "\033[31m[FAIL] Example code repository missing\033[0m"
+bash ~/ot_demo/msot/example/quick_start/scripts/check_env.sh --task core
 ```
 
-若以上检查均输出 `[PASS]`，则学习环境安装完成。接下来，请返回快速入门文档继续后续操作。
+回显`Environment check successful, summary 0 failure(s)`  表示环境设置完成，可返回快速入门文档继续后续操作。
 
 <br>
 

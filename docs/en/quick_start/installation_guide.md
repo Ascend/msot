@@ -110,17 +110,24 @@ After cloning is complete, the example code is located at `~/ot_demo/msot/exampl
 
 ## 5. In the Container: Setting the Chip SoC Model
 
-Many subsequent commands need to reference the chip SoC model (system-on-a-chip model, used to identify the chip architecture). This section queries it uniformly and saves it to the environment variable `MY_STUDY_VAR_CHIP_SOC_TYPE` for direct use later.
-
-Run the following command in the container:
+Subsequent commands use the environment variable `MY_STUDY_VAR_CHIP_SOC_TYPE` to reference the chip SoC model. Run the following command inside the container with the CANN environment loaded to set the variable:
 
 ```bash
-echo 'export MY_STUDY_VAR_CHIP_SOC_TYPE=$(python3 -c "import acl; print(acl.get_soc_name().replace(\"Ascend\", \"\"))")' > /etc/profile.d/custom-env.sh && chmod +x /etc/profile.d/custom-env.sh && source /etc/profile.d/custom-env.sh && { [ -n "$MY_STUDY_VAR_CHIP_SOC_TYPE" ] && echo -e "\033[32m[PASS] Chip SoC type: $MY_STUDY_VAR_CHIP_SOC_TYPE\033[0m" || echo -e '\033[31m[FAIL] Failed to set environment variable $MY_STUDY_VAR_CHIP_SOC_TYPE!\033[0m'; }
+source ~/ot_demo/msot/example/quick_start/scripts/set_chip_soc_env.sh
 ```
 
-If `[PASS]` is displayed, the setting succeeded. If `[FAIL]` is displayed, it is usually because the CANN container was not deployed successfully, or you mistakenly ran this step on the host machine (outside the container). Confirm that you are inside the container and try again.
+The message `Environment variable set successfully` indicates that the variable is available in **the current terminal and child processes started afterward**. The script also creates `/etc/profile.d/custom-env.sh` to automatically query the chip model in subsequent login Shell sessions.
+
+If persistence cannot be completed because of insufficient permissions or a read-only filesystem, the script prints a `[WARNING]` and automatically falls back to configuring only the current session. In this case, run the `source` command again in each new terminal.
+
+To explicitly configure only the current session without reading or writing persistent configuration, run:
+
+```bash
+source ~/ot_demo/msot/example/quick_start/scripts/set_chip_soc_env.sh --session-only
+```
 
 > [!CAUTION] Note
+> Use `source`, not `bash`: a child process cannot set environment variables in the current terminal.
 > The environment variables `MY_STUDY_VAR_CHIP_SOC_TYPE` and `MY_STUDY_VAR_CANN_IMAGE` apply only to this quick start tutorial. Do not use them in commercial development.
 
 ## 6. Installation Completion Self-Check
