@@ -117,11 +117,11 @@ git clone https://gitcode.com/Ascend/msot.git ~/ot_demo/msot
 source ~/ot_demo/msot/example/quick_start/scripts/set_chip_soc_env.sh
 ```
 
-回显 `Environment variable set successfully`，表示变量已在**当前终端及其后续启动的子进程**中生效。同时创建 `/etc/profile.d/custom-env.sh`，供后续新session或重新登录 Shell 时自动查询芯片型号；
+回显 `Environment variable set successfully` 表示变量已在**当前终端及其后续启动的子进程**中生效。同时创建或复用 `/etc/profile.d/custom-env.sh`，供后续新终端或重新登录 Shell 时自动查询芯片型号。
 
-若持久化因权限不足或文件系统只读而无法完成，脚本会输出 `[WARNING]`，自动退回仅设置当前 session。此时需在后续新终端中需重新执行上述 `source` 命令。
+若持久化因权限不足或文件系统只读而无法完成，脚本会输出 `[WARNING]`，自动退回仅设置当前终端。此时在后续新开启的终端中需重新执行上述 `source` 命令。
 
-如果明确只需要当前 session设置，不读取或写入持久化配置，可执行：
+如果明确只需要在当前终端中设置，不读取或写入持久化配置，可执行：
 
 ```bash
 source ~/ot_demo/msot/example/quick_start/scripts/set_chip_soc_env.sh --session-only
@@ -139,7 +139,7 @@ source ~/ot_demo/msot/example/quick_start/scripts/set_chip_soc_env.sh --session-
 bash ~/ot_demo/msot/example/quick_start/scripts/check_env.sh --task core
 ```
 
-回显`Environment check successful, summary 0 failure(s)`  表示环境设置完成，可返回快速入门文档继续后续操作。
+回显 `Environment check successful, summary 0 failure(s).` 表示环境设置完成，可返回快速入门文档继续后续操作。
 
 <br>
 
@@ -153,15 +153,15 @@ bash ~/ot_demo/msot/example/quick_start/scripts/check_env.sh --task core
 
 **方法二（原生命令）**：执行 `docker exec -it alice_YYMMDD_HHMMSS bash`（请替换为实际容器名称）。
 
-### 7.2 执行 Docker 命令遇到 permission denied 类错误提示？
+### 7.2 执行 Docker 命令遇到 permission denied 如何处理？
 
-可能当前用户未加入 Docker 用户组，可使用 root 权限在宿主机执行：
+可能是当前用户未加入 Docker 用户组，可使用 root 权限在宿主机执行：
 
 ```bash
 sudo usermod -aG docker <当前用户名>
 ```
 
-执行后需要重新登录当前用户会话，或执行 `newgrp docker` 使用户组变更立即生效。不建议以 root 身份进行日常操作。
+执行后需要重新登录当前用户，或执行 `newgrp docker` 使用户组变更立即生效。不建议以 root 身份进行日常操作。
 
 ## 8. 内网环境无公网访问权限的应对方案
 
@@ -191,7 +191,7 @@ sudo systemctl restart docker
 
 **方案二：离线导入 CANN 镜像**
 
-如果代理方案不可行，请先在内网 NPU 服务器上执行 [2.1 节](#21-基于芯片型号自动识别并配置镜像环境变量)，根据当前芯片型号得到环境变量 `MY_STUDY_VAR_CANN_IMAGE` 的值；再将该镜像名复制到具备公网且 CPU 架构相同的机器上，执行如下命令：
+如果代理方案不可行，请先在内网 NPU 服务器上执行 [2.1 节](#21-基于芯片型号自动识别并配置镜像环境变量)操作，根据当前芯片型号得到环境变量 `MY_STUDY_VAR_CANN_IMAGE` 的值；再将该镜像名复制到具备公网访问能力且 CPU 架构相同的机器上，执行如下命令：
 
 ```bash
 docker pull <MY_STUDY_VAR_CANN_IMAGE>

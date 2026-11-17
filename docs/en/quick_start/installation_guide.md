@@ -116,7 +116,7 @@ Subsequent commands use the environment variable `MY_STUDY_VAR_CHIP_SOC_TYPE` to
 source ~/ot_demo/msot/example/quick_start/scripts/set_chip_soc_env.sh
 ```
 
-The message `Environment variable set successfully` indicates that the variable is available in **the current terminal and child processes started afterward**. The script also creates `/etc/profile.d/custom-env.sh` to automatically query the chip model in subsequent login Shell sessions.
+The message `Environment variable set successfully` indicates that the variable is available in **the current terminal and child processes started afterward**. The script also creates or reuses `/etc/profile.d/custom-env.sh` to automatically query the chip model in new terminals or subsequent login Shell sessions.
 
 If persistence cannot be completed because of insufficient permissions or a read-only filesystem, the script prints a `[WARNING]` and automatically falls back to configuring only the current session. In this case, run the `source` command again in each new terminal.
 
@@ -132,14 +132,13 @@ source ~/ot_demo/msot/example/quick_start/scripts/set_chip_soc_env.sh --session-
 
 ## 6. Installation Completion Self-Check
 
-Run the following commands in the container to confirm that the environment required for the quick start is ready:
+Run the following command in the container to confirm that the environment required for the quick start is ready:
 
 ```bash
-[ -n "$MY_STUDY_VAR_CHIP_SOC_TYPE" ] && echo -e "\033[32m[PASS] Chip SoC type: $MY_STUDY_VAR_CHIP_SOC_TYPE\033[0m" || echo -e "\033[31m[FAIL] Missing environment variable MY_STUDY_VAR_CHIP_SOC_TYPE\033[0m"
-[ -d ~/ot_demo/msot/example/quick_start ] && echo -e "\033[32m[PASS] Example code repository OK\033[0m" || echo -e "\033[31m[FAIL] Example code repository missing\033[0m"
+bash ~/ot_demo/msot/example/quick_start/scripts/check_env.sh --task core
 ```
 
-If all the preceding checks output `[PASS]`, the learning environment installation is complete. Return to the quick start document and continue with the subsequent operations.
+The message `Environment check successful, summary 0 failure(s).` indicates that the environment setup is complete. You can return to the quick start document and continue with the subsequent operations.
 
 <br>
 

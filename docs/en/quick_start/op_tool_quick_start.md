@@ -112,7 +112,7 @@ Taking `Instruction_statistic.csv` as an example, its content is as follows:
 |     VADD     |    0.0135    |  25   |    -    | 1536 |
 | MOV-UB_TO_GM |    0.4254    |  787  |  3072   |  -   |
 
-From the above content, it can be seen that MOV-UB_TO_GM (moving from UB to GM) has the longest duration and the highest number of instruction cycles, making it the critical path that requires focused attention during performance optimization. In actual development, if such memory transfer time is found to account for an excessively high proportion, priority should be given to optimizing data reuse (Tiling) or using more efficient transfer instructions.
+From the above content, it can be seen that MOV-UB_TO_GM (moving from UB to GM) has the longest duration and the highest number of instruction cycles, making it a major bottleneck that requires focused attention during performance optimization. In actual development, if such memory transfer time is found to account for an excessively high proportion, priority should be given to optimizing data reuse (Tiling) or using more efficient transfer instructions.
 
 ### 2.3 [Development] Building the Operator Project (msOpGen)
 
@@ -160,7 +160,7 @@ After designing the algorithm, implement the operator. Operator projects typical
     > Kernel Side: Code running on the NPU, responsible for executing the actual large-scale parallel computation logic.   
     > Tiling: Partitioning large-scale data into blocks to improve Local Memory utilization and optimize memory access efficiency.
 
-    The generated project may look large and complex, but you **only need to focus on the three C++ files marked as [User Extension Points]**. The remaining files provide framework code and do not need to be inspected or modified unless required:
+    The following is an example of the generated project structure. You **only need to focus on the three C++ files marked as [User Extension Points]**. The remaining files provide framework code and usually do not need to be inspected or modified:
 
     ```text
     AddCustom
@@ -212,7 +212,7 @@ bash ~/ot_demo/msot/example/quick_start/scripts/prepare_add_demo.sh --project .
     > [!NOTE]
     > **What Does Operator Deployment Mean?**
     >
-    > Deploying operators refers to registering the operator with the CANN framework. Essentially, it involves copying the binary files of the operator to a system public directory, allowing other programs to automatically discover and invoke the operator through standard interfaces (such as CANN API or PyTorch). The `*.run` deployment package format can be simply understood as a self-extracting archive.
+    > Deploying operators refers to registering the operator with the CANN framework. Essentially, it involves copying the binary files of the operator to a system public directory, allowing other programs to automatically discover and invoke the operator through standard interfaces (such as the CANN API) or upper-layer frameworks such as PyTorch. The `*.run` deployment package format can be simply understood as a self-extracting archive.
 
     Run the following command to deploy the operator:
 
@@ -295,7 +295,7 @@ cd ~/ot_demo/workspace/src/caller
 mssanitizer --tool=memcheck -- bash run.sh
 ```
 
-If the tool outputs the following error report, it indicates successful execution and that the constructed out-of-bounds access has been identified (the display may vary slightly between versions, which does not affect learning how to use the tool):  
+If the tool outputs the following error report, it indicates that the tool ran to completion and that the constructed out-of-bounds access has been identified (the display may vary slightly between versions, which does not affect learning how to use the tool):  
 
 1. `illegal read of size 224`: Indicates an illegal read of 224 bytes.   
 2. `op_kernel/add_custom.cpp:44:9`: Indicates that the out-of-bounds access occurred at line 44 of `add_custom.cpp`.   
@@ -485,7 +485,7 @@ If operator performance does not meet expectations, use msOpProf to collect runt
     bash ./build_out/custom_opp_openEuler_aarch64.run
     ```
 
-#### 2.6.2 Starting On-Board and Simulation Collection
+#### 2.6.2 Starting Simulation and On-Board Collection
 
 > [!NOTE]
 > **Differences Between Simulation and On-Board Profiling**
@@ -539,7 +539,7 @@ The tool generates `.csv` and `.bin` result files in the directory specified by 
 
   > [!NOTE]
   > 
-  > To experience visual chart viewing, refer to the <a href="https://gitcode.com/Ascend/msinsight/blob/master/docs/en/install_guide/mindstudio_insight_install_guide.md" target="_blank">MindStudio Insight Tool Documentation</a> to install the Insight tool.
+  > To experience visual chart viewing, refer to the <a href="https://gitcode.com/Ascend/msinsight/blob/master/docs/en/install_guide/mindstudio_insight_install_overview.md" target="_blank">MindStudio Insight Tool Documentation</a> to install the Insight tool.
 
 #### 2.6.4 Restoring Profile Preparation
 
@@ -571,7 +571,7 @@ Refer to the `AddCustom` example in this tutorial and try to independently imple
 
 **Step 2: Diving into Tools: Mastering the Advanced Features of Each Tool**  
 
-This tutorial only covers the introductory usage of each tool. Each tool offers richer advanced capabilities. You are advised to access the *User Guide* of the corresponding repository as needed for in-depth learning:
+This tutorial only covers the introductory usage of each tool. Each tool offers richer advanced capabilities. You are advised to consult the *User Guide* of the corresponding repository as needed for in-depth learning:
 
 | Tool | Advanced Capabilities |
 |------|--------------|
@@ -579,7 +579,7 @@ This tutorial only covers the introductory usage of each tool. Each tool offers 
 | [msOpGen](https://gitcode.com/Ascend/msopgen/blob/master/docs/en/user_guide/msopgen_user_guide.md) | Complex operator template customization, project generation for multi-input multi-output operators, and so on. |
 | [msSanitizer](https://gitcode.com/Ascend/mssanitizer/blob/master/docs/en/user_guide/mssanitizer_user_guide.md) | More detection modes such as race condition detection, synchronization anomaly diagnosis, and uninitialized variable checking. |
 | [msDebug](https://gitcode.com/Ascend/msdebug/blob/master/docs/en/user_guide/msdebug_user_guide.md) | Advanced debugging techniques such as memory viewing, core switching, and parsing Core dump files. |
-| [msOpProf](https://gitcode.com/Ascend/msopprof/blob/master/docs/en/user_guide/msopprof_user_guide.md) | Visual performance analysis combined with [MindStudio Insight](https://gitcode.com/Ascend/msinsight/blob/master/docs/en/install_guide/mindstudio_insight_install_guide.md), including compute memory heatmaps, cache heatmaps, and code hotspot maps. |
+| [msOpProf](https://gitcode.com/Ascend/msopprof/blob/master/docs/en/user_guide/msopprof_user_guide.md) | Visual performance analysis combined with [MindStudio Insight](https://gitcode.com/Ascend/msinsight/blob/master/docs/en/install_guide/mindstudio_insight_install_overview.md), including compute memory heatmaps, cache heatmaps, and code hotspot maps. |
 
 **Step 3: Applying the Toolchain to Real Workloads: From Learning to Production**
 
