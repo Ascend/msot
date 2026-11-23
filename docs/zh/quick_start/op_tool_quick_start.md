@@ -1,5 +1,6 @@
 # 算子开发工具链快速入门
 
+本文档介绍 MindStudio 算子开发工具链，以开发一个简单加法算子为例贯穿算子开发全流程，涵盖环境准备、算子设计、工程开发、异常检测、断点调试与性能调优，适用于需要快速体验算子开发全流程的用户。
 <br>
 
 ## 1. 概述
@@ -26,7 +27,7 @@ MindStudio 算子开发工具链包含多种工具。本文档以开发一个简
 
 本教程**仅支持**标准化 CANN 容器环境，不支持裸机、虚拟机或其他非标准容器部署。
 **请按以下指南完成环境安装**，否则可能导致后续操作执行失败。
-👉 **[《昇腾 AI 算子开发工具链学习环境安装指南》](installation_guide.md)**
+👉 **《[昇腾 AI 算子开发工具链学习环境安装指南](installation_guide.md)》**
 
 > **具备公网访问能力的环境预计耗时：约 3 分钟（具体时间受网络状况影响）**
 > 安装完成后，您将获得一个预装所有算子工具、示例代码和依赖库的标准化容器环境。
@@ -48,7 +49,7 @@ bash ~/ot_demo/msot/example/quick_start/scripts/check_env.sh --task core
 
 首先进行算子算法设计，借助 msKPP 工具，可快速获得算子性能建模结果，在不依赖硬件的条件下验证实现方案的可行性，并预估算子性能。工具使用步骤如下：
 
-> [!NOTE]说明   
+> [!NOTE]
 > 
 > **知识点：msKPP 工具原理**   
 > msKPP 包含一套专用于昇腾的 Python 类库，用户需通过 `import` 相关模块、编写并运行 Python 脚本，生成性能分析结果文件与建模结果。
@@ -74,9 +75,9 @@ cd ~/ot_demo/workspace/mskpp
 
 输出 `Prepare sample successful` 表示执行成功。由于本文为快速入门，聚焦工具使用方法，因此准备了样例脚本，脚本路径见日志回显内容，实际开发时请根据需求自行实现或编辑。
 
-> [!NOTE]说明  
+> [!NOTE]
 > 
-> **知识点（可选阅读）：msKPP 的 DSL 语言方案（Domain-Specific Language，领域特定语言）**   
+> **知识点（可选阅读）：msKPP 的 DSL 语言方案（Domain-Specific Language，领域专用语言）**   
 > 这套类库及接口是专为昇腾性能建模而设计的“方言”，无法仅凭通用 Python 语法直接编写，但用法较简单，稍加学习即可应用。
 > 常规开发流程：先导入 Tensor、Chip 以及算子实现所必需的指令（例如 vadd），通过 `with` 语句进入算子实现代码的上下文，再创建 Tensor 以执行具体操作，详细内容可参考样例脚本中相关注释，其他指令接口说明请参考《[msKPP 工具接口说明](https://gitcode.com/Ascend/mskpp/blob/master/docs/zh/api_reference/mskpp_api_reference.md)》。
 
@@ -128,7 +129,7 @@ MSKPP{timestamp}/
 
    输出 `Prepare sample successful` 表示执行成功。由于本文为快速入门，聚焦工具使用方法，因此准备了算子定义样例 JSON 文件，文件路径见脚本日志回显内容，实际开发时请根据需求自行实现或编辑。
 
-   > [!NOTE]说明   
+   > [!NOTE]
    > 
    > **知识点（可选阅读）：msOpGen 输入配置文件**   
    > 算子定义的 JSON 配置文件，用于结构化定义算子名称、输入、输出等信息，可以类比为 C 语言中的函数声明，包括：函数名、入参及返回值类型等信息。
@@ -137,24 +138,25 @@ MSKPP{timestamp}/
 
 2. 生成算子代码框架
 
-    执行以下命令生成 Ascend C 算子工程，参数说明：`-lan cpp` 指定生成 Ascend C 代码；`-c` 指定芯片 SoC 型号：
+    执行以下命令生成 Ascend C 算子工程，参数说明：`-i` 指定算子定义配置文件路径；`-c` 指定芯片SoC型号；`-lan cpp` 指定生成 Ascend C代码；`-out` 生成文件所在路径：
 
    ```bash
     msopgen gen -i msopgen_demo.json -c ai_core-ascend${MY_STUDY_VAR_CHIP_SOC_TYPE} -lan cpp -out AddCustom
    ```
 
-   回显 `Generation completed` 表示执行成功。如需了解上述命令各参数的详细含义，请参阅 [msOpGen 代码仓库](https://gitcode.com/Ascend/msopgen) 的《使用指南》。
+   回显 `Generation completed` 表示执行成功。如需了解上述命令各参数的详细含义，请参阅《[msOpGen工具使用指南](https://gitcode.com/Ascend/msopgen/blob/master/docs/zh/user_guide/msopgen_user_guide.md)》。
 
-    >[!CAUTION]注意          
-    > 上述命令生成的代码框架中，具体算子的实现为空，无法正常执行加法运算，需按照 [2.3.2 节](#232-实现核心逻辑) 内容进行修改后方可正常运行。 
+    > [!CAUTION]
+    > 
+    > 上述命令生成的代码框架中，具体算子的实现为空，无法正常执行加法运算，需按照 [2.3.2 节](#232-实现核心逻辑) 内容进行修改后方可正常运行。
    
 3. 查看生成的结果
 
-    > [!NOTE]说明   
+    > [!NOTE]
     > 
     > **知识点（可选阅读）：关键概念**       
-    > Host 侧：运行于 CPU 的代码，负责数据预处理、任务调度及算子调用。   
-    > Kernel 侧：运行于 NPU 的代码，负责执行实际的大规模并行计算逻辑。   
+    > Host 侧：运行于CPU的代码，负责数据预处理、任务调度及算子调用。   
+    > Kernel 侧：运行于NPU的代码，负责执行实际的大规模并行计算逻辑。   
     > Tiling：将大规模数据分块处理，以提高 Local Memory 利用率并优化内存访问效率。
 
     以下为生成的工程结构示例，实际开发中**仅需关注标记为【用户扩展点】的三个 C++ 文件**，其余均为框架代码，通常无需查看或修改：
@@ -186,7 +188,8 @@ bash ~/ot_demo/msot/example/quick_start/scripts/prepare_add_demo.sh --project .
 ```
 
 输出 `Prepare sample script successful` 表示执行成功。
-> [!NOTE]说明   
+
+> [!NOTE]
 > 
 > **知识点（可选阅读）：算子核心代码文件实现原理**  
 > op_host/add_custom.cpp：实现 Host 侧的 Tiling 计算逻辑与算子原型注册。  
@@ -211,7 +214,7 @@ bash ~/ot_demo/msot/example/quick_start/scripts/prepare_add_demo.sh --project .
     bash ./build_out/custom_opp_openEuler_aarch64.run
     ```
 
-    >[!NOTE]说明   
+    > [!NOTE]
     > 
     > **知识点：什么是部署算子**  
     > 部署算子是指将算子注册到 CANN 框架中，本质上是将算子的二进制文件拷贝至系统公共目录，使其他程序能够通过标准接口（如 CANN API）或 PyTorch 等上层框架自动发现并调用该算子。`*.run` 的部署包格式可以理解为一种自解压的压缩包。
@@ -225,10 +228,11 @@ bash ~/ot_demo/msot/example/quick_start/scripts/prepare_add_demo.sh --project .
 
 #### 2.3.4 验证算子功能
 
-> [!CAUTION]注意   
-> **关于 NPU 设备选择的说明**   
-> 执行以下 `run.sh` 脚本会实际运行算子。脚本默认根据 `npu-smi info` 的查询结果，按显示顺序选择第一张空闲的 NPU 卡执行任务。
-> 如需指定 NPU 卡，请根据 `npu-smi info` 返回的设备信息，使用其顺序号（取值范围为 [0, NPU 数量 - 1]）调用，例如：`bash ./run.sh 2`。
+> [!CAUTION]
+> 
+> **关于NPU设备选择的说明**   
+> 执行以下 `run.sh` 脚本会实际运行算子。脚本默认根据 `npu-smi info` 的查询结果，按显示顺序选择第一张空闲的NPU卡执行任务。
+> 如需指定NPU卡，请根据 `npu-smi info` 返回的设备信息，使用其顺序号（取值范围为 [0,NPU数量 - 1]）调用，例如：`bash ./run.sh 2`。
 
 执行算子调用工程，验证算子功能（本例执行 1.0 + 2.0，预期结果为 3.0）：
 
@@ -254,8 +258,8 @@ Init acl failed. ERROR: 1
 
 | 现象 | 可能原因 | 处理方式 |
 |------|----------|----------|
-| 超过 30 秒无返回 | NPU 卡繁忙 | 按 Ctrl+C 终止，切换至其他空闲卡重试（指定方法见上文“关于 NPU 设备选择的说明”） |
-| 出现如下 ACL 报错 | NPU 卡异常（硬件故障、驱动问题等）；<br>`/dev/hisi_hdc` 设备异常，比如未挂载、无权限等；<br>内存等系统资源不足 | 解决 NPU 卡故障或更换为正常卡后重试；错误码含义参见 [《ACL 错误码表》](https://www.hiascend.com/document/detail/zh/CANNCommunityEdition/850/API/appdevgapi/aclcppdevg_03_1345.html) |
+| 超过 30 秒无返回 |NPU卡繁忙 | 按 Ctrl+C 终止，切换至其他空闲卡重试（指定方法见上文“关于NPU设备选择的说明”） |
+| 出现如下 ACL 报错 |NPU卡异常（硬件故障、驱动问题等）；<br>`/dev/hisi_hdc` 设备异常，比如未挂载、无权限等；<br>内存等系统资源不足 | 解决NPU卡故障或更换为正常卡后重试；错误码含义参见 《[ACL 错误码表](https://www.hiascend.com/document/detail/zh/CANNCommunityEdition/850/API/appdevgapi/aclcppdevg_03_1345.html)》 |
 
 ### 2.4【检测】算子异常检测（msSanitizer）
 
@@ -271,7 +275,9 @@ bash ~/ot_demo/msot/example/quick_start/scripts/prepare_mode.sh --project . --mo
 ```
 
 输出 `Successfully prepared sanitizer mode` 表示检测模式准备成功。
->[!NOTE]说明  
+
+> [!NOTE]
+>
 > 构造异常如下：将 op_kernel/add_custom.cpp 中 `AscendC::DataCopy` 函数调用中的读取长度修改为 2 倍（`2 * this->tileLength`），导致访问超出 GM 内存中 `xGm` 的分配范围，从而触发“非法读取”错误。
 
 #### 2.4.2 重新编译部署
@@ -307,7 +313,8 @@ mssanitizer --tool=memcheck -- bash run.sh
 ======    #6 /root/ot_demo/workspace/src/caller/AddCustom/build_out/op_kernel/AddCustom_ascend910b/kernel_0/kernel_meta_AddCustom_ab1b6750d7f510985325b603cb06dc8b/kernel_meta/AddCustom_ab1b6750d7f510985325b603cb06dc8b_2130445_kernel.cpp:37:5
 ```
 
-> [!NOTE]说明  
+> [!NOTE]
+>
 > 算子出现内存问题后仍可能执行成功，这正体现了该工具的价值：内存问题通常具有偶发性，在多数情况下即使存在内存异常，程序仍可正常运行，表现为静默故障（Silent Failure），仅当问题累积至临界点时才会突发崩溃，难以通过表象直接定位。
 
 #### 2.4.4 恢复正常样例
@@ -341,8 +348,9 @@ cat /proc/debug_switch
 
 若 `cat /proc/debug_switch` 输出 `1`，表示设置成功；如果不能成功设置为 `1`，msDebug 功能不可用，只能跳过本节 msDebug 体验。
 
->[!CAUTION]注意    
-> /proc/debug_switch 是昇腾驱动提供的 NPU 调试开关接口，用于控制是否允许 msDebug 调试运行在 NPU 上的算子 Kernel，是 /proc 下的虚拟文件。
+> [!CAUTION]
+> 
+> /proc/debug_switch 是昇腾驱动提供的NPU调试开关接口，用于控制是否允许 msDebug 调试运行在NPU上的算子 Kernel，是 /proc 下的虚拟文件。
 > 由于容器的挂载方式和权限限制可能影响对驱动调试开关的访问与设置，因此需要由管理员用户在宿主机上操作并确认状态，否则可能在调试期间返回错误（如 `'A' packet returned an error: 8`）。  
 
 #### 2.5.2 修改编译选项并重新部署
@@ -463,7 +471,8 @@ bash ~/ot_demo/msot/example/quick_start/scripts/restore_demo.sh --project ~/ot_d
     ```
 
     回显 `Successfully prepared profile mode` 表示执行成功。
-    > [!NOTE]说明   
+
+    > [!NOTE]
     > 
     > **知识点（可选阅读）：为什么不同工具会设置不同 -O 优化等级**   
     > -O0 会关闭大部分编译优化，使调试时的执行过程更接近源码结构，便于设置断点、单步执行和查看变量；调试符号信息还需通过 -g 生成。
@@ -478,7 +487,8 @@ bash ~/ot_demo/msot/example/quick_start/scripts/restore_demo.sh --project ~/ot_d
 
 #### 2.6.2 启动仿真与上板采集
 
-> [!NOTE]说明   
+> [!NOTE]
+>
 > **知识点：仿真和上板采集信息的区别**   
 > 仿真：可在不依赖算力卡设备的条件下对指令流追踪、代码热点定位等方面进行稳定的初步分析，但对内存访问延迟、带宽瓶颈等硬件相关行为的模拟精度有限。  
 > 上板：通过在实际设备上运行，可精确捕获算子运行耗时、各 Pipe 使用情况、内存带宽、Cache 行为等真实硬件特性。  
@@ -492,7 +502,8 @@ bash ~/ot_demo/msot/example/quick_start/scripts/restore_demo.sh --project ~/ot_d
     ```
     
     回显 `Op profiling finish.` 表示采集成功，采集结果见回显日志中 `Profiling results saved in xxx` 路径。
-2. 上板性能采集 
+
+2. 上板性能采集
 
     ```bash
     cd ~/ot_demo/workspace/src/caller/build
@@ -509,7 +520,7 @@ bash ~/ot_demo/msot/example/quick_start/scripts/restore_demo.sh --project ~/ot_d
 
     例如 `MemoryUB.csv`，打开可以看到如下信息：
 
-    数据显示任务被均分为 8 个 block，全部调度至 Vector Core 执行。例如 Block 0 的带宽（1.02 GB/s）明显高于 Block 1（0.77 GB/s），差异过大，说明可能存在优化空间：
+    数据显示任务被均分为8个Block，全部调度至Vector Core执行。例如Block 0的带宽（1.02 GB/s）明显高于Block 1（0.77GB/s），差异过大，说明可能存在优化空间：
 
     | block_id | sub_block_id | aiv_time(μs) | aiv_total_cycles | aiv_ub_read_bw_vector(GB/s) | aiv_ub_write_bw_vector(GB/s) |
     |:--------:|:------------:|:------------:|:----------------:|:---------------------------:|:----------------------------:|
@@ -551,7 +562,7 @@ bash ~/ot_demo/msot/example/quick_start/scripts/restore_demo.sh --project ~/ot_d
 | **msKPP**       | 编写 DSL 脚本进行算子性能建模，在无硬件条件下预估性能瓶颈   |
 | **msOpGen**     | 基于配置文件自动生成算子工程框架，完成编译、部署与功能验证     |
 | **msSanitizer** | 注入检测桩代码，定位内存越界等运行时缺陷的源码位置         |
-| **msDebug**     | 启动断点调试，在 NPU 算子代码中设置断点并查看变量       |
+| **msDebug**     | 启动断点调试，在NPU算子代码中设置断点并查看变量       |
 | **msOpProf**    | 通过上板与仿真两种模式采集性能数据，分析各 Block 的执行效率 |
 
 如果您想继续进阶体验，可参考以下步骤：
@@ -574,7 +585,7 @@ bash ~/ot_demo/msot/example/quick_start/scripts/restore_demo.sh --project ~/ot_d
 
 **第三步：落地真实业务 —— 从教学走向生产**  
 
-深入研读 [《Ascend C 编程指南（官方教程）》](https://www.hiascend.com/zh/ascend-c?utm_source=cann&utm_medium=article&utm_campaign=alll)，系统掌握多级流水、数据排布、内存管理等核心概念，在此基础上尝试将工具链应用于实际业务算子的开发与调优，逐步构建从原型验证到生产级交付的完整能力。
+深入研读《[Ascend C 编程指南（官方教程）](https://www.hiascend.com/zh/ascend-c?utm_source=cann&utm_medium=article&utm_campaign=alll)》，系统掌握多级流水、数据排布、内存管理等核心概念，在此基础上尝试将工具链应用于实际业务算子的开发与调优，逐步构建从原型验证到生产级交付的完整能力。
 
 ## 3. FAQ
 
@@ -617,7 +628,7 @@ execute_add_op: symbol lookup error: ./build/execute_add_op: undefined symbol: a
 
 按 [2.3.3 编译与部署算子](#233-编译与部署算子) 第 3 步，重新设置 `LD_LIBRARY_PATH` 环境变量。
 
-### 3.3 执行 msDebug 设置断点时报错：WARNING:  Unable to resolve breakpoint to any actual locations
+### 3.3 执行 msDebug 设置断点时报错：WARNING:Unable to resolve breakpoint to any actual locations
 
 **问题现象**
 

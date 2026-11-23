@@ -1,12 +1,12 @@
-# msOT 安装指南
+# msOT安装指南
 
 <br>
 
 ## 1. 安装说明
 
-本工具链已集成于CANN中，若已安装 CANN 且无需更新此工具，可直接使用，无需按本文档安装。
+本工具链已集成于CANN中，若已安装CANN且无需更新此工具，可直接使用，无需按本文档安装。
 
-若您的环境尚未安装 CANN，请参见《[CANN 快速安装](https://www.hiascend.com/cann/download)》安装昇腾NPU驱动和 CANN 软件（包含 Toolkit 和 ops 包），并配置环境变量。
+若您的环境尚未安装CANN，请参见《[CANN 快速安装](https://www.hiascend.com/cann/download)》安装昇腾NPU驱动和CANN软件（包含 Toolkit 和 ops 包），并配置环境变量。
 
 如需单独升级本工具或使用最新版本，您可通过以下三种方式进行安装：[在线安装](#21-在线安装)、[离线安装](#22-离线安装)、[源码安装](#23-源码安装)。
 
@@ -26,16 +26,16 @@
 
 #### 2.3.1 环境准备
 
-源码编译统一使用 MindStudio 标准构建环境。
+源码编译统一使用MindStudio标准构建环境。
 
 - 日常开发或使用已发布镜像，请参考《[MindStudio 工具开发环境安装指导](../common/dev_env_setup.md)》。
-- 需要从基础操作系统复现环境、执行源码构建验证或单元测试验证时，必须参考《[MindStudio 统一构建镜像制作指南](../common/docker_image_build_guide.md)》，从 openEuler 基础镜像现场构建环境镜像。
+- 需要从基础操作系统复现环境、执行源码构建验证或单元测试验证时，必须参考《[MindStudio 统一构建镜像制作指南](../common/docker_image_build_guide.md)》，从openEuler基础镜像现场构建环境镜像。
 
-本文档后续的源码编译和单元测试命令，均在上述指定镜像容器或现场构建的环境镜像的容器中执行，CANN 软件包版本、GCC 版本和 Python 版本以统一镜像制作指南为准。
+本文档后续的源码编译和单元测试命令，均在上述指定镜像容器或现场构建的环境镜像的容器中执行，CANN软件包版本、GCC版本和Python版本以统一镜像制作指南为准。
 
-镜像构建完成后，必须使用统一镜像制作指南第 7 章给出的 `ctr_in.py` 命令，在交互式终端中启动并进入容器。不得使用普通 `docker run` 创建容器，也不得使用 `docker exec <容器名> bash -c '<命令>'` 替代交互式环境；否则可能跳过 Python、GCC 和 CANN 环境初始化。
+镜像构建完成后，必须使用统一镜像制作指南第7章给出的 `ctr_in.py` 命令，在交互式终端中启动并进入容器。不得使用普通 `docker run` 创建容器，也不得使用 `docker exec <容器名> bash -c '<命令>'` 替代交互式环境；否则可能跳过Python、GCC和CANN环境初始化。
 
-进入 `ctr_in.py` 打开的容器的交互式 Shell 后，执行如下命令克隆本仓库：
+进入 `ctr_in.py` 打开的容器的交互式Shell后，执行如下命令克隆本仓库：
 
 ```bash
 cd ~
@@ -44,14 +44,14 @@ git clone https://gitcode.com/Ascend/msot.git
 
 #### 2.3.2 执行编译
 
-保持在 `ctr_in.py` 打开的同一个交互式容器的 Shell 中，执行以下命令，自动完成依赖下载与构建：
+保持在 `ctr_in.py` 打开的同一个交互式容器的Shell中，执行以下命令，自动完成依赖下载与构建：
 
 ```bash
 cd ~/msot
 python3 build.py
 ```
 
-构建成功后，run 包将生成在 `artifacts/` 目录下。
+构建成功后，run包将生成在 `artifacts/` 目录下。
 
 #### 2.3.3 执行单元测试（可选）
 
@@ -62,13 +62,13 @@ cd ~/msot
 python3 build.py test
 ```
 
-命令返回码为 0，且测试用例均无失败，表示单元测试通过。
+命令返回码为0，且测试用例均无失败，表示单元测试通过。
 
 #### 2.3.4 安装
 
-##### 2.3.4.1 准备 run 包
+##### 2.3.4.1 准备run包
 
-run 包将生成在 `artifacts` 目录下，执行以下命令为其添加可执行权限：
+run包将生成在 `artifacts` 目录下，执行以下命令为其添加可执行权限：
 
 ```bash
 cd ~/msot/artifacts
@@ -77,7 +77,7 @@ chmod +x ascend-mindstudio-operator-tools_*.run
 
 ##### 2.3.4.2 安装
 
-将 run 包拷贝到运行环境中（本机安装则无需拷贝），执行如下安装命令：
+将run包拷贝到运行环境中（本机安装则无需拷贝），执行如下安装命令：
 
 ```bash
 ./ascend-mindstudio-operator-tools_*.run --install
@@ -153,7 +153,7 @@ export LD_LIBRARY_PATH=$ASCEND_HOME_PATH/lib64:$LD_LIBRARY_PATH
 
 若使用了 `--install-path` 指定了自定义路径，请将 `$HOME/Ascend` 替换为对应的安装路径。
 
-### 3.2 run 包已删除时如何卸载
+### 3.2 run包已删除时如何卸载
 
 可通过安装目录下的卸载脚本执行卸载：
 

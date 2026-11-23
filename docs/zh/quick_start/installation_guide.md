@@ -44,7 +44,7 @@ source /dev/stdin <<< "$(dev_id=$(lspci -n -D | grep -o '19e5:d[0-9a-f]\{3\}' | 
 
 若命令执行后输出 `[PASS]`，则表示执行成功；若输出 `[FAIL]`，可能原因如下：
 
-1. 硬件不在本教程支持范围内：本学习环境仅支持昇腾 910B、310P 及 A3 系列芯片，请切换至兼容的硬件环境后重试；
+1. 硬件不在本教程支持范围内：本学习环境仅支持昇腾 910B、310P 及 A3 系列芯片，请切换至兼容的硬件环境后重试。
 2. 底层环境异常：未安装 `lspci` 或当前用户无法通过 `lspci -n -D` 查询 NPU PCI ID，请联系环境管理员确认底层环境。
 
 ### 2.2 拉取镜像
@@ -119,7 +119,7 @@ source ~/ot_demo/msot/example/quick_start/scripts/set_chip_soc_env.sh
 
 回显 `Environment variable set successfully` 表示变量已在**当前终端及其后续启动的子进程**中生效。同时创建或复用 `/etc/profile.d/custom-env.sh`，供后续新终端或重新登录 Shell 时自动查询芯片型号。
 
-若持久化因权限不足或文件系统只读而无法完成，脚本会输出 `[WARNING]`，自动退回仅设置当前终端。此时在后续新开启的终端中需重新执行上述 `source` 命令。
+若持久化因权限不足或文件系统只读而无法完成，脚本会输出 `[WARNING]`，自动回退至仅设置当前终端。此时在后续新开启的终端中需重新执行上述 `source` 命令。
 
 如果明确只需要在当前终端中设置，不读取或写入持久化配置，可执行：
 
@@ -129,7 +129,7 @@ source ~/ot_demo/msot/example/quick_start/scripts/set_chip_soc_env.sh --session-
 
 > [!CAUTION]注意
 > 必须使用 `source`，不能替换为 `bash` 执行，否则子进程无法设置当前终端的环境变量。
-> 环境变量 `MY_STUDY_VAR_CHIP_SOC_TYPE` 与 `MY_STUDY_VAR_CANN_IMAGE` 仅适用于本快速入门教程，请勿在商业开发中使用。
+> 环境变量 `MY_STUDY_VAR_CHIP_SOC_TYPE` 与 `MY_STUDY_VAR_CANN_IMAGE` 仅适用于本教程，请勿在商业开发中使用。
 
 ## 6. 安装完成自检
 

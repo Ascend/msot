@@ -1,21 +1,21 @@
-# MindStudio 工具开发环境安装指导
+# MindStudio工具开发环境安装指导
 
 <br>
 
-本文档用于搭建 MindStudio 工具编译/UT 等开发所需的标准化容器环境。
+本文档用于搭建MindStudio工具编译/UT等开发所需的标准化容器环境。
 
 ## 1. 方式选择
 
-MindStudio 工具支持两种开发环境安装方式，请根据仓库实际情况选择：
+MindStudio工具支持两种开发环境安装方式，请根据仓库实际情况选择：
 
 | 方式 | 适用条件                       | 说明 |
 | --- |----------------------------| --- |
-| **Dev Containers** | 仓库根目录包含 `.devcontainer` 目录 | 开箱即用，具体步骤详见仓库内 `.devcontainer` 目录下的 README 说明 |
-| **命令行容器环境（通用方式）** | 所有 Linux 命令行工具的仓库          | 即本文后续章节介绍的方式 |
+| **Dev Containers** | 仓库根目录包含 `.devcontainer` 目录 | 开箱即用，具体步骤详见仓库内 `.devcontainer` 目录下的README说明 |
+| **命令行容器环境（通用方式）** | 所有Linux命令行工具的仓库          | 即本文后续章节介绍的方式 |
 
 > [!NOTE]说明
 >
-> 若仓库已配置 `.devcontainer` 目录，建议优先选用 Dev Containers 方式，效率最高；否则请按本文后续章节搭建命令行容器环境。
+> 若仓库已配置 `.devcontainer` 目录，建议优先选用Dev Containers方式，效率最高；否则请按本文后续章节搭建命令行容器环境。
 
 ## 2. 前置条件
 
@@ -26,7 +26,7 @@ MindStudio 工具支持两种开发环境安装方式，请根据仓库实际情
 | **Docker Engine** | 已安装且服务正在运行 | 执行 `docker ps`，无报错即表示服务正常启动 |
 | **Python 3**       | 宿主机已安装（任意 3.x 版本） | 执行 `python3 -V`，有版本信息输出即表示已安装 |
 
-> 若 `docker ps` 出现 permission denied 类错误，请参考 [FAQ 7.1](#71-执行-docker-命令遇到-permission-denied-类错误提示)。
+> 若 `docker ps` 出现permission denied类错误，请参考 [FAQ 7.1](#71-执行-docker-命令遇到-permission-denied-类错误提示)。
 
 ## 3. 宿主机：拉取编译专用镜像
 
@@ -70,13 +70,13 @@ cd ~ && curl -fLO --retry 3 https://inst.obs.cn-north-4.myhuaweicloud.com/env/ct
 
 > [!CAUTION]注意
 >
-> 本镜像**仅用于编译，不支持 NPU 程序运行**（原因：CANN 容器运行需 root 权限，编译产生大量 root 属主文件污染 HOME 目录；为控制镜像体积深度裁剪了运行库）。
+> 本镜像**仅用于编译，不支持 NPU 程序运行**（原因：CANN容器运行需root权限，编译产生大量root属主文件污染HOME目录；为控制镜像体积深度裁剪了运行库）。
 > 
-> 如需运行 NPU 程序，建议使用如下“**双终端模式**”开发方式，两端共享 HOME 目录，编译、运行与宿主机三套环境互不干扰，开发效率更高：
+> 如需运行NPU程序，建议使用如下“**双终端模式**”开发方式，两端共享HOME目录，编译、运行与宿主机三套环境互不干扰，开发效率更高：
 >
-> **终端 1（编译）**：启动本编译镜像容器，编译产物输出至 HOME 目录；
+> **终端 1（编译）**：启动本编译镜像容器，编译产物输出至HOME目录；
 >
-> **终端 2（运行）**：启动 CANN 官方运行容器，从 HOME 目录读取并执行，启动命令示例如下，具体版本等信息请参考 [CANN 官方镜像仓库](https://www.hiascend.com/developer/ascendhub/detail/17da20d1c2b6493cb38765adeba85884)：
+> **终端 2（运行）**：启动CANN官方运行容器，从HOME目录读取并执行，启动命令示例如下，具体版本等信息请参考 [CANN 官方镜像仓库](https://www.hiascend.com/developer/ascendhub/detail/17da20d1c2b6493cb38765adeba85884)：
 >
 > ```bash
 > ~/ctr_in.py swr.cn-south-1.myhuaweicloud.com/ascendhub/cann:9.1.0-910b-openeuler24.03-py3.12
@@ -84,9 +84,9 @@ cd ~ && curl -fLO --retry 3 https://inst.obs.cn-north-4.myhuaweicloud.com/env/ct
 
 ### 预期输出
 
-命令执行后，终端将自动切换至容器内的交互式 Shell，并显示类似如下 MindStudio 欢迎界面，即表示容器已启动并成功进入：
+命令执行后，终端将自动切换至容器内的交互式Shell，并显示类似如下MindStudio欢迎界面，即表示容器已启动并成功进入：
 
-```text
+```output
 =================================================================
            >>>>>   MindStudio Build Environment   <<<<<
     THE END-TO-END TOOLCHAIN TO UNLEASH HUAWEI ASCEND COMPUTE
@@ -146,7 +146,7 @@ sudo usermod -aG docker <当前用户名>
 3. 若处于企业内网，请根据实际网络策略配置 Docker 代理。
 4. 执行 `docker system df`，确认 Docker 数据目录空间充足。
 
-### 7.3 下载 `ctr_in.py` 失败如何处理？
+### 7.3 下载ctr_in.py失败如何处理？
 
 若 `curl` 下载失败，可手动将 `ctr_in.py` 脚本拷贝至宿主机 `~/` 目录，然后赋予执行权限：
 
